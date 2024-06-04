@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ethereum Call smart contract function 1`] = `"0x0000000000000000000000000000000000000000000000000858898f93629000"`;
+
+exports[`Ethereum Transfer some ethereum 1`] = `
+{
+  "high": EthereumFee {
+    "maxFeePerGas": EthereumCurrencyAmount {
+      "_baseAmount": "5e-18",
+    },
+    "maxPriorityFeePerGas": EthereumCurrencyAmount {
+      "_baseAmount": "1",
+    },
+  },
+  "low": EthereumFee {
+    "maxFeePerGas": EthereumCurrencyAmount {
+      "_baseAmount": "4e-18",
+    },
+    "maxPriorityFeePerGas": EthereumCurrencyAmount {
+      "_baseAmount": "0",
+    },
+  },
+  "maximum": EthereumFee {
+    "maxFeePerGas": EthereumCurrencyAmount {
+      "_baseAmount": "6e-18",
+    },
+    "maxPriorityFeePerGas": EthereumCurrencyAmount {
+      "_baseAmount": "3",
+    },
+  },
+  "normal": EthereumFee {
+    "maxFeePerGas": EthereumCurrencyAmount {
+      "_baseAmount": "4e-18",
+    },
+    "maxPriorityFeePerGas": EthereumCurrencyAmount {
+      "_baseAmount": "0",
+    },
+  },
+}
+`;

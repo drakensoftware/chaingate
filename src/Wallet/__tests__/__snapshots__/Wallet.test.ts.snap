@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Wallet Get all balances 1`] = `
+[
+  {
+    "balance": {
+      "confirmed": BitcoinCurrencyAmount {
+        "_baseAmount": "0",
+      },
+      "unconfirmed": BitcoinCurrencyAmount {
+        "_baseAmount": "0",
+      },
+    },
+    "currency": {
+      "defaultDerivationPath": "m/84'/0'/0'/0/0",
+      "id": "bitcoin",
+      "name": "bitcoin",
+      "svgLogoUrl": "https://api.chaingate.dev/bitcoin/logo",
+      "symbol": "BTC",
+    },
+  },
+  {
+    "balance": {
+      "confirmed": EthereumCurrencyAmount {
+        "_baseAmount": "1.1909e-14",
+      },
+      "unconfirmed": EthereumCurrencyAmount {
+        "_baseAmount": "0",
+      },
+    },
+    "currency": {
+      "defaultDerivationPath": "m/44'/60'/0'/0/0",
+      "id": "ethereum",
+      "name": "ethereum",
+      "svgLogoUrl": "https://api.chaingate.dev/ethereum/logo",
+      "symbol": "ETH",
+    },
+  },
+]
+`;
+
+exports[`Wallet New wallet with different lengths 1`] = `"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon address"`;
+
+exports[`Wallet New wallet with different lengths 2`] = `"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon agent"`;
+
+exports[`Wallet New wallet with different lengths 3`] = `"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon admit"`;
+
+exports[`Wallet New wallet with different lengths 4`] = `"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art"`;
+
+exports[`Wallet New wallet with phrases in different languages 1`] = `"abdikace abdikace abdikace abdikace abdikace abdikace abdikace abdikace abdikace abdikace abdikace agrese"`;
+
+exports[`Wallet New wallet with phrases in different languages 2`] = `"abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abeille"`;
+
+exports[`Wallet New wallet with phrases in different languages 3`] = `"abaco abaco abaco abaco abaco abaco abaco abaco abaco abaco abaco abete"`;
+
+exports[`Wallet New wallet with phrases in different languages 4`] = `"가격 가격 가격 가격 가격 가격 가격 가격 가격 가격 가격 가능"`;
+
+exports[`Wallet New wallet with phrases in different languages 5`] = `"あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あおぞら"`;
+
+exports[`Wallet New wallet with phrases in different languages 6`] = `"abacate abacate abacate abacate abacate abacate abacate abacate abacate abacate abacate abater"`;
+
+exports[`Wallet New wallet with phrases in different languages 7`] = `"的 的 的 的 的 的 的 的 的 的 的 在"`;
+
+exports[`Wallet New wallet with phrases in different languages 8`] = `"ábaco ábaco ábaco ábaco ábaco ábaco ábaco ábaco ábaco ábaco ábaco abierto"`;
+
+exports[`Wallet New wallet with phrases in different languages 9`] = `"的 的 的 的 的 的 的 的 的 的 的 在"`;

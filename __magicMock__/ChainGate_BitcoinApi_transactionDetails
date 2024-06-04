@@ -1,0 +1,124 @@
+{
+  "[[\"1\"],\"619e19924cce832c08e648624b4bcd3e5c21f6daf9c24c65042b4904083cb645\"]": {
+    "0": [
+      {
+        "blockHeight": 838888,
+        "timestamp": 1712940152,
+        "inputs": "1",
+        "outputs": "2",
+        "sizeBytes": 209,
+        "fee": "3",
+        "feePerByte": "4",
+        "rawTransaction": "5"
+      },
+      [
+        "6",
+        "7"
+      ],
+      [
+        "8",
+        "9"
+      ],
+      "0.00026072",
+      "0.0000012474641148325358852",
+      "02000000000102919373aa6d4b09d2e6c333771f278bfaf7d5d758d1e77bc3fa7e647b31fa8d6c0000000000ffffffff919373aa6d4b09d2e6c333771f278bfaf7d5d758d1e77bc3fa7e647b31fa8d6c0100000000ffffffff02589800000000000016001463d6c9cd908241d47f7b8697b0ba63fc46056c72b02a000000000000160014fbd12f2cef81908a18b0a2575741b9bdda71dc6102473044022029817c621f6a329b8beb1d0d339f499933e940376cb8efe6ce6e8dbef3abe87c02206f567519716cad24a1640a16c2e5c00c1c3a2f379542ef96d6125172219489d00121032bd2da675ce11c7891d1e4ba244081ebccdf48d585b3badc77b4786e6573e03d02483045022100d9017668dfa637e4c6e6968516468f3f23f9e8fbf7096f334157f5f9fc9896c40220020021f1bf1d1a5eaa26394858d0db2be6a46044f9847fb60cf96f593cdc5eb00121032bd2da675ce11c7891d1e4ba244081ebccdf48d585b3badc77b4786e6573e03d00000000",
+      {
+        "address": "10",
+        "amount": "11",
+        "txId": "12",
+        "n": 0,
+        "script": "13",
+        "scriptSig": "14"
+      },
+      {
+        "address": "10",
+        "amount": "11",
+        "txId": "12",
+        "n": 1,
+        "script": "13",
+        "scriptSig": "14"
+      },
+      {
+        "address": "15",
+        "amount": "16",
+        "n": 0,
+        "script": "17"
+      },
+      {
+        "address": "10",
+        "amount": "18",
+        "n": 1,
+        "script": "13"
+      },
+      "bc1ql0gj7t80sxgg5x9s5ft4wsdehhd8rhrpmtfg09",
+      "0.00038",
+      "6c8dfa317b647efac37be7d158d7d5f7fa8b271f7733c3e6d2094b6daa739391",
+      "0014fbd12f2cef81908a18b0a2575741b9bdda71dc61",
+      "",
+      "bc1qv0tvnnvssfqaglmms6tmpwnrl3rq2mrjvq2z7k",
+      "0.00039",
+      "001463d6c9cd908241d47f7b8697b0ba63fc46056c72",
+      "0.00010928"
+    ],
+    "1": [
+      {
+        "blockHeight": 838888,
+        "timestamp": 1712940152,
+        "inputs": "1",
+        "outputs": "2",
+        "sizeBytes": 209,
+        "fee": "3",
+        "feePerByte": "4",
+        "rawTransaction": "5"
+      },
+      [
+        "6",
+        "7"
+      ],
+      [
+        "8",
+        "9"
+      ],
+      "0.00026072",
+      "0.0000012474641148325358852",
+      "02000000000102919373aa6d4b09d2e6c333771f278bfaf7d5d758d1e77bc3fa7e647b31fa8d6c0000000000ffffffff919373aa6d4b09d2e6c333771f278bfaf7d5d758d1e77bc3fa7e647b31fa8d6c0100000000ffffffff02589800000000000016001463d6c9cd908241d47f7b8697b0ba63fc46056c72b02a000000000000160014fbd12f2cef81908a18b0a2575741b9bdda71dc6102473044022029817c621f6a329b8beb1d0d339f499933e940376cb8efe6ce6e8dbef3abe87c02206f567519716cad24a1640a16c2e5c00c1c3a2f379542ef96d6125172219489d00121032bd2da675ce11c7891d1e4ba244081ebccdf48d585b3badc77b4786e6573e03d02483045022100d9017668dfa637e4c6e6968516468f3f23f9e8fbf7096f334157f5f9fc9896c40220020021f1bf1d1a5eaa26394858d0db2be6a46044f9847fb60cf96f593cdc5eb00121032bd2da675ce11c7891d1e4ba244081ebccdf48d585b3badc77b4786e6573e03d00000000",
+      {
+        "address": "10",
+        "amount": "11",
+        "txId": "12",
+        "n": 0,
+        "script": "13",
+        "scriptSig": "14"
+      },
+      {
+        "address": "10",
+        "amount": "11",
+        "txId": "12",
+        "n": 1,
+        "script": "13",
+        "scriptSig": "14"
+      },
+      {
+        "address": "15",
+        "amount": "16",
+        "n": 0,
+        "script": "17"
+      },
+      {
+        "address": "10",
+        "amount": "18",
+        "n": 1,
+        "script": "13"
+      },
+      "bc1ql0gj7t80sxgg5x9s5ft4wsdehhd8rhrpmtfg09",
+      "0.00038",
+      "6c8dfa317b647efac37be7d158d7d5f7fa8b271f7733c3e6d2094b6daa739391",
+      "0014fbd12f2cef81908a18b0a2575741b9bdda71dc61",
+      "",
+      "bc1qv0tvnnvssfqaglmms6tmpwnrl3rq2mrjvq2z7k",
+      "0.00039",
+      "001463d6c9cd908241d47f7b8697b0ba63fc46056c72",
+      "0.00010928"
+    ]
+  }
+}

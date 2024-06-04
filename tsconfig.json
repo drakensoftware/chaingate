@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", // Good for using the latest ECMAScript features.
+    "module": "CommonJS",
+    "outDir": "build/", // Keeps compiled files in a separate directory.
+    "sourceMap": true, // Useful for debugging.
+    "declaration": true, // Generates declaration files for type checking.
+    "allowSyntheticDefaultImports": true, // Allows default imports from modules with no default export.
+    "noImplicitAny": true, // Helps catch implicit `any` type errors.
+    "allowJs": true, // Allows JavaScript files to be compiled.
+    "esModuleInterop": true, // Enables compatibility with CommonJS and AMD modules.
+    "skipLibCheck": true, // Skips type checking of all declaration files (improves performance).
+    "forceConsistentCasingInFileNames": true // Ensures consistent file naming.
+  },
+  "include": ["src/**/*"], // Includes all TypeScript files in the src directory.
+  "exclude": ["node_modules", "build", "dist"] // Excludes unnecessary files and directories.
+}
