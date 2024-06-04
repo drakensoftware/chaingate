@@ -1,0 +1,38 @@
+{
+  "[[]]": {
+    "0": [
+      {
+        "low": "1",
+        "normal": "2",
+        "high": "3",
+        "maximum": "4"
+      },
+      {
+        "maxFeePerGas": "5",
+        "confirmationTimeSecs": 40,
+        "maxPriorityFeePerGas": "6"
+      },
+      {
+        "maxFeePerGas": "5",
+        "confirmationTimeSecs": 23.333333333333336,
+        "maxPriorityFeePerGas": "6"
+      },
+      {
+        "maxFeePerGas": "7",
+        "confirmationTimeSecs": 15.555555555555557,
+        "maxPriorityFeePerGas": "8"
+      },
+      {
+        "maxFeePerGas": "9",
+        "confirmationTimeSecs": 14,
+        "maxPriorityFeePerGas": "10"
+      },
+      "4e-18",
+      "0",
+      "5e-18",
+      "1",
+      "6e-18",
+      "3"
+    ]
+  }
+}

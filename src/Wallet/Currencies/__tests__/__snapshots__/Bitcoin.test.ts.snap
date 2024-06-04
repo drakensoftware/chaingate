@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bitcoin Transfer some bitcoins 1`] = `
+{
+  "high": BitcoinFee {
+    "fee": BitcoinCurrencyAmount {
+      "_baseAmount": "0.00000122406",
+    },
+    "kind": 1,
+  },
+  "low": BitcoinFee {
+    "fee": BitcoinCurrencyAmount {
+      "_baseAmount": "0.00000105456",
+    },
+    "kind": 1,
+  },
+  "maximum": BitcoinFee {
+    "fee": BitcoinCurrencyAmount {
+      "_baseAmount": "0.00000122406",
+    },
+    "kind": 1,
+  },
+  "normal": BitcoinFee {
+    "fee": BitcoinCurrencyAmount {
+      "_baseAmount": "0.00000122406",
+    },
+    "kind": 1,
+  },
+}
+`;
