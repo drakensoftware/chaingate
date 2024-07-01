@@ -21,7 +21,7 @@ export class Bitcoin extends Currency {
             symbol: 'BTC',
             id: 'bitcoin',
             defaultDerivationPath: 'm/84\'/0\'/0\'/0/0',
-            name: 'bitcoin',
+            name: 'Bitcoin',
             svgLogoUrl: Utils.buildUrlWithApiKey('https://api.chaingate.dev/bitcoin/logo'),
             decimals: 8,
             minimalUnitSymbol: 'satoshi'
