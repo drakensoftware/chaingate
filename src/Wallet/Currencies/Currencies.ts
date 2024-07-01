@@ -30,6 +30,6 @@ export class DefaultCurrencies extends Currencies {
         this.ethereum = new Ethereum(chainGateClient.Ethereum, privateKeySource)
         this.polygon = new Polygon(chainGateClient.PolygonApi, privateKeySource)
 
-        this.all = [this.bitcoin, this.ethereum]
+        this.all = [this.arbitrum, this.avalanche, this.binanceSmartChain, this.bitcoin, this.boba, this.ethereum, this.polygon]
     }
 }
