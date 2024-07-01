@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js'
-import {ChainGateClient} from 'chaingate-client'
+import {Api} from 'chaingate-client'
 import {Phrase, PrivateKey, PrivateKeySource, PublicKey, Seed} from '../Keys'
 
 export class NotEnoughFundsError extends Error {
@@ -13,6 +13,14 @@ export class NotEnoughFundsError extends Error {
 export class CannotDerive extends Error {
     constructor() {
         super('Derivation path are not supported (Are you using an imported private key?)')
+        if (Error.captureStackTrace) Error.captureStackTrace(this, CannotDerive)
+        this.name = this.constructor.name
+    }
+}
+
+export class CannotParseAmount extends Error {
+    constructor(amountStr: string) {
+        super(`Invalid amount: ${amountStr}`)
         if (Error.captureStackTrace) Error.captureStackTrace(this, CannotDerive)
         this.name = this.constructor.name
     }
@@ -47,15 +55,24 @@ export abstract class PreparedTransaction {
     abstract confirm(fee: string | Fee): Promise<ConfirmedTransaction>
 }
 
-export abstract class CurrencyAmount {
-    abstract get baseAmount(): Decimal
-    abstract get baseSymbol(): string
+export class CurrencyAmount {
+    readonly baseAmount: Decimal
+    readonly baseSymbol: string
 
-    abstract get minimalAmount(): Decimal
-    abstract get minimalSymbol(): string
+    readonly minimalUnitAmount: Decimal
+    readonly minimalUnitSymbol: string
+
+    constructor(currency: Currency, baseAmount: Decimal){
+        this.baseAmount = baseAmount
+        this.minimalUnitAmount = baseAmount.mul( (new Decimal(10)).pow(currency.currencyInfo.decimals))
+
+        this.baseSymbol = currency.currencyInfo.symbol
+        this.minimalUnitSymbol = currency.currencyInfo.minimalUnitSymbol
+    }
 }
 
 export abstract class Fee {}
+export abstract class FeeInitializer {}
 export type PossibleFees<T> = {[key in FeeGrade]: T}
 
 export type CurrencyInfo = {
@@ -63,22 +80,21 @@ export type CurrencyInfo = {
     name: string
     defaultDerivationPath: string
     svgLogoUrl: string,
-    symbol: string
+    symbol: string,
+    minimalUnitSymbol: string,
+    decimals: number
 }
 
-
-
 export abstract class Currency{
-
-    protected readonly chaingateClient: ChainGateClient
+    protected readonly api: Api
     public readonly currencyInfo: CurrencyInfo
 
     protected publicKey: PublicKey | null
     protected privateKeySource: PrivateKeySource
 
-    protected constructor(currencyInfo: CurrencyInfo, chaingateClient: ChainGateClient, privateKeySource: PrivateKeySource) {
+    protected constructor(currencyInfo: CurrencyInfo, api: Api, privateKeySource: PrivateKeySource) {
         this.currencyInfo = currencyInfo
-        this.chaingateClient = chaingateClient
+        this.api = api
         this.privateKeySource = privateKeySource
         this._derivationPath = currencyInfo.defaultDerivationPath
     }
@@ -94,7 +110,35 @@ export abstract class Currency{
         this.publicKey = await (await this.getPrivateKey()).getPublicKey()
     }
 
+    amount(amountStr: string) : CurrencyAmount{
+        const regex = /^(\d+(\.\d+)?) ?([A-Za-z]+)?$/
+        const match = amountStr.match(regex)
+        if (!match) throw new CannotParseAmount(amountStr)
+
+        const amount = new Decimal(match[1])
+
+        if (match[3]) {
+            let currencySymbol = match[3].toLowerCase()
+            if(currencySymbol.endsWith('s')) currencySymbol = currencySymbol.substring(currencySymbol.length - 1) //Remove plural -s
+
+            if (currencySymbol === this.currencyInfo.symbol.toLowerCase() ||
+                currencySymbol === this.currencyInfo.name.toLowerCase()) {
+                return new CurrencyAmount(this, amount)
+            } else if (currencySymbol === this.currencyInfo.minimalUnitSymbol.toLowerCase()) {
+                return new CurrencyAmount(this, amount.mul((new Decimal(10)).pow(this.currencyInfo.decimals)))
+            } else {
+                throw new CannotParseAmount(amountStr)
+            }
+        }
+
+        return new CurrencyAmount(this, amount)
+    }
+
+
+    abstract fee(fee: unknown): Fee
+
     abstract getAddress(): Promise<string>
+
     abstract getBalance(address?: string): Promise<{confirmed: CurrencyAmount, unconfirmed: CurrencyAmount}>
 
     abstract prepareTransfer(toAddress: string, amount: CurrencyAmount): Promise<PreparedTransaction>

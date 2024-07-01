@@ -4,16 +4,24 @@ exports[`Wallet Get all balances 1`] = `
 [
   {
     "balance": {
-      "confirmed": BitcoinCurrencyAmount {
-        "_baseAmount": "0",
+      "confirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "BTC",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "satoshi",
       },
-      "unconfirmed": BitcoinCurrencyAmount {
-        "_baseAmount": "0",
+      "unconfirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "BTC",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "satoshi",
       },
     },
     "currency": {
+      "decimals": 8,
       "defaultDerivationPath": "m/84'/0'/0'/0/0",
       "id": "bitcoin",
+      "minimalUnitSymbol": "satoshi",
       "name": "bitcoin",
       "svgLogoUrl": "https://api.chaingate.dev/bitcoin/logo",
       "symbol": "BTC",
@@ -21,17 +29,25 @@ exports[`Wallet Get all balances 1`] = `
   },
   {
     "balance": {
-      "confirmed": EthereumCurrencyAmount {
-        "_baseAmount": "1.1909e-14",
+      "confirmed": CurrencyAmount {
+        "baseAmount": "1.1909e-14",
+        "baseSymbol": "ETH",
+        "minimalUnitAmount": "11909",
+        "minimalUnitSymbol": "wei",
       },
-      "unconfirmed": EthereumCurrencyAmount {
-        "_baseAmount": "0",
+      "unconfirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "ETH",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
       },
     },
     "currency": {
+      "decimals": 18,
       "defaultDerivationPath": "m/44'/60'/0'/0/0",
       "id": "ethereum",
-      "name": "ethereum",
+      "minimalUnitSymbol": "wei",
+      "name": "Ethereum",
       "svgLogoUrl": "https://api.chaingate.dev/ethereum/logo",
       "symbol": "ETH",
     },
