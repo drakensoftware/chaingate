@@ -1,7 +1,7 @@
 # 🔗 ChainGate
 A complete cryptocurrency TypeScript framework for connecting to and making transactions on different blockchains
 
-**<p align="center">Bitcoin • Bitcoin testnet • Ethereum</p>**
+**<p align="center">Bitcoin • Ethereum • Binance • Avalanche • Polygon • Arbitrum • Boba</p>**
 
 
 ![banner.png](banner.png)
@@ -122,7 +122,8 @@ import { InitializeWallet } from 'chaingate'
 const wallet = await InitializeWallet.create('API_KEY')  
   
 const bitcoinAddress = await wallet.currencies.bitcoin.getAddress()  
-const ethereumAddress = await wallet.currencies.ethereum.getAddress()  
+const ethereumAddress = await wallet.currencies.ethereum.getAddress()
+const polygonAddress = await wallet.currencies.polygon.getAddress()
 ```
 
 
@@ -133,14 +134,17 @@ If you import using a phrase or seed, you can utilize derivation paths in any cu
 To change the derivation path, call setDerivationPath() as follows:
 
 ```typescript
-import { InitializeWallet } from 'chaingate'  
-  
-const wallet = await InitializeWallet.create('API_KEY')  
-  
-//Use non-default derivation path  
-await wallet.currencies.bitcoin.setDerivationPath('m/44\'/0\'/0\'/1/3')  
-  
-const address = await wallet.currencies.bitcoin.getAddress()
+import { InitializeWallet } from 'chaingate'
+
+const wallet = await InitializeWallet.create('API_KEY')
+
+//Default derivation path is used
+const addressDefault = await wallet.currencies.bitcoin.getAddress()
+
+//Change derivation path
+await wallet.currencies.bitcoin.setDerivationPath('m/44\'/0\'/0\'/1/3')
+
+const addressNonDefaultDerivationPath = await wallet.currencies.bitcoin.getAddress()
 ```
 
 
@@ -149,28 +153,29 @@ const address = await wallet.currencies.bitcoin.getAddress()
 To initiate a transaction or operate on the blockchain, you need to fund your addresses. After funding your wallet's addresses, you can query their balances to confirm you possess the corresponding crypto:
 
 ```typescript
-import { InitializeWallet } from 'chaingate'  
-  
-const wallet = await InitializeWallet.create('')  
-  
-// Verify your crypto addresses (in bitcoin and ethereum) to fund them  
-const bitcoinAddress = wallet.currencies.bitcoin.getAddress()  
-const ethereumAddress = wallet.currencies.ethereum.getAddress()  
-  
-// Query the balance of Bitcoin  
-const bitcoinBalance = await wallet.currencies.bitcoin.getBalance()  
-console.log(`Confirmed balance in BTC: ${bitcoinBalance.confirmed.btc}`)  
-console.log(`Confirmed balance in satoshi: ${bitcoinBalance.confirmed.btc}`)  
-  
-// Query the balance of Ethereum  
-const ethereumBalance = await wallet.currencies.ethereum.getBalance()  
-console.log(`Confirmed balance in ETH: ${ethereumBalance.confirmed.eth}`)  
-console.log(`Confirmed balance in wei: ${ethereumBalance.confirmed.wei}`)  
-  
-//Get a resume of balances  
-const allBalances = await wallet.getAllBalances()  
-for(const b of allBalances)  
-    console.log(`Your ${b.currency.name} wallet amount is ${b.balance.confirmed.baseAmount} ${b.balance.confirmed.baseSymbol}`)
+import { InitializeWallet } from 'chaingate'
+
+const wallet = await InitializeWallet.create('')
+
+// Verify your crypto addresses (in bitcoin and ethereum) to fund them
+const bitcoinAddress = wallet.currencies.bitcoin.getAddress()
+const ethereumAddress = wallet.currencies.ethereum.getAddress()
+
+// Query the balance of Bitcoin
+const bitcoinBalance = await wallet.currencies.bitcoin.getBalance()
+console.log(`Confirmed balance in BTC: ${bitcoinBalance.confirmed.baseAmount}`)
+console.log(`Confirmed balance in satoshi: ${bitcoinBalance.confirmed.minimalUnitAmount}`)
+
+
+// Query the balance of Ethereum
+const ethereumBalance = await wallet.currencies.ethereum.getBalance()
+console.log(`Confirmed balance in ETH: ${ethereumBalance.confirmed.baseAmount}`)
+console.log(`Confirmed balance in wei: ${ethereumBalance.confirmed.minimalUnitAmount}`)
+
+//Get a resume of balances
+const allBalances = await wallet.getAllBalances()
+for(const b of allBalances)
+  console.log(`Your ${b.currency.name} wallet amount is ${b.balance.confirmed.baseAmount} ${b.balance.confirmed.baseSymbol}`)
 ```
 
 
@@ -179,35 +184,47 @@ for(const b of allBalances)
 Transferring crypto is easy with ChainGate. You can prepare a transaction, query the possible fees, confirm it, and broadcast it to the network:
 
 ```typescript
-import { Wallet } from 'chaingate'
-import { Satoshi } from 'chaingate/currencies/Bitcoin'
+import { InitializeWallet } from 'chaingate'
 
 const phrase = 'abandon abandon about...'
-const wallet = Wallet.fromPhrase('API_KEY', keystore)
+const wallet = await InitializeWallet.fromPhrase('API_KEY', phrase)
 
 //Verify the address and balance of your wallet
-const bitcoinAddress = wallet.Currencies.Bitcoin.getAddress()
-const bitcoinBalance = await wallet.Currencies.Bitcoin.getBalance()
-console.log(`The Bitcoin address of your wallet is {bitcoinAddress}`)
-console.log(`You currently have {bitcoinBalance} BTC`)
+const bitcoinAddress = wallet.currencies.bitcoin.getAddress()
+const bitcoinBalance = await wallet.currencies.bitcoin.getBalance()
+console.log(`The Bitcoin address of your wallet is ${bitcoinAddress}`)
+console.log(`You currently have ${bitcoinBalance} BTC`)
 
 //Prepare the transaction
-const transaction = await wallet.Currencies.Bitcoin.prepareTransfer(
-	'1111111111111111111114oLvT2', //Destination address
-	Satoshis(1_000) //Amount (in Satoshi)
+const bitcoin = wallet.currencies.bitcoin
+const transaction = await bitcoin.prepareTransfer(
+        '1111111111111111111114oLvT2', //Destination address
+        bitcoin.amount('1000 satoshi') //Amount (in Satoshi)
 )
 
 //We will use fast fees for transaction to confirm earlier
-console.log(`We are going to use a fee of {transaction.possibleFees['high']}`)
+console.log(`We are going to use a fee of ${transaction.possibleFees['high']}`)
 
 //Broadcast the transaction
 const broadcasted = await transaction.confirm('high') //High confirmation fees
-console.log(`Transaction is on the network :) The txid is {broadcasted.txId}`)
+console.log(`Transaction is on the network :) The txid is ${broadcasted.txId}`)
 
 //Wait until is confirmed
 console.log('Wait for confirmation... This might take a while')
 await broadcasted.isConfirmed()
-console.log('The transaction is fully confirmed`)
+console.log('The transaction is fully confirmed')
+
+
+//You can also use native units:
+const transaction2 = await bitcoin.prepareTransfer(
+        '1111111111111111111114oLvT2', //Destination address
+        bitcoin.amount('1 btc') //Amount (1 BTC)
+)
+
+const transaction3 = await bitcoin.prepareTransfer(
+        '1111111111111111111114oLvT2', //Destination address
+        bitcoin.amount('1') //Amount (1 BTC)
+)
 ```
 
 

@@ -1,35 +1,34 @@
-import {FeeGrade, PossibleFees, PreparedTransaction} from '../Currency'
+import {CurrencyAmount, FeeGrade, PossibleFees, PreparedTransaction} from '../Currency'
 import {Transaction} from 'bitcore-lib'
 import {ConfirmedBitcoinTransaction} from './ConfirmedBitcoinTransfer'
 import {Utils} from '../../../Utils'
-import {ChainGateClient} from 'chaingate-client'
+import {BitcoinApi} from 'chaingate-client'
 import {BitcoinFee, FeeKind} from './BitcoinFee'
 import {BitcoinUtils} from './BitcoinUtils'
-import BitcoinCurrencyAmount from './BitcoinCurrencyAmount'
 import {Bitcoin} from './index'
 import {ConsumeFunction} from '../../../CGDriver'
 import {UTXO} from './Bitcoin'
 import UnspentOutput = Transaction.UnspentOutput;
 
 export class PreparedBitcoinTransfer extends PreparedTransaction {
-    private readonly chaingateClient: ChainGateClient
+    private readonly api: BitcoinApi
     private readonly bitcoin: Bitcoin
     private fromAddress: string
     private toAddress: string
-    private amount: BitcoinCurrencyAmount
+    private amount: CurrencyAmount
     private utxos: Array<UTXO>
     readonly possibleFees: PossibleFees<BitcoinFee>
 
-    constructor(chainGateClient: ChainGateClient,
+    constructor(api: BitcoinApi,
         bitcoin: Bitcoin,
         fromAddress: string,
         toAddress: string,
-        amount: BitcoinCurrencyAmount,
+        amount: CurrencyAmount,
         utxos: Array<UTXO>,
         possibleFees: PossibleFees<BitcoinFee>
     ) {
         super()
-        this.chaingateClient = chainGateClient
+        this.api = api
         this.bitcoin = bitcoin
         this.fromAddress = fromAddress
         this.toAddress = toAddress
@@ -51,23 +50,23 @@ export class PreparedBitcoinTransfer extends PreparedTransaction {
 
         let transaction = new Transaction()
             .from(bitcoreUtxo)
-            .to(this.toAddress, this.amount.satoshis.toNumber())
+            .to(this.toAddress, this.amount.minimalUnitAmount.toNumber())
             .change(this.fromAddress)
 
         if(fee.kind == FeeKind.FeeAmount)
-            transaction = transaction.fee(fee.fee.satoshis.toNumber())
+            transaction = transaction.fee(fee.fee.minimalUnitAmount.toNumber())
         if(fee.kind == FeeKind.FeePerByte)
-            transaction = transaction.feePerKb(fee.fee.satoshis.mul(1_024).toNumber())
+            transaction = transaction.feePerKb(fee.fee.minimalUnitAmount.mul(1_024).toNumber())
 
         transaction = transaction.sign(Utils.bytesToHex(((await this.bitcoin.getPrivateKey()).raw), false))
 
         const broadcastTx = await ConsumeFunction(
-            this.chaingateClient.Bitcoin,
-            this.chaingateClient.Bitcoin.broadcastTransaction,
+            this.api,
+            this.api.broadcastTransaction,
             {transactionRaw: transaction.serialize()}
         )
 
-        return new ConfirmedBitcoinTransaction(this.chaingateClient, broadcastTx.txId)
+        return new ConfirmedBitcoinTransaction(this.api, broadcastTx.txId)
     }
 
 }

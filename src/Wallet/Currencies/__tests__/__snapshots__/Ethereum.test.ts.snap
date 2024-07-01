@@ -4,36 +4,60 @@ exports[`Ethereum Call smart contract function 1`] = `"0x00000000000000000000000
 
 exports[`Ethereum Transfer some ethereum 1`] = `
 {
-  "high": EthereumFee {
-    "maxFeePerGas": EthereumCurrencyAmount {
-      "_baseAmount": "5e-18",
+  "high": EvmFee {
+    "maxFeePerGas": CurrencyAmount {
+      "baseAmount": "5e-18",
+      "baseSymbol": "ETH",
+      "minimalUnitAmount": "5",
+      "minimalUnitSymbol": "wei",
     },
-    "maxPriorityFeePerGas": EthereumCurrencyAmount {
-      "_baseAmount": "1",
-    },
-  },
-  "low": EthereumFee {
-    "maxFeePerGas": EthereumCurrencyAmount {
-      "_baseAmount": "4e-18",
-    },
-    "maxPriorityFeePerGas": EthereumCurrencyAmount {
-      "_baseAmount": "0",
+    "maxPriorityFeePerGas": CurrencyAmount {
+      "baseAmount": "1",
+      "baseSymbol": "ETH",
+      "minimalUnitAmount": "1000000000000000000",
+      "minimalUnitSymbol": "wei",
     },
   },
-  "maximum": EthereumFee {
-    "maxFeePerGas": EthereumCurrencyAmount {
-      "_baseAmount": "6e-18",
+  "low": EvmFee {
+    "maxFeePerGas": CurrencyAmount {
+      "baseAmount": "4e-18",
+      "baseSymbol": "ETH",
+      "minimalUnitAmount": "4",
+      "minimalUnitSymbol": "wei",
     },
-    "maxPriorityFeePerGas": EthereumCurrencyAmount {
-      "_baseAmount": "3",
+    "maxPriorityFeePerGas": CurrencyAmount {
+      "baseAmount": "0",
+      "baseSymbol": "ETH",
+      "minimalUnitAmount": "0",
+      "minimalUnitSymbol": "wei",
     },
   },
-  "normal": EthereumFee {
-    "maxFeePerGas": EthereumCurrencyAmount {
-      "_baseAmount": "4e-18",
+  "maximum": EvmFee {
+    "maxFeePerGas": CurrencyAmount {
+      "baseAmount": "6e-18",
+      "baseSymbol": "ETH",
+      "minimalUnitAmount": "6",
+      "minimalUnitSymbol": "wei",
     },
-    "maxPriorityFeePerGas": EthereumCurrencyAmount {
-      "_baseAmount": "0",
+    "maxPriorityFeePerGas": CurrencyAmount {
+      "baseAmount": "3",
+      "baseSymbol": "ETH",
+      "minimalUnitAmount": "3000000000000000000",
+      "minimalUnitSymbol": "wei",
+    },
+  },
+  "normal": EvmFee {
+    "maxFeePerGas": CurrencyAmount {
+      "baseAmount": "4e-18",
+      "baseSymbol": "ETH",
+      "minimalUnitAmount": "4",
+      "minimalUnitSymbol": "wei",
+    },
+    "maxPriorityFeePerGas": CurrencyAmount {
+      "baseAmount": "0",
+      "baseSymbol": "ETH",
+      "minimalUnitAmount": "0",
+      "minimalUnitSymbol": "wei",
     },
   },
 }

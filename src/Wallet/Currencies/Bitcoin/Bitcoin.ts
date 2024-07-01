@@ -1,13 +1,11 @@
 import Decimal from 'decimal.js'
-import {Currency, NotEnoughFundsError, PossibleFees} from '../Currency'
-import {ChainGateClient} from 'chaingate-client'
+import {Currency, CurrencyAmount, NotEnoughFundsError, PossibleFees} from '../Currency'
 import {PrivateKeySource} from '../../Keys'
 import {AddressType} from './BitcoinUtils'
 import {Address as TapScriptAddress, Tap} from '@cmdcode/tapscript'
 import {ConsumeFunction} from '../../../CGDriver'
-import BitcoinCurrencyAmount from './BitcoinCurrencyAmount'
 import {PreparedBitcoinTransfer} from './PreparedBitcoinTransfer'
-import {Utxos} from 'chaingate-client/dist/api'
+import {BitcoinApi} from 'chaingate-client'
 import {BitcoinFee} from './BitcoinFee'
 import * as Utils from '../../../Utils/Utils'
 
@@ -16,16 +14,20 @@ export type UTXO = {
 }
 
 export class Bitcoin extends Currency {
-    constructor(chainGateClient: ChainGateClient, privateKeySource: PrivateKeySource) {
+    declare readonly api: BitcoinApi
+
+    constructor(api: BitcoinApi, privateKeySource: PrivateKeySource) {
         super({
             symbol: 'BTC',
             id: 'bitcoin',
             defaultDerivationPath: 'm/84\'/0\'/0\'/0/0',
             name: 'bitcoin',
-            svgLogoUrl: Utils.buildUrlWithApiKey('https://api.chaingate.dev/bitcoin/logo')
+            svgLogoUrl: Utils.buildUrlWithApiKey('https://api.chaingate.dev/bitcoin/logo'),
+            decimals: 8,
+            minimalUnitSymbol: 'satoshi'
         }
         ,
-        chainGateClient,
+        api,
         privateKeySource)
     }
 
@@ -47,26 +49,25 @@ export class Bitcoin extends Currency {
         }
     }
 
-    async getBalance(address?: string) {
-        if (!address) address = await this.getAddress()
+    async getBalance(address?: string): Promise<{confirmed: CurrencyAmount, unconfirmed: CurrencyAmount}>{
         const balance = await ConsumeFunction(
-            this.chaingateClient.Bitcoin,
-            this.chaingateClient.Bitcoin.addressBalance,
-            address)
+            this.api,
+            this.api.addressBalance,
+            address ?? await this.getAddress())
         return {
-            confirmed: new BitcoinCurrencyAmount(new Decimal(balance.confirmed)),
-            unconfirmed: new BitcoinCurrencyAmount(new Decimal(balance.unconfirmed))
+            confirmed: new CurrencyAmount(this, new Decimal(balance.confirmed)),
+            unconfirmed: new CurrencyAmount(this, new Decimal(balance.unconfirmed))
         }
     }
 
-    async prepareTransfer(toAddress: string, amount: BitcoinCurrencyAmount): Promise<PreparedBitcoinTransfer> {
+    async prepareTransfer(toAddress: string, amount: CurrencyAmount): Promise<PreparedBitcoinTransfer> {
         if (toAddress.startsWith('bcrt1q')) throw new Error('Taproot addresses are not yet supported')
 
         const fromAddress = await this.getAddress()
-        const utxos = await this.buildUtxos(amount.btc)
+        const utxos = await this.buildUtxos(amount.baseAmount)
         const possibleFees = await this.buildPossibleFees()
 
-        return new PreparedBitcoinTransfer(this.chaingateClient, this, fromAddress, toAddress, amount, utxos, possibleFees)
+        return new PreparedBitcoinTransfer(this.api, this, fromAddress, toAddress, amount, utxos, possibleFees)
     }
 
     private async buildUtxos(amountBtc: Decimal) {
@@ -74,11 +75,11 @@ export class Bitcoin extends Currency {
         let totalUtxosAmount = new Decimal(0)
 
         let page = 0
-        let utxosByAddress: Utxos
+        let utxosByAddress
         do {
             utxosByAddress = await ConsumeFunction(
-                this.chaingateClient.Bitcoin,
-                this.chaingateClient.Bitcoin.utxosByAddress,
+                this.api,
+                this.api.utxosByAddress,
                 await this.getAddress(), page)
 
             for (const utxo of utxosByAddress.utxos) {
@@ -94,21 +95,26 @@ export class Bitcoin extends Currency {
             page++
         } while (totalUtxosAmount.lt(amountBtc) && utxosByAddress.page != utxosByAddress.lastPage)
 
-        if (totalUtxosAmount.lt(amountBtc)) throw new NotEnoughFundsError(this, new BitcoinCurrencyAmount(amountBtc.minus(totalUtxosAmount)))
+        if (totalUtxosAmount.lt(amountBtc)) throw new NotEnoughFundsError(this, new CurrencyAmount(this, amountBtc.minus(totalUtxosAmount)))
 
         return pickedUtxos
     }
 
     private async buildPossibleFees(): Promise<PossibleFees<BitcoinFee>> {
         const feeRateResponse = await ConsumeFunction(
-            this.chaingateClient.Bitcoin,
-            this.chaingateClient.Bitcoin.feeRate)
+            this.api,
+            this.api.feeRate)
 
         return {
-            low: BitcoinFee.feePerByte(new BitcoinCurrencyAmount(new Decimal(feeRateResponse['low'].feePerByte))),
-            normal: BitcoinFee.feePerByte(new BitcoinCurrencyAmount(new Decimal(feeRateResponse['normal'].feePerByte))),
-            high: BitcoinFee.feePerByte(new BitcoinCurrencyAmount(new Decimal(feeRateResponse['high'].feePerByte))),
-            maximum: BitcoinFee.feePerByte(new BitcoinCurrencyAmount(new Decimal(feeRateResponse['maximum'].feePerByte))),
+            low: BitcoinFee.feePerByte(new CurrencyAmount(this, new Decimal(feeRateResponse['low'].feePerByte))),
+            normal: BitcoinFee.feePerByte(new CurrencyAmount(this, new Decimal(feeRateResponse['normal'].feePerByte))),
+            high: BitcoinFee.feePerByte(new CurrencyAmount(this, new Decimal(feeRateResponse['high'].feePerByte))),
+            maximum: BitcoinFee.feePerByte(new CurrencyAmount(this, new Decimal(feeRateResponse['maximum'].feePerByte))),
         }
+    }
+
+    fee(fee: { feePerByte: CurrencyAmount } | { feeAmount: CurrencyAmount }): BitcoinFee {
+        if('feePerByte' in fee) return BitcoinFee.feeAmount(fee.feePerByte)
+        if('feeAmount' in fee) return BitcoinFee.feeAmount(fee.feeAmount)
     }
 }
