@@ -6,6 +6,81 @@ exports[`Wallet Get all balances 1`] = `
     "balance": {
       "confirmed": CurrencyAmount {
         "baseAmount": "0",
+        "baseSymbol": "ARB",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
+      },
+      "unconfirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "ARB",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
+      },
+    },
+    "currency": {
+      "decimals": 18,
+      "defaultDerivationPath": "m/44'/60'/0'/0/0",
+      "id": "arbitrum",
+      "minimalUnitSymbol": "wei",
+      "name": "Arbitrum One",
+      "svgLogoUrl": "https://api.chaingate.dev/arbitrum/logo",
+      "symbol": "ARB",
+    },
+  },
+  {
+    "balance": {
+      "confirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "AVAX",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
+      },
+      "unconfirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "AVAX",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
+      },
+    },
+    "currency": {
+      "decimals": 18,
+      "defaultDerivationPath": "m/44'/60'/0'/0/0",
+      "id": "avalanche",
+      "minimalUnitSymbol": "wei",
+      "name": "Avalanche C-Chain",
+      "svgLogoUrl": "https://api.chaingate.dev/avalanche/logo",
+      "symbol": "AVAX",
+    },
+  },
+  {
+    "balance": {
+      "confirmed": CurrencyAmount {
+        "baseAmount": "2.083e-14",
+        "baseSymbol": "BSC",
+        "minimalUnitAmount": "20830",
+        "minimalUnitSymbol": "wei",
+      },
+      "unconfirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "BSC",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
+      },
+    },
+    "currency": {
+      "decimals": 18,
+      "defaultDerivationPath": "m/44'/60'/0'/0/0",
+      "id": "binanceSmartChain",
+      "minimalUnitSymbol": "wei",
+      "name": "Binance Smart Chain",
+      "svgLogoUrl": "https://api.chaingate.dev/binance/logo",
+      "symbol": "BSC",
+    },
+  },
+  {
+    "balance": {
+      "confirmed": CurrencyAmount {
+        "baseAmount": "0",
         "baseSymbol": "BTC",
         "minimalUnitAmount": "0",
         "minimalUnitSymbol": "satoshi",
@@ -22,9 +97,34 @@ exports[`Wallet Get all balances 1`] = `
       "defaultDerivationPath": "m/84'/0'/0'/0/0",
       "id": "bitcoin",
       "minimalUnitSymbol": "satoshi",
-      "name": "bitcoin",
+      "name": "Bitcoin",
       "svgLogoUrl": "https://api.chaingate.dev/bitcoin/logo",
       "symbol": "BTC",
+    },
+  },
+  {
+    "balance": {
+      "confirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "BOBA",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
+      },
+      "unconfirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "BOBA",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
+      },
+    },
+    "currency": {
+      "decimals": 18,
+      "defaultDerivationPath": "m/44'/60'/0'/0/0",
+      "id": "boba",
+      "minimalUnitSymbol": "wei",
+      "name": "Boba Network",
+      "svgLogoUrl": "https://api.chaingate.dev/boba/logo",
+      "symbol": "BOBA",
     },
   },
   {
@@ -50,6 +150,31 @@ exports[`Wallet Get all balances 1`] = `
       "name": "Ethereum",
       "svgLogoUrl": "https://api.chaingate.dev/ethereum/logo",
       "symbol": "ETH",
+    },
+  },
+  {
+    "balance": {
+      "confirmed": CurrencyAmount {
+        "baseAmount": "1.9e-14",
+        "baseSymbol": "MATIC",
+        "minimalUnitAmount": "19000",
+        "minimalUnitSymbol": "wei",
+      },
+      "unconfirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "MATIC",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "wei",
+      },
+    },
+    "currency": {
+      "decimals": 18,
+      "defaultDerivationPath": "m/44'/60'/0'/0/0",
+      "id": "polygon",
+      "minimalUnitSymbol": "wei",
+      "name": "Polygon",
+      "svgLogoUrl": "https://api.chaingate.dev/polygon/logo",
+      "symbol": "MATIC",
     },
   },
 ]
