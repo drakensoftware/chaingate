@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bitcoin Testnet Transfer some bitcoins 1`] = `
+{
+  "high": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "0.00000122406",
+      "baseSymbol": "BTC",
+      "minimalUnitAmount": "122.406",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "low": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "0.00000105456",
+      "baseSymbol": "BTC",
+      "minimalUnitAmount": "105.456",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "maximum": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "0.00000122406",
+      "baseSymbol": "BTC",
+      "minimalUnitAmount": "122.406",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "normal": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "0.00000122406",
+      "baseSymbol": "BTC",
+      "minimalUnitAmount": "122.406",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+}
+`;
+
+exports[`Bitcoin Transfer some bitcoins 1`] = `
+{
+  "high": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "0.00000122406",
+      "baseSymbol": "BTC",
+      "minimalUnitAmount": "122.406",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "low": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "0.00000105456",
+      "baseSymbol": "BTC",
+      "minimalUnitAmount": "105.456",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "maximum": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "0.00000122406",
+      "baseSymbol": "BTC",
+      "minimalUnitAmount": "122.406",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "normal": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "0.00000122406",
+      "baseSymbol": "BTC",
+      "minimalUnitAmount": "122.406",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+}
+`;
