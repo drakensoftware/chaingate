@@ -69,5 +69,6 @@ async function callMocked<T>(
     let func = () => getData<T>(endpoint.bind(api, ...args))
     func = mockFunction(api, `ChainGate_${funcNamespace}_${funcName}`, func)
 
-    return await func.call(api, ...args)
+    const res = await func.call(api, ...args)
+    return res
 }

@@ -106,6 +106,31 @@ exports[`Wallet Get all balances 1`] = `
     "balance": {
       "confirmed": CurrencyAmount {
         "baseAmount": "0",
+        "baseSymbol": "BTC-TESTNET",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "satoshi",
+      },
+      "unconfirmed": CurrencyAmount {
+        "baseAmount": "0",
+        "baseSymbol": "BTC-TESTNET",
+        "minimalUnitAmount": "0",
+        "minimalUnitSymbol": "satoshi",
+      },
+    },
+    "currency": {
+      "decimals": 8,
+      "defaultDerivationPath": "m/84'/1'/0'/0/0",
+      "id": "bitcoin-testnet",
+      "minimalUnitSymbol": "satoshi",
+      "name": "Bitcoin",
+      "svgLogoUrl": "https://api.chaingate.dev/bitcoin/logo",
+      "symbol": "BTC-TESTNET",
+    },
+  },
+  {
+    "balance": {
+      "confirmed": CurrencyAmount {
+        "baseAmount": "0",
         "baseSymbol": "BOBA",
         "minimalUnitAmount": "0",
         "minimalUnitSymbol": "wei",

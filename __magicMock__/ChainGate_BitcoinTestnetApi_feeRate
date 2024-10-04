@@ -1,0 +1,30 @@
+{
+  "[[]]": {
+    "0": [
+      {
+        "low": "1",
+        "normal": "2",
+        "high": "3",
+        "maximum": "4"
+      },
+      {
+        "feePerByte": "5",
+        "confirmationTimeSecs": 6000
+      },
+      {
+        "feePerByte": "6",
+        "confirmationTimeSecs": 1200
+      },
+      {
+        "feePerByte": "6",
+        "confirmationTimeSecs": 600
+      },
+      {
+        "feePerByte": "6",
+        "confirmationTimeSecs": 600
+      },
+      "1e-8",
+      "6.5035e-7"
+    ]
+  }
+}
