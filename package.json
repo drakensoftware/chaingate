@@ -1,6 +1,6 @@
 {
   "name": "chaingate",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A complete TypeScript library for connecting to and making transactions on different blockchains",
   "keywords": [
     "blockchain",
