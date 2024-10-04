@@ -60,10 +60,14 @@ export class PreparedBitcoinTransfer extends PreparedTransaction {
 
         transaction = transaction.sign(Utils.bytesToHex(((await this.bitcoin.getPrivateKey()).raw), false))
 
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        const serializedTx = transaction.serialize({disableDustOutputs: true})
+
         const broadcastTx = await ConsumeFunction(
             this.api,
             this.api.broadcastTransaction,
-            {transactionRaw: transaction.serialize()}
+            {transactionRaw: serializedTx}
         )
 
         return new ConfirmedBitcoinTransaction(this.api, broadcastTx.txId)

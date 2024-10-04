@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bitcoin Testnet Transfer some bitcoins 1`] = `
+{
+  "high": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "6.5035e-7",
+      "baseSymbol": "BTC-TESTNET",
+      "minimalUnitAmount": "65.035",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "low": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "1e-8",
+      "baseSymbol": "BTC-TESTNET",
+      "minimalUnitAmount": "1",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "maximum": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "6.5035e-7",
+      "baseSymbol": "BTC-TESTNET",
+      "minimalUnitAmount": "65.035",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+  "normal": BitcoinFee {
+    "fee": CurrencyAmount {
+      "baseAmount": "6.5035e-7",
+      "baseSymbol": "BTC-TESTNET",
+      "minimalUnitAmount": "65.035",
+      "minimalUnitSymbol": "satoshi",
+    },
+    "kind": 1,
+  },
+}
+`;
