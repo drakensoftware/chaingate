@@ -1,7 +1,7 @@
 import {mockFunction} from '@drakensoftware/magicmock'
 
 const maximumSecondsRetryAfter = 120
-const intervalSecondsBetweenExchaustedMessages = 60
+const intervalSecondsBetweenExhaustedMessages = 60
 let lastExhaustedMessageShownTimestamp = 0
 
 export class InvalidApiKeyError extends Error {
@@ -14,7 +14,9 @@ export class InvalidApiKeyError extends Error {
 
 export class ExhaustedApiKey extends Error {
     constructor() {
-        super('You have reached the limit of your API key. Please upgrade to a higher tier.')
+        super('You have exceeded your current rate limit. ' +
+            'To continue making requests, either register for a free API key ' +
+            'or upgrade your existing API tier at https://chaingate.dev/')
         if (Error.captureStackTrace) Error.captureStackTrace(this, InvalidApiKeyError)
         this.name = this.constructor.name
     }
@@ -36,12 +38,12 @@ export async function ConsumeFunction<T>(
                 if(retryAfter <= maximumSecondsRetryAfter){
 
                     if(
-                        Date.now() >= lastExhaustedMessageShownTimestamp + (intervalSecondsBetweenExchaustedMessages * 1000)
+                        Date.now() >= lastExhaustedMessageShownTimestamp + (intervalSecondsBetweenExhaustedMessages * 1000)
                         &&
                         !process.env.DISABLE_EXHAUSTED_TIER_MESSAGE){
                         console.warn(
-                            'You have exhausted your API tier limit, and ChainGate is operating beyond its capacity. ' +
-                            'Consider upgrading to a higher tier.\nWaiting for a few seconds...')
+                            'You have exceeded your current rate limit, and ChainGate is currently operating beyond its capacity.' +
+                            ' To increase your request capacity and reduce delays, please upgrade your API tier at https://chaingate.dev')
                         lastExhaustedMessageShownTimestamp = Date.now()
                     }
 
@@ -69,6 +71,5 @@ async function callMocked<T>(
     let func = () => getData<T>(endpoint.bind(api, ...args))
     func = mockFunction(api, `ChainGate_${funcNamespace}_${funcName}`, func)
 
-    const res = await func.call(api, ...args)
-    return res
+    return await func.call(api, ...args)
 }

@@ -1,0 +1,11 @@
+export type PhraseLanguage =
+    'czech'
+    | 'english'
+    | 'french'
+    | 'italian'
+    | 'japanese'
+    | 'korean'
+    | 'portuguese'
+    | 'simplifiedChinese'
+    | 'spanish'
+    | 'traditionalChinese'

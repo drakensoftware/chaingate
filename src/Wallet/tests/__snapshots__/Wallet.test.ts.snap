@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Wallet Export wallet 1`] = `
+{
+  "crypto": {
+    "ciphertext": "d6c5c9d5134eeadab3aadfb31ff0b85151a18c11293d9caec9537dc58a5f71419b590eeef1f6df4a7ade7c60401924d14787b40de753cf0be3e9966f935935542451f173727a8c7fd0e8b92b2989a2031f23f055fe87690b8e8340cfc8d87594231b2fe3943e763061ccb89e45",
+    "iv": "000000000000000000000000",
+    "kdfsalt": "0000000000000000000000000000000000000000000000000000000000000000",
+  },
+  "format": "ChainGate Keystore Version 1",
+  "type": "phrase",
+  "version": 1,
+  "walletUniqueId": "b8eee38e26035e61411c8cd3c1cf2f7255a0ca323fb3d7d6cca685ab880537a1",
+}
+`;
+
+exports[`Wallet Export wallet 2`] = `
+{
+  "currenciesDerivationPaths": {},
+  "knownExtendedPublicKeys": {
+    "m/44'/0'/0'/0/0": "xpub6Fbrwk4KhC8qnFVXTcR3wRsqiTGkedcSSZKyTqKaxXjFN6rZv3UJYZ4mQtjNYY3gCa181iCHSBWyWst2PFiXBKgLpFVSdcyLbHyAahin8pd",
+    "m/44'/1'/0'/0/0": "xpub6G21nRKCqtUxarscgCiydZc1d4ZfTcGdYe25AdCC7n1XHTB8AxQRahx6tmvJ9rQVW6Vk9EUsmJWhzTzPFXh2y9gP6yMAV46VcxAfDs7ft1e",
+    "m/44'/145'/0'/0/0": "xpub6FzaFYeC1izfUn7tJkJRzxrFz47DK3bbE8UPhUaqBqES5pHKdPVTUqMJnALA2sy4tAUNofeWUVEydbS8TXYp89mdwfXw3NG4sUNmZ9bEh6R",
+    "m/44'/2'/0'/0/0": "xpub6GqaQgtcWMW4HV75xdABTvKhaJWoYih3i4z7TuCsrFb8HXev4YRiqnDptx5NX8n2yMr9FzeYtxAqQ58NSp1ZdELPvAYFAv4Cc8Va6pCSZkb",
+    "m/44'/3'/0'/0/0": "xpub6H51oNnRkNZYhtfG35ZterhqpyrAVwcEAXdWKw2zuQ6k1fhW4EREbDUviJT8NGGbQqsReriErMKqwLSAD7tRos77AWgiwdApZx6bwz3qFhv",
+    "m/44'/60'/0'/0/0": "xpub6H6LG2We64bdwqNF7gNkUJ5EvDibiT2gbs77oonbawV86XE3eMxZf9czGQ9CPdSzsdsHLnLEjiJJEDnFMAyLrWATesaVbTYeggBXMHaFKLg",
+    "m/84'/0'/0'/0/0": "xpub6FrCS2gWHvogbAX8ipHuBmbPvckXLYs5SfEKq1Lp3tneESUXuNNUw67q6Q6r1xHhmoQtByXS7SXes78nuGckLXWEuRPWNfwBo8Cp5QQLPKy",
+    "m/84'/1'/0'/0/0": "xpub6H2Bt6EzHKCFacP4W2ptPq1dV89YGGb2Jog6gr3uAhGhvfcPKEEGAsQy3ePJcDdC1pDNEjCX3aBjcmcgiZGg6pj8YtxX2TpxyjQZtsQxnsn",
+    "m/84'/2'/0'/0/0": "xpub6GE2uqZg1W93uLuzZ7Bxv5gucbjrTiyp2YWHAPc75Cu8m2mnfrdEzjBxGzDYkkPZhbhAm8cFv4fdBYrZtkB429aPPickAWHWg5N1UnV4Da8",
+    "m/84'/3'/0'/0/0": "xpub6GFoPKzdKUinnY5xNXjtden2uQ8Ji2CEUJAhGKYwA8fGUUJMPvkCVdUCfo3DeMKvoRioVevQ8K9cB9NietWusqnzdhqFKR8QBEQRpay1RLU",
+    "m/86'/0'/0'/0/0": "xpub6H3W6JmYJXN49h5TfcVjLC3onS6uPeUTTJoVvRC8oG9vsTn2J8LwigLzq5tHbrwAzH9DGo6ThGUdWsqce8dGfwHVBxSbixjDADGGdzF7t2B",
+    "m/86'/1'/0'/0/0": "xpub6GFN7bDy6jyxcdFpTo3TUcRQVgUQWe5GR9KbXqNx5vvKzyh9TUcKLCR2mHemA1LzQ1B83a26inPaxhNYQ6VV2AbCeKv4uLxVZCqcXWUQreN",
+    "m/86'/2'/0'/0/0": "xpub6Gkj22LzaydzjBiicVKBuLbU28HVuBi7ottzVLMHsNxeaYwMK2gsXPxHXkqnTND6dmJApSNNh6cuayeS2YfAMhKZdigYo9mZewaeFraVRBf",
+    "m/86'/3'/0'/0/0": "xpub6G7V6dE5PY9zChxWNAHWxF4wvRZu9G8R3upCjGj1wiPFfhKCEoUMZ9ewvV893NHfK9toGCNEhvcDZcPEWJEdwjkSETgRc6DN131X9bboRs1",
+  },
+  "walletUniqueId": "b8eee38e26035e61411c8cd3c1cf2f7255a0ca323fb3d7d6cca685ab880537a1",
+}
+`;

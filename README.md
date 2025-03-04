@@ -1,403 +1,449 @@
 # 🔗 ChainGate
-A complete cryptocurrency TypeScript framework for connecting to and making transactions on different blockchains
 
-**<p align="center">Bitcoin • Ethereum • Binance • Avalanche • Polygon • Arbitrum • Boba</p>**
+<p align="center">A complete cryptocurrency Typescript framework for connecting to and making transactions on different blockchains.</p>
 
+<p align="center"><strong>Bitcoin • Ethereum • Bnb • Dogecoin • Avalanche • Litecoin • Bitcoin Cash • Polygon • Arbitrum • Fantom • Base • Bitcoin Testnet</strong></p>
+
+<p align="center">
+    <img src="https://img.shields.io/github/package-json/v/drakensoftware/chaingate" alt="Version" />
+    <img src="https://img.shields.io/github/actions/workflow/status/drakensoftware/chaingate/test.yml?label=Test&branch=main" alt="Test" />
+    <img src="https://img.shields.io/github/actions/workflow/status/drakensoftware/chaingate/build.yml?label=Build&branch=main" alt="Build" />
+    <img src="https://img.shields.io/github/actions/workflow/status/drakensoftware/chaingate/build-web.yml?label=Build%20Web&branch=main" alt="Build Web" />
+</p>
 
 ![banner.png](banner.png)
 
-Install ChainGate by executing `npm i chaingate`
+## Installation
 
-Get your API key now for free on https://chaingate.dev
+```bash
+npm i chaingate
+```
 
-- 💻❤️🌐 NodeJS & Browser
-- 🔌 **Plug and Play wallet:**
-    - 🆕 Create new wallet from phrase
-    - 📥 Import any wallet: BIP39, private keys, seeds
-    - 🗺️ HDWallets: Supports BIP32 derivation paths
-    - 📜 Import wallet from phrase (BIP39)
-    - 🌱 Raw format seeds
-    - 🔐 Keystores: Ethereum-like keystore, DEX-like keystores
-- 🔗 Cross-Chain Functionality
-- 🔄 Access to a wide range of blockchain RPCs
-- 💱 Balance Querying: Retrieve balances across any currency
-- 📡 Easy transaction creation and broadcasting
-- 📏 Blockchain Information: Block height, status, transaction details
-- 🔮 Gas station: Predict accurately the fees of a transaction
+Get your API key now for free at [https://chaingate.dev](https://chaingate.dev)
 
+## Features
 
-⚠️ USE OF THIS BLOCKCHAIN LIBRARY IS AT YOUR OWN RISK; NO WARRANTIES OR LIABILITIES ARE ASSUMED, AND DATA ACCURACY IS NOT GUARANTEED
+- 💻❤️🌐 **NodeJS & Browser** compatible
+- 🔌 **Plug and Play Wallet**:
+  - 🆕 **Create** new wallet from mnemonic (BIP39 phrase)
+  - 📥 **Import** any wallet:
+    - 📜 BIP39 (mnemonic)
+    - 🔑 Private keys (hex string or `Uint8Array`)
+    - 🌱 Seeds (raw format)
+    - 🔐 Ethereum-like or DEX-like keystores
+  - 🗺️ **HD Wallet** support (BIP32 derivation paths)
+- 🔗 **Multi-Chain Functionality**:
+  - 🔄 Access multiple blockchains with the same library
+  - 💱 Retrieve balances (BTC, ETH, BNB, etc.)
+  - 📡 Create and broadcast transactions
+  - 📏 Get blockchain info (block height, transaction details, etc.)
+- 🔮 **Fee Estimation / Gas Prediction**: Accurately predict fees for transactions
 
+> **Warning**  
+> Use of this blockchain library is at your own risk. There are no warranties or liabilities assumed, and data accuracy is not guaranteed.
 
----
+# Table of Contents
 
+1. [🔗 ChainGate](#chaingate)  
+   1.1. [Installation](#installation)  
+   1.2. [Features](#features)
 
-- [Create or import a wallet](#create-or-import-a-wallet)
-    - [Wallet creation](#wallet-creation)
-    - [Import a wallet](#import-a-wallet)
-    - [Keys and exporting](#keys-and-exporting)
-    - [Addresses](#addresses)
-    - [Derivation paths](#derivation-paths)
-- [Query balances](#query-balances)
-- [Create and broadcast a transaction](#create-and-broadcast-a-transaction)
-- [Query RPCs](#query-rpcs)
-- [Query the API directly](#query-the-api-directly)
-- [Why am I receiving the message "You are running with a wallet unencrypted..."](#why-am-i-receiving-the-message-you-are-running-with-an-unencrypted-wallet)
-- [Why I am receiving the message "You have exhausted your API tier limit..."](#why-i-am-receiving-the-message-you-have-exhausted-your-api-tier-limit)
-- [I can't build my web app: "webpack < 5 used to include polyfills for node.js core modules by default"](#i-cant-build-my-web-app-webpack--5-used-to-include-polyfills-for-nodejs-core-modules-by-default)
+2. [Create or import a wallet](#create-or-import-a-wallet)  
+   2.1. [Wallet creation](#wallet-creation)  
+   2.2. [Import a wallet](#import-a-wallet)  
+   2.3. [Encryption](#encryption)  
+   2.4. [Keys and exporting](#keys-and-exporting)  
+   2.4.1. [Accessing phrase, seed, or private keys](#accessing-phrase-seed-or-private-keys)  
+   2.4.2. [Export wallet](#export-wallet)  
+   2.4.2.1. [Export Wallet Data](#export-wallet-data)  
+   2.4.2.2. [Export Encrypted Keystore](#export-encrypted-keystore)  
+   2.5. [Addresses](#addresses)  
+   2.5.1. [Generate Addresses](#1-generate-addresses)  
+   2.5.2. [Check Balances](#2-check-balances)  
+   2.5.3. [Send Transactions](#3-send-transactions)  
+   2.6. [Derivation paths](#derivation-paths)
 
+3. [Query RPCs](#query-rpcs)  
+   3.1. [Usage with Web3.js](#usage-with-web3js)  
+   3.2. [Usage with ethers.js](#usage-with-ethersjs)
+
+4. [Query the API directly](#query-the-api-directly)
+
+5. [Blockchain data](#blockchain-data)
+
+6. [Why am I receiving the message "You have exhausted your API tier limit..."](#why-am-i-receiving-the-message-you-have-exhausted-your-api-tier-limit)
+
+7. [I can't build my web app: "webpack < 5 used to include polyfills for node.js core modules by default"](#i-cant-build-my-web-app-webpack--5-used-to-include-polyfills-for-nodejs-core-modules-by-default)  
+   7.1. [What's happening?](#whats-happening)  
+   7.2. [Why does ChainGate need polyfills?](#why-does-chaingate-need-polyfills)  
+   7.3. [How to fix](#how-to-fix)
 
 # Create or import a wallet
 
 ## Wallet creation
 
-You can create a new wallet by calling:
+Create a new wallet by calling:
 
 ```typescript
-import {InitializeWallet} from 'chaingate'
-const wallet = await InitializeWallet.create('API_KEY')
-```
+import { initializeWallet } from 'chaingate'
 
-
-## Import a wallet
-
-Additionally, you can import a wallet created with another software or library:
-
-```typescript
-import { InitializeWallet } from 'chaingate'  
-  
-// Initialize wallet from keystore  
-const keystore = '{"cipher":"aes-128-ctr"...}'  
-const wallet = await InitializeWallet.fromKeystore('API_KEY', keystore, 'password')  
-  
-//Initialize wallet from phrase  
-const phrase = 'abandon abandon about ...'  
-const wallet = await InitializeWallet.fromPhrase('API_KEY', phrase)  
-  
-//Initalize wallet from seed  
-const wallet1 = await InitializeWallet.fromSeed('API_KEY', '676c4f62...')  
-const wallet2 = await InitializeWallet.fromSeed('API_KEY', new Uint8Array([0x01, 0x02, 0x03]))  
-  
-//Initalize wallet from private key  
-const wallet1 = await InitializeWallet.fromPrivateKey('API_KEY', '6b53aa40...')  
-const wallet2 = await InitializeWallet.fromPrivateKey('API_KEY', new Uint8Array([0xab, 0xcd, 0xed]))
-```
-
-
-## Keys and exporting
-
-You can access the seed phrase or private keys of the wallet you have just created or imported:
-
-```typescript
-import { InitializeWallet } from 'chaingate'  
-  
-const wallet = await InitializeWallet.create('API_KEY')  
-  
-// Export phrase or seed  
-const phrase : string = wallet.Phrase   //Phrase  
-const seed : string = wallet.getSeed()  //Seed  
-  
-  
-const wallet2 = await InitializeWallet.fromPrivateKey('API_KEY', '6b53aa40...')  
-  
-// Export private key of the wallet in various formats  
-const privateKeyRaw : Uint8Array = wallet2.PrivateKey.raw  
-const privateKeyHexa : string = wallet2.PrivateKey.hexa  
-const privateKeyWIF : string = wallet2.PrivateKey.wif  
-  
-// Export public key of the wallet  
-const publicKey = await wallet2.PrivateKey.getPublicKey()  
-const publicKeyCompressed = publicKey.compressed  
-const publicKeyUncompressed = publicKey.uncompressed
-```
-
-
-## Addresses
-
-Additionally, to obtain addresses of different blockchains:
-
-```typescript
-import { InitializeWallet } from 'chaingate'  
-  
-const wallet = await InitializeWallet.create('API_KEY')  
-  
-const bitcoinAddress = await wallet.currencies.bitcoin.getAddress()  
-const ethereumAddress = await wallet.currencies.ethereum.getAddress()
-const polygonAddress = await wallet.currencies.polygon.getAddress()
-```
-
-
-## Derivation paths
-
-If you import using a phrase or seed, you can utilize derivation paths in any currency. By default, the derivation path used is the default for the currency.
-
-To change the derivation path, call setDerivationPath() as follows:
-
-```typescript
-import { InitializeWallet } from 'chaingate'
-
-const wallet = await InitializeWallet.create('API_KEY')
-
-//Default derivation path is used
-const addressDefault = await wallet.currencies.bitcoin.getAddress()
-
-//Change derivation path
-await wallet.currencies.bitcoin.setDerivationPath('m/44\'/0\'/0\'/1/3')
-
-const addressNonDefaultDerivationPath = await wallet.currencies.bitcoin.getAddress()
-```
-
-
-# Query balances
-
-To initiate a transaction or operate on the blockchain, you need to fund your addresses. After funding your wallet's addresses, you can query their balances to confirm you possess the corresponding crypto:
-
-```typescript
-import { InitializeWallet } from 'chaingate'
-
-const wallet = await InitializeWallet.create('')
-
-// Verify your crypto addresses (in bitcoin and ethereum) to fund them
-const bitcoinAddress = wallet.currencies.bitcoin.getAddress()
-const ethereumAddress = wallet.currencies.ethereum.getAddress()
-
-// Query the balance of Bitcoin
-const bitcoinBalance = await wallet.currencies.bitcoin.getBalance()
-console.log(`Confirmed balance in BTC: ${bitcoinBalance.confirmed.baseAmount}`)
-console.log(`Confirmed balance in satoshi: ${bitcoinBalance.confirmed.minimalUnitAmount}`)
-
-
-// Query the balance of Ethereum
-const ethereumBalance = await wallet.currencies.ethereum.getBalance()
-console.log(`Confirmed balance in ETH: ${ethereumBalance.confirmed.baseAmount}`)
-console.log(`Confirmed balance in wei: ${ethereumBalance.confirmed.minimalUnitAmount}`)
-
-//Get a resume of balances
-const allBalances = await wallet.getAllBalances()
-for(const b of allBalances)
-  console.log(`Your ${b.currency.name} wallet amount is ${b.balance.confirmed.baseAmount} ${b.balance.confirmed.baseSymbol}`)
-```
-
-
-# Create and broadcast a transaction
-
-Transferring crypto is easy with ChainGate. You can prepare a transaction, query the possible fees, confirm it, and broadcast it to the network:
-
-```typescript
-import { InitializeWallet } from 'chaingate'
-
-const phrase = 'abandon abandon about...'
-const wallet = await InitializeWallet.fromPhrase('API_KEY', phrase)
-
-//Verify the address and balance of your wallet
-const bitcoinAddress = wallet.currencies.bitcoin.getAddress()
-const bitcoinBalance = await wallet.currencies.bitcoin.getBalance()
-console.log(`The Bitcoin address of your wallet is ${bitcoinAddress}`)
-console.log(`You currently have ${bitcoinBalance} BTC`)
-
-//Prepare the transaction
-const bitcoin = wallet.currencies.bitcoin
-const transaction = await bitcoin.prepareTransfer(
-        '1111111111111111111114oLvT2', //Destination address
-        bitcoin.amount('1000 satoshi') //Amount (in Satoshi)
-)
-
-//We will use fast fees for transaction to confirm earlier
-console.log(`We are going to use a fee of ${transaction.possibleFees['high']}`)
-
-//Broadcast the transaction
-const broadcasted = await transaction.confirm('high') //High confirmation fees
-console.log(`Transaction is on the network :) The txid is ${broadcasted.txId}`)
-
-//Wait until is confirmed
-console.log('Wait for confirmation... This might take a while')
-await broadcasted.isConfirmed()
-console.log('The transaction is fully confirmed')
-
-
-//You can also use native units:
-const transaction2 = await bitcoin.prepareTransfer(
-        '1111111111111111111114oLvT2', //Destination address
-        bitcoin.amount('1 btc') //Amount (1 BTC)
-)
-
-const transaction3 = await bitcoin.prepareTransfer(
-        '1111111111111111111114oLvT2', //Destination address
-        bitcoin.amount('1') //Amount (1 BTC)
-)
-```
-
-
-# Query RPCs
-
-If you're using libraries such as Web3.js or Ethers, or need to work with code not directly supported by ChainGate, you can leverage ChainGate's reliable RPC endpoints for various cryptocurrencies, including:
-
-- Arbitrum
-- Avalanche C-Chain
-- Binance Smart Chain
-- Bitcoin
-- Boba Network
-- Ethereum
-- Fantom Opera
-- Polygon
-- zkSync
-
-To access these RPCs, query the API URL, which can be found in the [ChainGate API Documentation RPCs](https://api.chaingate.dev/docs#tag/RPCs).
-
-When using Web3.js or Ethers, include your API KEY in the URL within the 'apiKey' parameter:
-
-```typescript
-import Web3 from 'web3'  
-const chainGateApiKey = 'API_KEY'  
-const web3 = new Web3(`https://api.chaingate.dev/rpc/binance?api_key=${chainGateApiKey}`)  
-  
-const latestBlock = await web3.eth.getBlock('latest')  
-console.log(latestBlock)
-```
-
-```typescript
-import { JsonRpcProvider } from 'ethers'  
-const chainGateApiKey = 'API_KEY'  
-const ethers = new JsonRpcProvider(`https://api.chaingate.dev/rpc/binance?api_key=${chainGateApiKey}`)  
-  
-const latestBlock = await ethers.getBlock('latest')  
-console.log(latestBlock)
-```
-
-
-# Query the API directly
-
-ChainGate offers a ChainGate API with REST endpoints, providing advanced features and information on supported blockchains.
-
-API documentation: [ChainGate API Documentation](https://api.chaingate.dev/docs)
-
-Key features of the API include:
-
-- Transaction details
-- Mempool
-- Block transactions
-- (...)
-
-Access the API through a ApiClient instance:
-
-```typescript
-import { ApiClient } from 'chaingate'  
-
-const apiClient = new ApiClient('API_KEY')  
-  
-//Get transaction details  
-const transactionDetails = (await apiClient.Bitcoin.transactionDetails('e9a66845...')).data  
-  
-//Get mempool transactions  
-const mempool = (await apiClient.Ethereum.mempool()).data  
-  
-//Get block transactions  
-const blockTransactions = (await apiClient.Bitcoin.blockTransactions(1000)).data
-```
-
-
-# Why am I receiving the message "You are running with an unencrypted wallet..."
-
-Occasionally, you may receive the following message through the console:
-
-```
-You are running with an unencrypted wallet. This should only be done for development purposes.
-If you intend to use it in production, call encrypt(password) after it is created,
-and run functions that require the usage of private key with runUnencrypted(password, ...)
-```
-
-Software wallets face a significant problem: the private key is stored unencrypted in the memory. If someone gains access to the computer's memory (e.g., through a debugger), the wallet's private key can be compromised.
-
-The solution that ChainGate proposes is to encrypt the wallet with a password (using AES encryption) and ask the user for the password every time the private key needs to be accessed (such as when building a transaction or exporting the private key).
-
-To implement this, encrypt the wallet initially and, for every code that outputs the message, prompt the user for the password and run the code with `runUnencrypted(password, ...)`. Here's an example:
-
-```typescript
-import { InitializeWallet } from 'chaingate'  
-import p from 'prompt-sync'  
-import {Units} from 'chaingate'  
-const prompt = p()  
-  
-//Initialize wallet  
-const phrase = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'  
-const wallet = await InitializeWallet.fromPhrase('API_KEY', phrase)
-
-//Ask for password  
-const walletPassword = prompt('Wallet password? ')  
-
-//Encrypt wallet  
-await wallet.encrypt(walletPassword)
-```
-
-```typescript
-//Prepare a transaction  
-const transaction = await wallet.currencies.bitcoin.prepareTransfer(  
-    '1111111111111111111114oLvT2', //Destination address  
-    Units.Satoshis('1_000_000') //Amount (in Satoshi)  
-)  
-  
-//Broadcast the transaction (need to acess the private key)  
-const password = prompt('What is the wallet password? ')  
-await wallet.runUnencrypted(password, async () => {  
-    await transaction.confirm('normal')  
+const { wallet, phrase } = await initializeWallet.create({
+  apiKey: '1234-5678'
 })
 ```
 
-To remove this message safely, set the variable `process.env.I_AM_SURE_I_AM_NOT_IN_PRODUCTION` to a truthy value.
+- `wallet` is a fully initialized wallet instance.
+- `phrase` is the generated mnemonic (BIP39) for backup.
 
+## Import a wallet
 
-# Why I am receiving the message "You have exhausted your API tier limit..."
+You can also import an existing wallet created with other software or libraries:
 
-If you encounter the message:
+```typescript
+import { initializeWallet } from 'chaingate'
 
+// 1. Initialize wallet from keystore (JSON + password)
+const keystore = '{"cipher":"aes-128-ctr","ciphertext":"..."}'
+const { wallet: walletFromKeystore } = await initializeWallet.fromKeystore({
+  apiKey: '1234-5678',
+  keystore,
+  password: 'password'
+})
+
+// 2. Initialize wallet from mnemonic (BIP39)
+const phrase = 'abandon abandon about ...'
+const { wallet: walletFromPhrase } = await initializeWallet.fromPhrase({
+  apiKey: '1234-5678',
+  phrase
+})
+
+// 3. Initialize wallet from seed
+const { wallet: walletFromSeedHex } = await initializeWallet.fromSeed({
+  apiKey: '1234-5678',
+  seed: '0x75a993774...'
+})
+const { wallet: walletFromSeedUint } = await initializeWallet.fromSeed({
+  apiKey: '1234-5678',
+  seed: new Uint8Array([0x01, 0x02, 0x03])
+})
+
+// 4. Initialize wallet from private key
+const { wallet: walletFromPkHex } = await initializeWallet.fromPrivateKey({
+  apiKey: '1234-5678',
+  privateKey: '6b53aa40...'
+})
+const { wallet: walletFromPkUint } = await initializeWallet.fromPrivateKey({
+  apiKey: '1234-5678',
+  privateKey: new Uint8Array([0xab, 0xcd, 0xed])
+})
 ```
-You have exhausted your API tier limit, and ChainGate is operating beyond its capacity. Consider upgrading to a higher tier.
+
+## Encryption
+
+You can optionally encrypt the wallet with a password at initialization:
+
+```typescript
+import { initializeWallet } from 'chaingate'
+
+const { wallet } = await initializeWallet.fromPhrase({
+  phrase: 'abandon abandon about ...',
+  encrypt: {
+    password: 'your-strong-password',
+    askForPassword: async (incorrectPassword: boolean) => {
+      // Implement an interactive password prompt or any input flow
+      return prompt('Enter wallet password:')
+    }
+  }
+})
+
+// Future transactions or sensitive operations automatically prompt for the password
 ```
 
-it indicates that you have reached the limit of your current API tier with ChainGate. As a result, you may experience delays or slower performance when using the API. To resolve this issue, you should consider upgrading to a higher tier or paying for a ChainGate subscription.
+**Notes**:
+- Encrypted wallets require `askForPassword` to decrypt private data during sensitive operations.
+- Use `warnAboutUnencrypted: false` to disable warnings in secure environments.
 
-You can upgrade your tier or manage your subscription by visiting the ChainGate application at [https://app.chaingate.dev](https://app.chaingate.dev/).
+## Keys and exporting
 
-To remove this message safely, set the variable `process.env.DISABLE_EXHAUSTED_TIER_MESSAGE` to a truthy value.
+After creating or importing a wallet, you can access and export its keys.
 
+### Accessing phrase, seed, or private keys
+
+```typescript
+import { initializeWallet } from 'chaingate'
+
+const { wallet } = await initializeWallet.create({
+  apiKey: '1234-5678'
+})
+
+// Export phrase (mnemonic)
+const phrase: string = await wallet.getPhrase()
+
+// Export seed in hex format
+const seedHex: string = (await wallet.getSeed()).hexa
+
+// Use a wallet from a private key
+const { wallet: wallet2 } = await initializeWallet.fromPrivateKey({
+  apiKey: '1234-5678',
+  privateKey: '6b53aa40...'
+})
+
+// Export private key in various formats
+const privateKeyRaw: Uint8Array = (await wallet2.getPrivateKey()).raw
+const privateKeyHex: string = (await wallet2.getPrivateKey()).hexa
+const privateKeyWIF: string = (await wallet2.getPrivateKey()).wif
+
+// Export public key
+const publicKey = await wallet2.getPublicKey()
+const publicKeyHex = publicKey.hex
+```
+
+### Export wallet
+
+#### Export Wallet Data
+
+You can export wallet-related data (e.g., derivation paths, public keys) for backup or restoration:
+
+```typescript
+const exportedData = await wallet.exportWalletData()
+console.log(exportedData.currenciesDerivationPaths)
+/*
+{
+  "bitcoin": "m/84'/0'/0'/0/0",
+  "ethereum": "m/44'/60'/0'/0/0"
+}
+*/
+```
+
+#### Export Encrypted Keystore
+
+ChainGate uses its own keystore format. If your wallet is encrypted, you can export an encrypted JSON for backup:
+
+```typescript
+import { WalletIsNotEncrypted } from 'chaingate'
+
+try {
+  const keystore = await wallet.exportKeys() // JSON with encryption details
+  console.log(keystore)
+} catch (e) {
+  if (e instanceof WalletIsNotEncrypted) {
+    console.error('Wallet must be encrypted first!')
+  }
+}
+```
+
+## Addresses
+
+### 1. Generate Addresses
+
+```typescript
+// Bitcoin (default: Native SegWit)
+const btcCurrency = wallet.currency('bitcoin')
+console.log(await btcCurrency.getAddress())
+// e.g. bc1qcu2aq327lzgee5f9vqm7m23fhck39ja7j37ass
+
+// Ethereum
+const ethCurrency = wallet.currency('ethereum')
+console.log(await ethCurrency.getAddress())
+// e.g. 0xE7c19D5A90352b5eE0144363D1191E2549Ca2146
+
+// Custom Derivation Path (e.g., Bitcoin Taproot)
+btcCurrency.setDerivationPath("m/86'/0'/0'/0/0")
+console.log(await btcCurrency.getAddress('taproot'))
+// e.g. bc1ps6lm9t9yx6etly4y06hvqwyyzk4pc0j02w58s2frsgxlsh5hv47qvermj7
+```
+
+### 2. Check Balances
+
+```typescript
+// Bitcoin
+const bitcoinBalance = await btcCurrency.getBalance()
+console.log(bitcoinBalance.confirmed.baseAmount.toString()) // "0.00020739"
+
+// Ethereum
+const ethBalance = await ethCurrency.getBalance()
+console.log(ethBalance.confirmed.baseAmount.toString()) // "0.005"
+```
+
+### 3. Send Transactions
+
+```typescript
+// Bitcoin Transfer
+const transfer = await btcCurrency.createTransfer(
+  'bc1qv5r9mr7ajz2jh04d87c4nnhfjj0jqhm3z5v0hx',
+  await btcCurrency.amount('0.000005', 'btc')
+)
+
+const fees = await transfer.getSuggestedFees()
+if (fees.normal.enoughFunds) {
+  const broadcasted = await transfer.broadcast('normal')
+  console.log(broadcasted.txId)
+  // e.g. "98f04fb1e708cc18525e49ad05b4d6055496a86f231b04bc132f2fd712d1f488"
+}
+
+// Ethereum Transfer
+const ethTransfer = await ethCurrency.createTransfer(
+  '0x1853be2c350EB9588bdC2Af73bDAA0C4B8Ac3583',
+  await ethCurrency.amount('0.003', 'eth')
+)
+
+// ... check fees, broadcast similarly
+```
+
+## Derivation paths
+
+When importing with a phrase or seed, you can specify different derivation paths for any currency. By default, ChainGate uses a recommended path for each chain.
+
+```typescript
+const { wallet } = await initializeWallet.create({ apiKey: '1234-5678' })
+
+// Default derivation path
+const addressDefault = await wallet.currency('bitcoin').getAddress()
+
+// Change derivation path
+wallet.currency('bitcoin').setDerivationPath("m/44'/0'/0'/1/3")
+const customAddress = await wallet.currency('bitcoin').getAddress()
+```
+
+---
+
+# Query RPCs
+
+If you are using libraries such as **Web3.js** or **ethers**, or you need lower-level RPC access not directly covered by ChainGate’s higher-level functions, you can utilize ChainGate’s reliable RPC endpoints.
+
+Examples of supported blockchains:
+
+- Bitcoin
+- Ethereum
+- Bnb
+- Dogecoin
+- Avalanche
+- Litecoin
+- ... and more
+
+### Usage with Web3.js
+
+```typescript
+import Web3 from 'web3'
+
+const apiKey = '1234-5678'
+const web3 = new Web3(`https://api.chaingate.dev/rpc/bnb?api_key=${apiKey}`)
+
+const latestBlock = await web3.eth.getBlock('latest')
+console.log(latestBlock)
+```
+
+### Usage with ethers.js
+
+```typescript
+import { JsonRpcProvider } from 'ethers'
+
+const apiKey = '1234-5678'
+const provider = new JsonRpcProvider(`https://api.chaingate.dev/rpc/bnb?api_key=${apiKey}`)
+
+const latestBlock = await provider.getBlock('latest')
+console.log(latestBlock)
+```
+
+---
+
+# Query the API directly
+
+You can also call the ChainGate API endpoints directly (bypassing the SDK) if you need lower-level control. For example, using `fetch` or `axios`:
+
+```typescript
+import axios from 'axios'
+
+const apiKey = '1234-5678'
+const response = await axios.get('https://api.chaingate.dev/balance', {
+  params: {
+    currency: 'bitcoin',
+    address: 'bc1qcu2aq327lzgee5f9vqm7m23fhck39ja7j37ass'
+  },
+  headers: {
+    'X-API-KEY': apiKey
+  }
+})
+
+console.log(response.data)
+```
+
+Consult the [ChainGate API Documentation](https://api.chaingate.dev/docs) for available endpoints, parameters, and detailed examples.
+
+---
+
+# Blockchain data
+
+ChainGate offers additional blockchain data endpoints, such as:
+
+- Transaction details
+- Latest blocks
+- Block transactions
+
+... and more. You can access them via the `BlockchainData` class:
+
+```typescript
+import { BlockchainData } from 'chaingate'
+
+const blockchainData = new BlockchainData('1234-5678')
+
+// Get transaction details (Bitcoin example)
+const txDetails = (await blockchainData.BitcoinApi.transactionDetails('e9a66845...')).data
+console.log(txDetails)
+
+// Get the latest Ethereum block
+const ethLatestBlock = (await blockchainData.EthereumApi.latestBlock()).data
+console.log(ethLatestBlock)
+```
+
+For a full list of methods, see the [ChainGate API Documentation](https://api.chaingate.dev/docs).
+
+---
+
+# Why am I receiving the message "You have exhausted your API tier limit..."
+
+ChainGate provides different usage tiers (e.g., number of requests per day). If you exceed the free or paid tier limit, you will see this message. To continue using the service, either:
+
+1. Wait for your limit to reset at the specified interval, or
+2. [Upgrade your plan](https://chaingate.dev) to a higher tier.
+
+---
 
 # I can't build my web app: "webpack < 5 used to include polyfills for node.js core modules by default"
 
-**What's the issue?**
+### What's happening?
 
-Webpack versions below 5 automatically included polyfills for certain Node.js core modules. These polyfills make those modules work in browser environments. With Webpack 5, this behavior changed, and you might need to configure polyfills manually.
+Older versions of Webpack (below 5) automatically included polyfills for certain Node.js core modules, making them work in a browser environment. Webpack 5 no longer does this by default, so you may encounter errors if your code or dependencies rely on Node.js modules.
 
-**Why does ChainGate need polyfills?**
+### Why does ChainGate need polyfills?
 
-ChainGate uses some native libraries that aren't available directly in browsers. Polyfills provide browser-compatible versions of these libraries.
+ChainGate uses some Node.js-based libraries. Polyfills are necessary to provide a browser-compatible version of those APIs.
 
-**Solution: Using `node-polyfill-webpack-plugin`**
+### How to fix
 
-To fix this, you can use a helpful plugin called `node-polyfill-webpack-plugin`.
+Use the `node-polyfill-webpack-plugin` in your project:
 
-Here's how to integrate it:
+1. **Install the plugin**:
 
-1. **Install the plugin:**
+   ```bash
+   npm install node-polyfill-webpack-plugin
+   ```
 
-```
-npm install node-polyfill-webpack-plugin
-```
+2. **Update `webpack.config.js`**:
 
-2. **Update `webpack.config.js`:**
+   ```js
+   const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+       
+   module.exports = {
+     // ... your existing configuration ...
+     plugins: [
+       new NodePolyfillPlugin()
+     ],
+   };
+   ```
 
-Add the following code to your `webpack.config.js` file:
+This plugin adds the missing Node.js core module polyfills, ensuring ChainGate can run in a browser environment without errors.
 
-``` javascript
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
-    
-module.exports = {
-	// Other rules...
-	plugins: [
-		new NodePolyfillPlugin(),
-	],
-};
-```
+---
 
-This code imports the plugin and adds it to the `plugins` array in your Webpack configuration.
-
-**Special thanks** to Richienb for creating this amazing module!
+_Thanks for using ChainGate!_

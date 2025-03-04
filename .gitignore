@@ -222,3 +222,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# dotenvx
+.env.keys
