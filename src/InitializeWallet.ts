@@ -42,7 +42,9 @@ export class InitializeWallet {
         if(encrypt) wallet = await PhraseWallet.new(
             new ChainGateClient(apiKey),
             secret,
-            warnAboutUnencrypted)
+            warnAboutUnencrypted,
+            encrypt
+        )
         else wallet = await PhraseWallet.new(new ChainGateClient(apiKey), secret, warnAboutUnencrypted)
 
         return { phrase, wallet }
