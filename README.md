@@ -149,7 +149,7 @@ const { wallet } = await initializeWallet.fromPhrase({
   phrase: 'abandon abandon about ...',
   encrypt: {
     password: 'your-strong-password',
-    askForPassword: async (incorrectPassword: boolean) => {
+      askForPassword: async (attempts, reject) => {
       // Implement an interactive password prompt or any input flow
       return prompt('Enter wallet password:')
     }

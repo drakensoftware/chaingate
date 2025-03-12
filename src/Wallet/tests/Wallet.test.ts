@@ -11,7 +11,7 @@ describe('Wallet', () => {
 
         const wallet = await initializeWallet.fromPhrase({phrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            encrypt: {password: '1234', askForPassword: async (_incorrectPassword: boolean) => {return '1234'}}})
+            encrypt: {password: '1234', askForPassword: async (_attempts, _reject) => {return '1234'}}})
         expect(await wallet.exportKeys()).toMatchSnapshot()
         expect(await wallet.exportWalletData()).toMatchSnapshot()
     })

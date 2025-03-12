@@ -9,7 +9,7 @@ import {IncorrectPassword} from './Keystore/errors'
 
 export type Encrypt = {
     password: string,
-    askForPassword: (incorrectPassword: boolean) => Promise<string>
+    askForPassword: (attempts: number, reject: () => void) => Promise<string>
 }
 
 type SupportedSecrets = Phrase | Seed | PrivateKey
@@ -27,6 +27,14 @@ export class WalletIsNotEncrypted extends Error {
     }
 }
 
+export class WalletIncorrectPassword extends Error {
+    constructor() {
+        super('Password for the wallet is incorrect')
+        if (Error.captureStackTrace) Error.captureStackTrace(this, IncorrectPassword)
+        this.name = this.constructor.name
+    }
+}
+
 export class EncodingError extends Error {
     constructor(message: string) {
         super(message)
@@ -36,8 +44,9 @@ export class EncodingError extends Error {
 }
 
 export abstract class LocalWallet<Secret extends SupportedSecrets, SupportedCurrencies extends AllCurrencies> extends Wallet<SupportedCurrencies> {
-    private askForPassword: (incorrectPassword: boolean) => Promise<string>
+    private askForPassword: (attempts: number, reject: () => void) => Promise<string>
     private _secret: Secret | ChainGateKeystore
+    private _uniqueId: string
     protected warnAboutUnencrypted = false
 
     protected constructor(apiClient: ChainGateClient, currencyParams: CurrencyParams, secret: Secret) {
@@ -45,8 +54,9 @@ export abstract class LocalWallet<Secret extends SupportedSecrets, SupportedCurr
         this._secret = secret
     }
 
-    protected async encrypt(password: string, askForPassword: (incorrectPassword: boolean) => Promise<string>){
+    protected async encrypt(password: string, askForPassword: (attempts: number, reject: () => void) => Promise<string>){
         if(this._secret instanceof ChainGateKeystore) throw new Error('Wallet is already encrypted')
+        this._uniqueId = this._secret.uniqueId
         this._secret = await ChainGateKeystore.from(this._secret, password)
         this.askForPassword = askForPassword
     }
@@ -57,16 +67,16 @@ export abstract class LocalWallet<Secret extends SupportedSecrets, SupportedCurr
 
             if(!this.askForPassword) throw new Error('Asking for password function not defined')
             else{
-                let incorrectPassword = false
+                let attempts = 0
 
                 // eslint-disable-next-line no-constant-condition
                 while(true) {
-                    const password = await this.askForPassword(incorrectPassword)
+                    const password = await this.askForPassword(attempts, () => { throw new WalletIncorrectPassword() })
                     try {
                         secret = (await (this._secret as ChainGateKeystore).decrypt(password)) as Secret
                         break
                     }catch(e){
-                        if (e instanceof IncorrectPassword) incorrectPassword = true
+                        if (e instanceof IncorrectPassword) attempts++
                         else throw e
                     }
                 }
@@ -107,8 +117,8 @@ export abstract class LocalWallet<Secret extends SupportedSecrets, SupportedCurr
     }
 
     async getWalletUniqueId(): Promise<string> {
-        const secret = await this.getSecret()
-        return Promise.resolve(secret.uniqueId)
+        const uniqueId = this._uniqueId ?? (await this.getSecret()).uniqueId
+        return Promise.resolve(uniqueId)
     }
 
 }

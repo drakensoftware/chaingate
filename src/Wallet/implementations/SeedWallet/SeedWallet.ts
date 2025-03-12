@@ -5,10 +5,6 @@ import {Encrypt} from '../../abstract/LocalWallet/LocalWallet'
 import {ExportedWalletData} from '../../Wallet'
 
 export class SeedWallet extends HDWallet<Seed>{
-    exportWalletData(): Promise<ExportedWalletData> {
-        return Promise.resolve(undefined)
-    }
-
     protected constructor(apiClient: ChainGateClient, secret: Seed, exportedWalletData?: ExportedWalletData) {
         super(apiClient, secret, exportedWalletData)
     }
