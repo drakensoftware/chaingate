@@ -1,10 +1,10 @@
 import {PolygonApi} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../Utils/Utils'
 import {Evm} from '../abstract/Evm/Evm'
-import {HDPrivateKeySign, PrivateKeySign} from '../CurrencyParams'
+import {CurrencyProviders} from '../CurrencyProviders'
 
 export class Polygon extends Evm<'pol'> {
-    constructor(api: PolygonApi, currencyParams: PrivateKeySign | HDPrivateKeySign) {
+    constructor(api: PolygonApi, currencyProviders: CurrencyProviders) {
         super({
             symbol: 'POL',
             id: 'polygon',
@@ -15,6 +15,6 @@ export class Polygon extends Evm<'pol'> {
             defaultDerivationPath: 'm/44\'/60\'/0\'/0/0',
             minimalUnitSymbol: 'wei',
             commonDerivationPaths: ['m/44\'/60\'/0\'/0/0',]
-        }, api, currencyParams)
+        }, api, currencyProviders)
     }
 }

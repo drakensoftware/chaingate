@@ -1,11 +1,10 @@
 import {hexToBytes} from '../../../../../Utils/Utils'
 import Decimal from 'decimal.js'
 import * as btc from '@scure/btc-signer'
-import {UtxoApi} from 'chaingate-client'
-import { Address } from '../../../Address'
 import {OutScript} from '@scure/btc-signer'
-import {PrivateKey} from '../../../Secret/implementations/PrivateKey'
-import {CurrencyParams} from '../../CurrencyParams'
+import {UtxoApi} from 'chaingate-client'
+import {Address} from '../../../Address'
+import {CurrencyProviders, PrivateKeyProvider} from '../../CurrencyProviders'
 import {TxVout, UtxoPreparedTransaction} from '../Utxo/UtxoPreparedTransaction'
 import {CurrencyInfo} from '../../CurrencyInfo'
 import {CurrencyAmount} from '../../CurrencyAmount'
@@ -17,14 +16,14 @@ import {toSatoshi} from '../Utxo/UtxoUtils'
 export class LegacyUtxoPreparedTransaction<DefaultUnit extends string> extends UtxoPreparedTransaction<DefaultUnit> {
     constructor(
         api: UtxoApi,
-        currencyParams: CurrencyParams,
+        currencyProviders: CurrencyProviders,
         currencyInfo: CurrencyInfo,
         fromAddress: Address,
         toAddress: Address,
         amount: CurrencyAmount,
         networkParams: NetworkParams,
-        privateKeyProvider: () => Promise<PrivateKey>) {
-        super(api, currencyParams, currencyInfo, fromAddress, toAddress, amount, networkParams, privateKeyProvider)
+        privateKeyProvider: PrivateKeyProvider) {
+        super(api, currencyProviders, currencyInfo, fromAddress, toAddress, amount, networkParams, privateKeyProvider)
     }
 
     protected toLegacyAddress(address: Address): string {

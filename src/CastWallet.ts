@@ -1,7 +1,6 @@
 import {ChainGateWallet} from './ChainGateWallet'
-import {LocalWallet} from './Wallet/abstract/LocalWallet/LocalWallet'
 import {HDWallet} from './Wallet/abstract/HDWallet/HDWallet'
-import {ImportedPrivateKey} from './Wallet/implementations/ImportedPrivateKey/ImportedPrivateKey'
+import {PrivateKeyWallet} from './Wallet/implementations/PrivateKeyWallet/PrivateKeyWallet'
 import {SeedWallet} from './Wallet/implementations/SeedWallet/SeedWallet'
 import {PhraseWallet} from './Wallet/implementations/PhraseWallet/PhraseWallet'
 
@@ -17,33 +16,33 @@ export class InvalidWallet extends Error {
 // LocalWallet
 
 export function isLocalWallet(wallet: ChainGateWallet){
-    return wallet instanceof LocalWallet
+    return wallet instanceof PhraseWallet || wallet instanceof SeedWallet || wallet instanceof PrivateKeyWallet
 }
 
 export function requireLocalWallet(wallet: ChainGateWallet){
-    if(!(wallet instanceof LocalWallet)) throw new InvalidWallet()
+    if(!isLocalWallet(wallet)) throw new InvalidWallet()
 }
 
 
 // HDWallet
 
-export function supportsDerivationPaths(wallet: ChainGateWallet){
+export function isDerivationPathsWallet(wallet: ChainGateWallet){
     return wallet instanceof HDWallet
 }
 
 export function requireDerivationPathsSupport(wallet: ChainGateWallet){
-    if(!(wallet instanceof HDWallet)) throw new InvalidWallet()
+    if(!isDerivationPathsWallet(wallet)) throw new InvalidWallet()
 }
 
 
 // ImportedPrivateKey
 
 export function isPrivateKeyWallet(wallet: ChainGateWallet){
-    return wallet instanceof ImportedPrivateKey
+    return wallet instanceof PrivateKeyWallet
 }
 
 export function requirePrivateKeyWallet(wallet: ChainGateWallet){
-    if(!(wallet instanceof ImportedPrivateKey)) throw new InvalidWallet()
+    if(!isPrivateKeyWallet(wallet)) throw new InvalidWallet()
 }
 
 
@@ -54,7 +53,7 @@ export function isSeedWallet(wallet: ChainGateWallet){
 }
 
 export function requireSeedWallet(wallet: ChainGateWallet){
-    if(!(wallet instanceof SeedWallet)) throw new InvalidWallet()
+    if(!isSeedWallet(wallet)) throw new InvalidWallet()
 }
 
 
@@ -65,5 +64,5 @@ export function isPhraseWallet(wallet: ChainGateWallet){
 }
 
 export function requirePhraseWallet(wallet: ChainGateWallet){
-    if(!(wallet instanceof PhraseWallet)) throw new InvalidWallet()
+    if(!isPhraseWallet(wallet)) throw new InvalidWallet()
 }

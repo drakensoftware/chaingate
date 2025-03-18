@@ -1,5 +1,5 @@
 import {getTestPhrase} from '../../../../../../Utils/TestUtils'
-import {initializeWallet} from '../../../../../../index'
+import * as initializeWallet from '../../../../../../InitializeWallet'
 
 describe('Dogecoin', function () {
     it('Generate addresses', async () => {

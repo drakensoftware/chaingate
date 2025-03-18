@@ -1,11 +1,11 @@
 import {BitcoinTestnetApi} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../../Utils/Utils'
 import {Bech32Utxo} from '../../abstract/Bech32Utxo/Bech32Utxo'
-import {HDPrivateKeySign, PrivateKeySign} from '../../CurrencyParams'
+import {CurrencyProviders} from '../../CurrencyProviders'
 
 export class BitcoinTestnet extends Bech32Utxo<'btc'> {
 
-    constructor(api: BitcoinTestnetApi,  currencyParams: PrivateKeySign | HDPrivateKeySign) {
+    constructor(api: BitcoinTestnetApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'BTC-TEST',
             id: 'bitcoin-testnet',
@@ -17,7 +17,7 @@ export class BitcoinTestnet extends Bech32Utxo<'btc'> {
             commonDerivationPaths: ['m/44\'/1\'/0\'/0/0', 'm/84\'/1\'/0\'/0/0', 'm/86\'/1\'/0\'/0/0']
         },
         api,
-        currencyParams,
+        currencyProviders,
         {
             bech32: 'tb',
             pubKeyHash: 0x6f,

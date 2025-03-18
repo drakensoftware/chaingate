@@ -5,19 +5,19 @@ import {Address} from '../../../Address'
 import {Currency} from '../../Currency'
 import {NetworkParams} from './NetworkParams'
 import {CurrencyInfo} from '../../CurrencyInfo'
-import {HDPrivateKeySign, PrivateKeySign} from '../../CurrencyParams'
 import {CurrencyAmount} from '../../CurrencyAmount'
 import {UtxoPreparedTransaction} from './UtxoPreparedTransaction'
 import {CannotParseAmount} from '../../errors'
 import {AddressHistory} from './AddressHistory'
+import {CurrencyProviders} from '../../CurrencyProviders'
 
 export abstract class Utxo<DefaultUnit extends string> extends Currency {
     declare protected readonly api: UtxoApi
 
     protected readonly networkParams: NetworkParams
 
-    protected constructor(currencyInfo: CurrencyInfo, api: UtxoApi, currencyParams: PrivateKeySign | HDPrivateKeySign, networkParams: NetworkParams) {
-        super(currencyInfo, api, currencyParams)
+    protected constructor(currencyInfo: CurrencyInfo, api: UtxoApi, currencyProviders: CurrencyProviders, networkParams: NetworkParams) {
+        super(currencyInfo, api, currencyProviders)
         this.networkParams = networkParams
     }
 

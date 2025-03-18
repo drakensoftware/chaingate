@@ -1,10 +1,10 @@
 import {BitcoinApi} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../../Utils/Utils'
 import {Bech32Utxo} from '../../abstract/Bech32Utxo/Bech32Utxo'
-import {HDPrivateKeySign, PrivateKeySign} from '../../CurrencyParams'
+import {CurrencyProviders} from '../../CurrencyProviders'
 
 export class Bitcoin extends Bech32Utxo<'btc'> {
-    constructor(api: BitcoinApi,  currencyParams: PrivateKeySign | HDPrivateKeySign) {
+    constructor(api: BitcoinApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'BTC',
             id: 'bitcoin',
@@ -16,7 +16,7 @@ export class Bitcoin extends Bech32Utxo<'btc'> {
             commonDerivationPaths: ['m/44\'/0\'/0\'/0/0', 'm/84\'/0\'/0\'/0/0', 'm/86\'/0\'/0\'/0/0']
         },
         api,
-        currencyParams,
+        currencyProviders,
         {
             bech32: 'bc',
             pubKeyHash: 0x00,

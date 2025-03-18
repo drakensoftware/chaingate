@@ -11,15 +11,13 @@ import {BitcoinTestnet} from './entities/Currency/implementations/BitcoinTestnet
 import {Dogecoin} from './entities/Currency/implementations/Dogecoin/Dogecoin'
 import {Litecoin} from './entities/Currency/implementations/Litecoin/Litecoin'
 import {BitcoinCash} from './entities/Currency/implementations/BitcoinCash/BitcoinCash'
-import {CurrencyParams} from './entities/Currency/CurrencyParams'
+import {CurrencyProviders} from './entities/Currency/CurrencyProviders'
 import {Currency} from './entities/Currency/Currency'
 
-export type ExportedWalletData = {
+export type SerializedWallet = {
+    format: 'ChainGate Serialize Wallet Format Version 2'
+    walletType: string
     walletUniqueId: string
-    knownPublicKeys?: Record<string, string>
-    knownExtendedPublicKeys?: Record<string, string>
-    currenciesDerivationPaths?: Record<string, string>,
-    publicKey?: string
 }
 
 export const EvmCurrencies = [
@@ -53,13 +51,13 @@ export type CurrencyMap = {
 
 export abstract class Wallet<SupportedCurrencies extends AllCurrencies> {
     public readonly apiClient: ChainGateClient
-    protected readonly currencyParams: CurrencyParams
+    protected readonly currencyProviders: CurrencyProviders
 
     protected abstract supportedCurrencies: readonly SupportedCurrencies[]
 
-    protected constructor(apiClient: ChainGateClient, currencyParams: CurrencyParams) {
+    protected constructor(apiClient: ChainGateClient, currencyProviders: CurrencyProviders) {
         this.apiClient = apiClient
-        this.currencyParams = currencyParams
+        this.currencyProviders = currencyProviders
     }
 
     public abstract currency<T extends SupportedCurrencies>(currency: T): CurrencyMap[T]
@@ -69,5 +67,32 @@ export abstract class Wallet<SupportedCurrencies extends AllCurrencies> {
     }
 
     abstract getWalletUniqueId(): Promise<string>
-    abstract exportWalletData(): Promise<ExportedWalletData>
+
+    protected abstract serializeInternal(): Promise<SerializedWallet>
+    async serialize(){
+        return JSON.stringify(await this.serializeInternal())
+    }
+
+    /**
+     * Retrieves the balances for all supported currencies.
+     *
+     * @returns A promise that resolves to an array of currency balances.
+     */
+    async getAllBalances(){
+        return await Promise.all(
+            this.allCurrencies.map(async (currency) => ({
+                currency: currency.currencyInfo,
+                balance: await currency.getBalance()
+            }))
+        )
+    }
+
+    static isSerializedWallet(serialized: object){
+        if(!('format' in serialized)) return false
+        if(serialized.format != 'ChainGate Serialize Wallet Format Version 2') return false
+        if(!('walletType' in serialized)) return false
+        if(!('walletUniqueId' in serialized)) return false
+
+        return true
+    }
 }

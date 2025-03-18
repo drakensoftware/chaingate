@@ -1,5 +1,5 @@
 import {Api} from 'chaingate-client'
-import {CurrencyParams} from './CurrencyParams'
+import {CurrencyProviders} from './CurrencyProviders'
 import {CurrencyInfo} from './CurrencyInfo'
 import {Address} from '../Address'
 import {CurrencyAmount} from './CurrencyAmount'
@@ -9,15 +9,15 @@ import {ConfirmedTransaction} from './ConfirmedTransaction'
 
 export abstract class CurrencyPreparedTransaction {
     protected readonly api: Api
-    protected readonly currencyParams: CurrencyParams
+    protected readonly currencyProviders: CurrencyProviders
     protected readonly currencyInfo: CurrencyInfo
     public readonly fromAddress
     public readonly toAddress
     public readonly amount
 
-    protected constructor(api: Api, currencyParams: CurrencyParams, currencyInfo: CurrencyInfo, fromAddress: Address, toAddress: Address, amount: CurrencyAmount) {
+    protected constructor(api: Api, currencyProviders: CurrencyProviders, currencyInfo: CurrencyInfo, fromAddress: Address, toAddress: Address, amount: CurrencyAmount) {
         this.api = api
-        this.currencyParams = currencyParams
+        this.currencyProviders = currencyProviders
         this.currencyInfo = currencyInfo
         this.fromAddress = fromAddress
         this.toAddress = toAddress

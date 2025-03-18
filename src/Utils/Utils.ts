@@ -39,3 +39,30 @@ export function buildUrlWithApiKey(baseUrl: string, apiKey?: string) {
 export function isBase58(base58: string): boolean {
     return /^[A-HJ-NP-Za-km-z1-9]+$/.test(base58)
 }
+
+export function recordToMap<K extends string, V>(record: Record<K, V>): Map<K, V> {
+    // Convert record to an array of [key, value] pairs, then pass to new Map
+    return new Map<K, V>(Object.entries(record) as [K, V][])
+}
+
+export function mapToRecord<K extends string, V>(map: Map<K, V>): Record<K, V> {
+    const record: Record<K, V> = {} as Record<K, V>
+    for (const [key, value] of map) {
+        record[key] = value
+    }
+    return record
+}
+
+export function transformMap<K, V, U>(
+    originalMap: Map<K, V>,
+    transformFn: (value: V, key: K) => U
+): Map<K, U> {
+    const newMap = new Map<K, U>()
+
+    // `Map.forEach` provides (value, key)
+    originalMap.forEach((value, key) => {
+        newMap.set(key, transformFn(value, key))
+    })
+
+    return newMap
+}

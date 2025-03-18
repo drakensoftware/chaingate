@@ -5,13 +5,12 @@ import {ConsumeFunction} from '../../../../../CGDriver'
 import Decimal from 'decimal.js'
 import * as btc from '@scure/btc-signer'
 import {Address} from '../../../Address'
-import {PrivateKey} from '../../../Secret/implementations/PrivateKey'
 import {CurrencyAmount} from '../../CurrencyAmount'
 import {Txo} from './Txo'
 import {CurrencyPreparedTransaction} from '../../CurrencyPreparedTransaction'
 import {FeeLevel} from '../../FeeLevel'
 import {NetworkParams} from './NetworkParams'
-import {CurrencyParams} from '../../CurrencyParams'
+import {CurrencyProviders, PrivateKeyProvider} from '../../CurrencyProviders'
 import {CurrencyInfo} from '../../CurrencyInfo'
 import {UtxoConfirmedTransaction} from './UtxoConfirmedTransaction'
 import {toBase, toSatoshi} from './UtxoUtils'
@@ -51,19 +50,19 @@ export abstract class UtxoPreparedTransaction<DefaultUnit extends string> extend
 
     private readonly state: UtxoApiState
 
-    protected readonly privateKeyProvider: () => Promise<PrivateKey>
+    protected readonly privateKeyProvider: PrivateKeyProvider
     protected readonly networkParams: NetworkParams
 
     protected constructor(
         api: UtxoApi,
-        currencyParams: CurrencyParams,
+        currencyProviders: CurrencyProviders,
         currencyInfo: CurrencyInfo,
         fromAddress: Address,
         toAddress: Address,
         amount: CurrencyAmount,
         networkParams: NetworkParams,
-        privateKeyProvider: () => Promise<PrivateKey>) {
-        super(api, currencyParams, currencyInfo, fromAddress, toAddress, amount)
+        privateKeyProvider: PrivateKeyProvider) {
+        super(api, currencyProviders, currencyInfo, fromAddress, toAddress, amount)
         this.state = {utxos: [], page: 0, crawled: false}
         this.networkParams = networkParams
         this.privateKeyProvider = privateKeyProvider

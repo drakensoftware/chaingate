@@ -7,7 +7,7 @@ setupCryptoGetRandomValuesMock()
 describe('Phrase', () => {
 
     it('New phrase (English)', async () => {
-        const phrase = await Phrase.fromString('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
+        const phrase = await Phrase.new('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about')
 
         const seed = await phrase.getSeed()
         expect(seed.hexa).toBe(
@@ -19,7 +19,7 @@ describe('Phrase', () => {
 
     it('New phrase (Chinese)', async () => {
         process.env.I_AM_SURE_I_AM_NOT_IN_PRODUCTION = String(true)
-        const phrase = await Phrase.fromString('的 的 的 的 的 的 的 的 的 的 的 的 的 的 的 的 的 动')
+        const phrase = await Phrase.new('的 的 的 的 的 的 的 的 的 的 的 的 的 的 的 的 的 动')
 
         const seed = await phrase.getSeed()
         expect(seed.hexa).toBe(
@@ -28,7 +28,7 @@ describe('Phrase', () => {
 
     it('Invalid phrase', async () => {
         await expect(
-            Phrase.fromString('state small satisfied budge ant provision pause clue still shrink score chemistry')
+            Phrase.new('state small satisfied budge ant provision pause clue still shrink score chemistry')
         ).rejects.toThrow(PhraseEncodingError)
     })
 

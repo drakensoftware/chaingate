@@ -4,16 +4,18 @@ import bch from 'bitcore-lib-cash'
 import {toCashAddress, toLegacyAddress} from 'bchaddrjs'
 import {Address} from '../../../Address'
 import {Utxo} from '../../abstract/Utxo/Utxo'
-import {HDPrivateKeySign, PrivateKeySign} from '../../CurrencyParams'
+import {CurrencyProviders} from '../../CurrencyProviders'
 import {CurrencyAmount} from '../../CurrencyAmount'
 import {
     BitcoinCashPreparedTransaction
 } from './BitcoinCashPreparedTransaction'
 
-export class BitcoinCash extends Utxo<'bch'> {
-    declare currencyParams: PrivateKeySign | HDPrivateKeySign
+Object.defineProperty(global,  '_bitcoreCash', { 	get(){ 		return undefined 	}, 	set(){}, configurable: true })
 
-    constructor(api: BitcoinCashApi,  currencyParams: PrivateKeySign | HDPrivateKeySign) {
+export class BitcoinCash extends Utxo<'bch'> {
+    declare currencyProviders: CurrencyProviders
+
+    constructor(api: BitcoinCashApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'BCH',
             id: 'bitcoin-cash',
@@ -25,7 +27,7 @@ export class BitcoinCash extends Utxo<'bch'> {
             commonDerivationPaths: ['m/44\'/145\'/0\'/0/0']
         },
         api,
-        currencyParams,
+        currencyProviders,
         {
             bech32: 'bc',
             pubKeyHash: 0x00,
@@ -35,9 +37,7 @@ export class BitcoinCash extends Utxo<'bch'> {
     }
 
     async getAddress(addressType: 'legacy' | 'cashaddr' | 'bitpay' = 'cashaddr'): Promise<string> {
-        let publicKey
-        if(this.currencyParams.signMode == 'privateKey') publicKey = await this.currencyParams.getPublicKey()
-        else publicKey = await this.currencyParams.getPublicKey(this.currencyParams.getDerivationPath(this.currencyInfo))
+        const publicKey = await (await this.currencyProviders.getPublicKeyProvider(this.currencyInfo))()
 
         const publicKeyRaw = publicKey.raw
 
@@ -52,17 +52,11 @@ export class BitcoinCash extends Utxo<'bch'> {
     }
 
     async createTransfer(toAddress: Address, amount: CurrencyAmount): Promise<BitcoinCashPreparedTransaction<'bch'>> {
-
-        let privateKeyProvider
-        if(this.currencyParams.signMode == 'privateKey') privateKeyProvider = this.currencyParams.getPrivateKey
-        else if (this.currencyParams.signMode == 'hdPrivateKey') {
-            const derivationPath = this.currencyParams.getDerivationPath(this.currencyInfo)
-            privateKeyProvider = this.currencyParams.getPrivateKey.bind(this.currencyParams, derivationPath)
-        }
+        const privateKeyProvider = await this.currencyProviders.getPrivateKeyProvider(this.currencyInfo)
 
         return new BitcoinCashPreparedTransaction(
             this.api,
-            this.currencyParams,
+            this.currencyProviders,
             this.currencyInfo,
             await this.getAddress(),
             toAddress,

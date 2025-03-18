@@ -1,4 +1,4 @@
-import {initializeWallet} from '../../../../../../index'
+import * as initializeWallet from '../../../../../../InitializeWallet'
 import {getTestPhrase} from '../../../../../../Utils/TestUtils'
 
 describe('Bitcoin Testnet', function () {

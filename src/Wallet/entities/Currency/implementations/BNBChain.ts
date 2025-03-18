@@ -1,10 +1,10 @@
 import {BNBChainApi} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../Utils/Utils'
 import {Evm} from '../abstract/Evm/Evm'
-import {HDPrivateKeySign, PrivateKeySign} from '../CurrencyParams'
+import {CurrencyProviders} from '../CurrencyProviders'
 
 export class BNBChain extends Evm<'bnb'> {
-    constructor(api: BNBChainApi, currencyParams: PrivateKeySign | HDPrivateKeySign) {
+    constructor(api: BNBChainApi, currencyProviders: CurrencyProviders) {
         super({
             symbol: 'BSC',
             id: 'bnbChain',
@@ -15,6 +15,6 @@ export class BNBChain extends Evm<'bnb'> {
             defaultDerivationPath: 'm/44\'/60\'/0\'/0/0',
             minimalUnitSymbol: 'wei',
             commonDerivationPaths: ['m/44\'/60\'/0\'/0/0',]
-        }, api, currencyParams)
+        }, api, currencyProviders)
     }
 }

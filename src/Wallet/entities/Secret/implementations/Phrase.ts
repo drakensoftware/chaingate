@@ -20,6 +20,7 @@ export class Phrase extends Secret{
 
     constructor(phrase: string){
         super()
+        if(!Phrase.isValidPhrase(phrase)) throw new Error('Invalid phrase')
         this.phrase = phrase
     }
 
@@ -31,7 +32,7 @@ export class Phrase extends Secret{
         return new TextDecoder().decode(this.raw)
     }
 
-    static isValidPhrase(phrase: string): boolean{
+    public static isValidPhrase(phrase: string): boolean{
         for(const language of Object.keys(WordsList) as PhraseLanguage[])
             if(bip39.validateMnemonic(phrase, WordsList[language])) return true
         return false
@@ -45,7 +46,7 @@ export class Phrase extends Secret{
         return new TextEncoder().encode(this.phrase)
     }
 
-    static async fromString(source: string) {
+    static async new(source: string) {
         if(!Phrase.isValidPhrase(source)) throw new PhraseEncodingError('Invalid phrase')
         return new Phrase(source)
     }

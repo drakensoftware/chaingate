@@ -2,13 +2,12 @@ import {EvmApi} from 'chaingate-client'
 import {ethers, SigningKey, TransactionRequest} from 'ethers'
 import Decimal from 'decimal.js'
 import {ConsumeFunction} from '../../../../../CGDriver'
-import { Address } from '../../../Address'
-import {PrivateKey} from '../../../Secret/implementations/PrivateKey'
+import {Address} from '../../../Address'
 import {FeeLevel} from '../../FeeLevel'
 import {CurrencyPreparedTransaction} from '../../CurrencyPreparedTransaction'
 import {EvmFee} from './EvmFee'
 import {EvmCurrencyInfo} from './EvmCurrencyInfo'
-import {CurrencyParams} from '../../CurrencyParams'
+import {CurrencyProviders, PrivateKeyProvider} from '../../CurrencyProviders'
 import {CurrencyAmount} from '../../CurrencyAmount'
 import {EvmConfirmedTransaction} from './EvmConfirmedTransaction'
 import {EvmPossibleFees} from 'chaingate-client/api'
@@ -20,21 +19,21 @@ export class EvmPreparedTransaction extends CurrencyPreparedTransaction{
 
     declare currencyInfo: EvmCurrencyInfo
 
-    private readonly privateKeyProvider: () => Promise<PrivateKey>
+    private readonly privateKeyProvider: PrivateKeyProvider
 
     readonly data: string
 
     constructor(
         api: EvmApi,
-        currencyParams: CurrencyParams,
+        currencyProviders: CurrencyProviders,
         currencyInfo: EvmCurrencyInfo,
         fromAddress: Address,
         toAddress: Address,
         amount: CurrencyAmount,
         data: string,
-        privateKeyProvider: () => Promise<PrivateKey>
+        privateKeyProvider: PrivateKeyProvider
     ){
-        super(api, currencyParams, currencyInfo, fromAddress, toAddress, amount)
+        super(api, currencyProviders, currencyInfo, fromAddress, toAddress, amount)
         this.data = data
         this.privateKeyProvider = privateKeyProvider
     }

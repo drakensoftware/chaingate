@@ -3,25 +3,26 @@ import {UtxoApi} from 'chaingate-client'
 import bch from 'bitcore-lib-cash'
 import {toCashAddress, toLegacyAddress} from 'bchaddrjs'
 import {Address} from '../../../Address'
-import {PrivateKey} from '../../../Secret/implementations/PrivateKey'
 import {TxVout, UtxoPreparedTransaction} from '../../abstract/Utxo/UtxoPreparedTransaction'
-import {CurrencyParams} from '../../CurrencyParams'
+import {CurrencyProviders, PrivateKeyProvider} from '../../CurrencyProviders'
 import {CurrencyInfo} from '../../CurrencyInfo'
 import {CurrencyAmount} from '../../CurrencyAmount'
 import {Txo} from '../../abstract/Utxo/Txo'
 import {toSatoshi} from '../../abstract/Utxo/UtxoUtils'
 
+Object.defineProperty(global,  '_bitcoreCash', { 	get(){ 		return undefined 	}, 	set(){}, configurable: true })
+
 export class BitcoinCashPreparedTransaction<DefaultUnit extends string> extends UtxoPreparedTransaction<DefaultUnit> {
 
     constructor(
         api: UtxoApi,
-        currencyParams: CurrencyParams,
+        currencyProviders: CurrencyProviders,
         currencyInfo: CurrencyInfo,
         fromAddress: Address,
         toAddress: Address,
         amount: CurrencyAmount,
-        privateKeyProvider: () => Promise<PrivateKey>) {
-        super(api, currencyParams, currencyInfo, fromAddress, toAddress, amount, {
+        privateKeyProvider: PrivateKeyProvider) {
+        super(api, currencyProviders, currencyInfo, fromAddress, toAddress, amount, {
             bech32: 'bc',
             pubKeyHash: 0x00,
             scriptHash: 0x05,

@@ -1,10 +1,10 @@
 import {BaseApi} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../Utils/Utils'
-import {HDPrivateKeySign, PrivateKeySign} from '../CurrencyParams'
+import {CurrencyProviders} from '../CurrencyProviders'
 import {Evm} from '../abstract/Evm/Evm'
 
 export class Base extends Evm<'eth'> {
-    constructor(api: BaseApi, currencyParams: PrivateKeySign | HDPrivateKeySign) {
+    constructor(api: BaseApi, currencyProviders: CurrencyProviders) {
         super({
             symbol: 'BASE',
             id: 'ETH-BASE',
@@ -15,6 +15,6 @@ export class Base extends Evm<'eth'> {
             defaultDerivationPath: 'm/44\'/60\'/0\'/0/0',
             minimalUnitSymbol: 'wei',
             commonDerivationPaths: ['m/44\'/60\'/0\'/0/0',]
-        }, api, currencyParams)
+        }, api, currencyProviders)
     }
 }

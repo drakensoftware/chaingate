@@ -1,25 +1,18 @@
 import {UtxoApi} from 'chaingate-client'
 import * as btc from '@scure/btc-signer'
 import {LegacyUtxo} from '../LegacyUtxo/LegacyUtxo'
-import {HDPrivateKeySign, PrivateKeySign} from '../../CurrencyParams'
 import {CurrencyInfo} from '../../CurrencyInfo'
 import {NetworkParams} from '../Utxo/NetworkParams'
-
-export type WalletType = 'legacy' | 'segwit' | 'taproot'
+import {CurrencyProviders} from '../../CurrencyProviders'
 
 export class Bech32Utxo<DefaultUnitSpecifier extends string> extends LegacyUtxo<DefaultUnitSpecifier> {
-    declare currencyParams: PrivateKeySign | HDPrivateKeySign
-
-    constructor(currencyInfo: CurrencyInfo, api: UtxoApi, currencyParams: PrivateKeySign | HDPrivateKeySign, networkParams: NetworkParams) {
-        super(currencyInfo, api, currencyParams, networkParams)
+    constructor(currencyInfo: CurrencyInfo, api: UtxoApi, currencyProviders: CurrencyProviders, networkParams: NetworkParams) {
+        super(currencyInfo, api, currencyProviders, networkParams)
     }
 
     async getAddress(addressType: 'legacy' | 'segwit' | 'taproot' = 'segwit'): Promise<string> {
 
-        let publicKey
-        if(this.currencyParams.signMode == 'privateKey') publicKey = await this.currencyParams.getPublicKey()
-        else publicKey = await this.currencyParams.getPublicKey(this.currencyParams.getDerivationPath(this.currencyInfo))
-
+        const publicKey = await (await this.currencyProviders.getPublicKeyProvider(this.currencyInfo))()
         let publicKeyRaw = publicKey.raw
 
         switch (addressType) {

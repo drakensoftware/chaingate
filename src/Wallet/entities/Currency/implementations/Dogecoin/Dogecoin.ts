@@ -2,12 +2,12 @@ import {BitcoinCashApi} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../../Utils/Utils'
 import * as btc from '@scure/btc-signer'
 import {LegacyUtxo} from '../../abstract/LegacyUtxo/LegacyUtxo'
-import {HDPrivateKeySign, PrivateKeySign} from '../../CurrencyParams'
+import {CurrencyProviders} from '../../CurrencyProviders'
 
 export class Dogecoin extends LegacyUtxo<'doge'> {
-    declare currencyParams: PrivateKeySign | HDPrivateKeySign
+    declare currencyProviders: CurrencyProviders
 
-    constructor(api: BitcoinCashApi,  currencyParams: PrivateKeySign | HDPrivateKeySign) {
+    constructor(api: BitcoinCashApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'DOGE',
             id: 'dogecoin',
@@ -19,7 +19,7 @@ export class Dogecoin extends LegacyUtxo<'doge'> {
             commonDerivationPaths: ['m/44\'/3\'/0\'/0/0', 'm/84\'/3\'/0\'/0/0', 'm/86\'/3\'/0\'/0/0']
         },
         api,
-        currencyParams,
+        currencyProviders,
         {
             bech32: null,
             pubKeyHash: 0x1E,
@@ -29,10 +29,7 @@ export class Dogecoin extends LegacyUtxo<'doge'> {
     }
 
     async getAddress(): Promise<string> {
-
-        let publicKey
-        if(this.currencyParams.signMode == 'privateKey') publicKey = await this.currencyParams.getPublicKey()
-        else publicKey = await this.currencyParams.getPublicKey(this.currencyParams.getDerivationPath(this.currencyInfo))
+        const publicKey = await (await this.currencyProviders.getPublicKeyProvider(this.currencyInfo))()
 
         const publicKeyRaw = publicKey.raw
 

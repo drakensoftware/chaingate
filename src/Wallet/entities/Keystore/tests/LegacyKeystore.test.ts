@@ -1,7 +1,6 @@
-import {setupCryptoGetRandomValuesMock} from '../../../../../Utils/TestUtils'
+import {setupCryptoGetRandomValuesMock} from '../../../../Utils/TestUtils'
 import {LegacyKeystore} from '../LegacyKeystore'
 import {IncorrectPassword} from '../errors'
-import {Phrase} from '../../../../entities/Secret/implementations/Phrase'
 
 setupCryptoGetRandomValuesMock()
 
@@ -15,11 +14,7 @@ describe('Legacy Keystore', () => {
         await expect(async () => keystore.decrypt('Incorrect password')).rejects.toThrow(IncorrectPassword)
 
         const x = await keystore.decrypt('1234')
-
-        expect(x instanceof Phrase).toBeTruthy()
-        if(!(x instanceof Phrase)) throw new Error() // Casting types
-
-        expect(await x.getPhrase()).toBe('wrap comfort tip tattoo morning trade glare tribe angry meadow crisp burger')
+        expect((new TextDecoder().decode(x))).toBe('wrap comfort tip tattoo morning trade glare tribe angry meadow crisp burger')
     })
 
 })

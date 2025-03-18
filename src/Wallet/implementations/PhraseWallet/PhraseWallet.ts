@@ -1,32 +1,65 @@
-import {HDWallet} from '../../abstract/HDWallet/HDWallet'
-import {ChainGateClient} from 'chaingate-client'
-import {Phrase} from '../../entities/Secret/implementations/Phrase'
 import {Seed} from '../../entities/Secret/implementations/Seed'
-import {ExportedWalletData} from '../../Wallet'
-import {Encrypt} from '../../abstract/LocalWallet/LocalWallet'
+import {SerializedWallet} from '../../Wallet'
+import {SerializedSeedableWallet, SeedableWallet} from '../../abstract/SeedableWallet'
+import {ChainGateClient} from 'chaingate-client'
+import {Encrypted} from '../../entities/WalletEncryption/Encrypted'
+import {Phrase} from '../../entities/Secret/implementations/Phrase'
+import {Encrypt} from '../../entities/WalletEncryption/WalletEncryption'
+import {hexToBytes, recordToMap, transformMap} from '../../../Utils/Utils'
+import {ExtendedPublicKey} from '../../entities/Secret/implementations/ExtendedPublicKey'
 
 
-export class PhraseWallet extends HDWallet<Phrase>{
-    protected constructor(apiClient: ChainGateClient, secret: Phrase, exportedWalletData?: ExportedWalletData) {
-        super(apiClient, secret, exportedWalletData)
+export class PhraseWallet extends SeedableWallet{
+    constructor(apiClient: ChainGateClient, secret: Phrase | Encrypted, askForPassword?: (attempts: number, reject: () => void) => Promise<string>) {
+        super(apiClient, secret, askForPassword)
     }
 
-    static async new(apiClient: ChainGateClient, phrase: Phrase, warnAboutUnencrypted: boolean, encrypt?: Encrypt, exportedWalletData?: ExportedWalletData) {
-        const wallet = new PhraseWallet(apiClient, phrase, exportedWalletData)
+    protected async serializeInternal(): Promise<SerializedWallet> {
+        return await this.internalSerialize('phrase')
+    }
 
-        await wallet.derivePublicKeys()
+    async getPhrase(): Promise<Phrase>{
+        const phrase = (new TextDecoder()).decode(await this.walletEncryption.getSecretDecrypted())
+        return new Phrase(phrase)
+    }
 
-        if(encrypt) await wallet.encrypt(encrypt.password, encrypt.askForPassword)
-        wallet.warnAboutUnencrypted = warnAboutUnencrypted
+    async getSeed(): Promise<Seed> {
+        return (await this.getPhrase()).getSeed()
+    }
+
+    static async new(apiKey: string, phrase: string, warnAboutUnencrypted: boolean, encrypt?: Encrypt) {
+        const chainGateClient = new ChainGateClient(apiKey)
+        const newPhrase = await Phrase.new(phrase)
+        const wallet = new PhraseWallet(chainGateClient, newPhrase, encrypt?.askForPassword)
+        wallet.walletUniqueId = newPhrase.uniqueId
+
+        await wallet.generateAllCurrencyDefaultDerivations()
+
+        if(encrypt) await wallet.walletEncryption.encrypt(encrypt.password)
+        wallet.walletEncryption.warnAboutUnencrypted = warnAboutUnencrypted
 
         return wallet
     }
 
-    async getPhrase(){
-        return await (await this.getSecret() as Phrase).getPhrase()
-    }
+    static async import(apiKey: string, serialized: SerializedSeedableWallet, askForPassword: (attempts: number, reject: () => void) => Promise<string>) : Promise<PhraseWallet>{
+        const encrypted = new Encrypted({
+            iterations: serialized.secret.iterations,
+            dkLen: serialized.secret.dkLen,
+            nonce: hexToBytes(serialized.secret.nonce),
+            salt: hexToBytes(serialized.secret.salt),
+            data: hexToBytes(serialized.secret.data),
+            cipher: serialized.secret.cipher
+        })
 
-    async getSeed(): Promise<Seed> {
-        return await (await this.getSecret() as Phrase).getSeed()
+        if(!(serialized.walletType == 'phrase')) throw new Error('Wallet format error')
+
+        const wallet = new PhraseWallet(new ChainGateClient(apiKey), encrypted, askForPassword)
+        wallet.walletUniqueId = serialized.walletUniqueId
+        wallet.derivationPaths = recordToMap(serialized.derivationPaths)
+
+        const derivationResultsStr = recordToMap(serialized.publicKeys)
+        wallet.derivationResults = transformMap(derivationResultsStr, (t) => new ExtendedPublicKey(t))
+
+        return wallet
     }
 }

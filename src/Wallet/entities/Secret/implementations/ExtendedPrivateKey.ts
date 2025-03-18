@@ -1,10 +1,13 @@
-import {PrivateKey} from './PrivateKey'
+import {HDKey} from '@scure/bip32'
 
-export class ExtendedPrivateKey extends PrivateKey{
+export class ExtendedPrivateKey{
+    get raw() {
+        return HDKey.fromExtendedKey(this.xpriv).privateKey
+    }
     readonly xpriv: string
 
-    constructor(privateKeyRaw: Uint8Array, xpriv: string) {
-        super(privateKeyRaw)
+    constructor(xpriv: string) {
         this.xpriv = xpriv
     }
 }
+

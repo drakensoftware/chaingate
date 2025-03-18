@@ -1,11 +1,8 @@
 import path from 'path'
-import WorkboxWebpackPlugin from 'workbox-webpack-plugin'
 import {fileURLToPath} from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-
-const isProduction = process.env.NODE_ENV === 'production'
 
 const config = {
     entry: './src/index.ts',
@@ -35,19 +32,11 @@ const config = {
         fallback: {
             'stream': 'stream-browserify',
             'crypto': 'crypto-browserify',
-            'vm': 'vm-browserify'
+            'vm': 'vm-browserify',
+            'assert': 'assert'
         },
         plugins: []
     }
 }
 
-export default () => {
-    if (isProduction) {
-        config.mode = 'production'
-
-        config.plugins.push(new WorkboxWebpackPlugin.GenerateSW())
-    } else {
-        config.mode = 'development'
-    }
-    return config
-}
+export default () => { return config }

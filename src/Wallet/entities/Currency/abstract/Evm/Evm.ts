@@ -5,7 +5,7 @@ import Decimal from 'decimal.js'
 import {ConsumeFunction} from '../../../../../CGDriver'
 import { Address } from '../../../Address'
 import {EvmCurrencyInfo} from './EvmCurrencyInfo'
-import {HDPrivateKeySign, PrivateKeySign} from '../../CurrencyParams'
+import {CurrencyProviders} from '../../CurrencyProviders'
 import {CurrencyAmount} from '../../CurrencyAmount'
 import {EvmPreparedTransaction} from './EvmPreparedTransaction'
 import {CannotParseAmount} from '../../errors'
@@ -14,18 +14,15 @@ import {Currency} from '../../Currency'
 export abstract class Evm<DefaultUnitSpecifier extends string> extends Currency {
     declare protected readonly api: EvmApi
     declare readonly currencyInfo: EvmCurrencyInfo
-    declare currencyParams: PrivateKeySign | HDPrivateKeySign
+    declare currencyProviders: CurrencyProviders
 
-    protected constructor(currencyInfo: EvmCurrencyInfo, api: EvmApi, currencyParams: PrivateKeySign | HDPrivateKeySign) {
-        super(currencyInfo, api, currencyParams)
+    protected constructor(currencyInfo: EvmCurrencyInfo, api: EvmApi, currencyProviders: CurrencyProviders) {
+        super(currencyInfo, api, currencyProviders)
         this.currencyInfo = currencyInfo
     }
 
     async getAddress(): Promise<string> {
-        let publicKey
-        if(this.currencyParams.signMode == 'privateKey') publicKey = await this.currencyParams.getPublicKey()
-        else publicKey = await this.currencyParams.getPublicKey(this.currencyParams.getDerivationPath(this.currencyInfo))
-
+        const publicKey = await (await this.currencyProviders.getPublicKeyProvider(this.currencyInfo))()
         return ethers.computeAddress(bytesToHex(publicKey.raw, true))
     }
 
@@ -44,16 +41,11 @@ export abstract class Evm<DefaultUnitSpecifier extends string> extends Currency 
 
     async prepareSmartContractTransaction(smartContractAddress: Address, amount: CurrencyAmount, data: string): Promise<EvmPreparedTransaction> {
 
-        let privateKeyProvider
-        if(this.currencyParams.signMode == 'privateKey') privateKeyProvider = this.currencyParams.getPrivateKey
-        else if (this.currencyParams.signMode == 'hdPrivateKey') {
-            const derivationPath = this.currencyParams.getDerivationPath(this.currencyInfo)
-            privateKeyProvider = this.currencyParams.getPrivateKey.bind(this.currencyParams, derivationPath)
-        }
+        const privateKeyProvider = await this.currencyProviders.getPrivateKeyProvider(this.currencyInfo)
 
         return new EvmPreparedTransaction(
             this.api,
-            this.currencyParams,
+            this.currencyProviders,
             this.currencyInfo,
             await this.getAddress(),
             smartContractAddress,

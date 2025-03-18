@@ -1,7 +1,6 @@
 import {ethers} from 'ethers'
 import {IncorrectPassword} from './errors'
-import {hexToBytes} from '../../../../Utils/Utils'
-import {PrivateKey} from '../../../entities/Secret/implementations/PrivateKey'
+import {hexToBytes} from '../../../Utils/Utils'
 import {Keystore} from './Keystore'
 
 export interface Web3KeystoreData {
@@ -25,7 +24,7 @@ export interface Web3KeystoreData {
 }
 
 
-export class Web3Keystore extends Keystore<PrivateKey>{
+export class Web3Keystore extends Keystore{
     private readonly keystoreData
 
     constructor(keystoreData: Web3KeystoreData) {
@@ -45,10 +44,10 @@ export class Web3Keystore extends Keystore<PrivateKey>{
         }
     }
 
-    async decrypt(password: string): Promise<PrivateKey> {
+    async decrypt(password: string): Promise<Uint8Array> {
         try {
             const ethersWallet = await ethers.Wallet.fromEncryptedJson(JSON.stringify(this.keystoreData), password)
-            return new PrivateKey(hexToBytes(ethersWallet.privateKey))
+            return hexToBytes(ethersWallet.privateKey)
         } catch (ex) {
             if (ex instanceof TypeError && 'argument' in ex && ex.argument === 'password') {
                 throw new IncorrectPassword()

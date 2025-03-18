@@ -1,7 +1,7 @@
-import {setupCryptoGetRandomValuesMock} from '../../../../../Utils/TestUtils'
+import {setupCryptoGetRandomValuesMock} from '../../../../Utils/TestUtils'
 import {IncorrectPassword} from '../errors'
 import {Web3Keystore} from '../Web3Keystore'
-import {PrivateKey} from '../../../../entities/Secret/implementations/PrivateKey'
+import {bytesToHex} from '../../../../Utils/Utils'
 
 setupCryptoGetRandomValuesMock()
 
@@ -15,11 +15,7 @@ describe('Web3 Keystore', () => {
         await expect(async () => keystore.decrypt('Incorrect password')).rejects.toThrow(IncorrectPassword)
 
         const x = await keystore.decrypt('1234')
-
-        expect(x instanceof PrivateKey).toBeTruthy()
-        if(!(x instanceof PrivateKey)) throw new Error() // Casting types
-
-        expect(x.hexa).toBe('0b9882e54799f1b73bde750298d841dc7a83ea99c85de0f38559d747b48f65af')
+        expect(bytesToHex(x, false)).toBe('0b9882e54799f1b73bde750298d841dc7a83ea99c85de0f38559d747b48f65af')
     })
 
 })

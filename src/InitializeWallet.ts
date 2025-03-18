@@ -3,224 +3,208 @@ import {PhraseNumOfWords} from './Wallet/implementations/PhraseWallet/PhraseNumO
 import {generateNewPhrase} from './Wallet/implementations/PhraseWallet/PhraseGenerator'
 import {Phrase} from './Wallet/entities/Secret/implementations/Phrase'
 import {PhraseWallet} from './Wallet/implementations/PhraseWallet/PhraseWallet'
-import {ChainGateClient} from 'chaingate-client'
-import {ChainGateKeystore} from './Wallet/abstract/LocalWallet/Keystore/ChainGateKeystore'
-import {ExportedWalletData} from './Wallet/Wallet'
-import {Seed} from './Wallet/entities/Secret/implementations/Seed'
+import {SerializedWallet, Wallet} from './Wallet/Wallet'
 import {SeedWallet} from './Wallet/implementations/SeedWallet/SeedWallet'
+import {PrivateKeyWallet, SerializedPrivateKeyWallet} from './Wallet/implementations/PrivateKeyWallet/PrivateKeyWallet'
+import {LegacyKeystore} from './Wallet/entities/Keystore/LegacyKeystore'
+import {Web3Keystore} from './Wallet/entities/Keystore/Web3Keystore'
+import {IncorrectPassword} from './Wallet/entities/Keystore/errors'
+import {EncodingError, Encrypt} from './Wallet/entities/WalletEncryption/WalletEncryption'
+import {SerializedSeedableWallet} from './Wallet/abstract/SeedableWallet'
+import {Seed} from './Wallet/entities/Secret/implementations/Seed'
 import {PrivateKey} from './Wallet/entities/Secret/implementations/PrivateKey'
-import {ImportedPrivateKey} from './Wallet/implementations/ImportedPrivateKey/ImportedPrivateKey'
-import {LegacyKeystore} from './Wallet/abstract/LocalWallet/Keystore/LegacyKeystore'
-import {Web3Keystore} from './Wallet/abstract/LocalWallet/Keystore/Web3Keystore'
-import {EncodingError, Encrypt} from './Wallet/abstract/LocalWallet/LocalWallet'
-import {IncorrectPassword} from './Wallet/abstract/LocalWallet/Keystore/errors'
 
-export type HDWalletExportedWalletData = {
-    walletUniqueId: string
-    knownPublicKeys?: Record<string, string>
-    currenciesDerivationPaths?: Record<string, string>
+export {PhraseLanguage, PhraseNumOfWords}
+
+export async function create({
+    apiKey = '',
+    phraseLanguage = 'english',
+    phraseNumOfWords = 12,
+    encrypt,
+    warnAboutUnencrypted = true
+}: {
+    apiKey?: string
+    phraseLanguage?: PhraseLanguage
+    phraseNumOfWords?: PhraseNumOfWords
+    encrypt?: Encrypt,
+    warnAboutUnencrypted?: boolean
+} = {}) {
+    const phrase = generateNewPhrase(phraseLanguage, phraseNumOfWords)
+
+    let wallet
+    if(encrypt) wallet = await PhraseWallet.new(
+        apiKey,
+        generateNewPhrase(phraseLanguage, phraseNumOfWords),
+        warnAboutUnencrypted,
+        encrypt
+    )
+    else wallet = await PhraseWallet.new(apiKey, phrase, warnAboutUnencrypted)
+
+    return { phrase, wallet }
 }
 
-export class InitializeWallet {
-    async create({
-        apiKey = '',
-        phraseLanguage = 'english',
-        phraseNumOfWords = 12,
-        encrypt,
-        warnAboutUnencrypted = true
-    }: {
-        apiKey?: string
-        phraseLanguage?: PhraseLanguage
-        phraseNumOfWords?: PhraseNumOfWords
-        encrypt?: Encrypt,
-        warnAboutUnencrypted?: boolean
-    } = {}) {
-        const phrase = generateNewPhrase(phraseLanguage, phraseNumOfWords)
-        const secret = new Phrase(phrase)
 
-        let wallet
-        if(encrypt) wallet = await PhraseWallet.new(
-            new ChainGateClient(apiKey),
-            secret,
-            warnAboutUnencrypted,
-            encrypt
-        )
-        else wallet = await PhraseWallet.new(new ChainGateClient(apiKey), secret, warnAboutUnencrypted)
-
-        return { phrase, wallet }
-    }
-
-
-    async fromPhrase({
-        apiKey = '',
+export async function fromPhrase({
+    apiKey = '',
+    phrase,
+    encrypt,
+    warnAboutUnencrypted = true
+}: {
+    apiKey?: string
+    phrase: string
+    encrypt?: Encrypt
+    warnAboutUnencrypted?: boolean
+}) {
+    return PhraseWallet.new(
+        apiKey,
         phrase,
-        exportedWalletData,
-        encrypt,
-        warnAboutUnencrypted = true
-    }: {
-        apiKey?: string
-        phrase: string
-        exportedWalletData?: ExportedWalletData
-        encrypt?: Encrypt
-        warnAboutUnencrypted?: boolean
-    }) {
-        const secret = await Phrase.fromString(phrase)
+        warnAboutUnencrypted,
+        encrypt
+    )
+}
 
-        return PhraseWallet.new(
-            new ChainGateClient(apiKey),
-            secret,
-            warnAboutUnencrypted,
-            encrypt,
-            exportedWalletData
-        )
+export async function checkPhrase(phrase: string) {
+    try{
+        Phrase.isValidPhrase(phrase)
+        return true
+    }catch (_ex){
+        return false
     }
+}
 
-    async fromSeed({
-        apiKey = '',
+export async function fromSeed({
+    apiKey = '',
+    seed,
+    encrypt,
+    warnAboutUnencrypted = true
+}: {
+    apiKey?: string
+    seed: string | Uint8Array
+    encrypt?: Encrypt,
+    warnAboutUnencrypted?: boolean
+}) {
+    return SeedWallet.new(
+        apiKey,
         seed,
-        exportedWalletData,
-        encrypt,
-        warnAboutUnencrypted = true
-    }: {
-        apiKey?: string
-        seed: string | Uint8Array
-        exportedWalletData?: ExportedWalletData
-        encrypt?: Encrypt,
-        warnAboutUnencrypted?: boolean
-    }) {
-        let secret
-        if(seed instanceof Uint8Array) secret = Seed.fromBytes(seed)
-        else secret = Seed.fromString(seed)
+        warnAboutUnencrypted,
+        encrypt
+    )
+}
 
-        return SeedWallet.new(
-            new ChainGateClient(apiKey),
-            secret,
-            warnAboutUnencrypted,
-            encrypt,
-            exportedWalletData
-        )
+export async function checkSeed(seed: string | Uint8Array) {
+    try{
+        new Seed(seed)
+        return true
+    }catch (_ex){
+        return false
     }
+}
 
-    async fromPrivateKey({
-        apiKey = '',
+export async function fromPrivateKey({
+    apiKey = '',
+    privateKey,
+    encrypt,
+    warnAboutUnencrypted = true
+}: {
+    apiKey?: string
+    privateKey: string | Uint8Array
+    encrypt?: Encrypt
+    warnAboutUnencrypted?: boolean
+}) {
+    return await PrivateKeyWallet.new(
+        apiKey,
         privateKey,
-        exportedWalletData,
-        encrypt,
-        warnAboutUnencrypted = true
-    }: {
-        apiKey?: string
-        privateKey: string | Uint8Array
-        exportedWalletData?: ExportedWalletData
-        encrypt?: Encrypt
-        warnAboutUnencrypted?: boolean
-    }) {
-        let secret
-        if(privateKey instanceof Uint8Array) secret = PrivateKey.fromBytes(privateKey)
-        else secret = PrivateKey.fromString(privateKey)
+        warnAboutUnencrypted,
+        encrypt
+    )
+}
 
-        return await ImportedPrivateKey.new(
-            new ChainGateClient(apiKey),
-            secret,
-            warnAboutUnencrypted,
-            encrypt,
-            exportedWalletData
-        )
+export async function checkPrivateKey(privateKey: string | Uint8Array) {
+    try{
+        new PrivateKey(privateKey)
+        return true
+    }catch (_ex){
+        return false
     }
+}
 
-    async fromKeystore({
-        apiKey = '',
-        keystore,
-        password,
-        exportedWalletData,
-        encrypt,
-        warnAboutUnencrypted = true
-    }: {
-        apiKey?: string
-        keystore: string
-        password: string
-        exportedWalletData?: ExportedWalletData
-        encrypt?: Encrypt
-        warnAboutUnencrypted?: boolean
-    }) {
-        try {
-            const obj = JSON.parse(keystore)
-            let secret
+export async function fromKeystore({
+    apiKey = '',
+    keystore,
+    password,
+    encrypt,
+    warnAboutUnencrypted = true
+}: {
+    apiKey?: string
+    keystore: string
+    password: string
+    encrypt?: Encrypt
+    warnAboutUnencrypted?: boolean
+}): Promise<PhraseWallet | SeedWallet | PrivateKeyWallet> {
+    try {
+        const obj = JSON.parse(keystore)
+        let decrypted
 
-            if(LegacyKeystore.isKeystore(obj)) secret = await new LegacyKeystore(obj).decrypt(password)
-            else if(Web3Keystore.isKeystore(obj)) secret = await new Web3Keystore(obj).decrypt(password)
-            else throw new EncodingError('Invalid keystore')
+        if(LegacyKeystore.isKeystore(obj)) decrypted = await new LegacyKeystore(obj).decrypt(password)
+        else if(Web3Keystore.isKeystore(obj)) decrypted = await new Web3Keystore(obj).decrypt(password)
+        else throw new EncodingError('Invalid json')
 
-
-            return this.walletFromSecret(secret, apiKey, warnAboutUnencrypted, encrypt, exportedWalletData)
-        } catch (ex) {
-            if (ex instanceof IncorrectPassword) throw ex
-            throw new EncodingError('Invalid keystore')
+        try{
+            const phraseText = new TextDecoder().decode(decrypted)
+            if(!Phrase.isValidPhrase(phraseText))
+                return PrivateKeyWallet.new(apiKey, decrypted, warnAboutUnencrypted, encrypt)
+            return PhraseWallet.new(apiKey, phraseText, warnAboutUnencrypted, encrypt)
+        }catch (_ex){
+            return PrivateKeyWallet.new(apiKey, decrypted, warnAboutUnencrypted, encrypt)
         }
+    } catch (ex) {
+        if (ex instanceof IncorrectPassword) throw ex
+        throw new EncodingError('Invalid json')
     }
+}
 
-    async fromExportedKeys({
-        apiKey = '',
-        keystore,
-        password,
-        exportedWalletData,
-        encrypt,
-        warnAboutUnencrypted = true
-    }: {
-        apiKey?: string
-        keystore: string
-        password: string
-        exportedWalletData?: ExportedWalletData
-        encrypt?: Encrypt
-        warnAboutUnencrypted?: boolean
-    }) {
-        try {
-            const obj = JSON.parse(keystore)
-            if (!ChainGateKeystore.isKeystore(obj)) throw new EncodingError('Invalid keystore')
-            const secret = await new ChainGateKeystore(obj).decrypt(password)
-
-            return this.walletFromSecret(secret, apiKey, warnAboutUnencrypted, encrypt, exportedWalletData)
-        } catch (ex) {
-            if (ex instanceof IncorrectPassword) throw ex
-            throw new EncodingError('Invalid keystore')
-        }
+export async function checkKeystore(keystore: string) {
+    try{
+        const keystoreObj = JSON.parse(keystore)
+        return LegacyKeystore.isKeystore(keystoreObj) || Web3Keystore.isKeystore(keystoreObj)
+    }catch(_ex){
+        return false
     }
+}
 
-    async walletFromSecret(
-        secret: Phrase | Seed | PrivateKey,
-        apiKey: string,
-        warnAboutUnencrypted : boolean,
-        encrypt?: Encrypt,
-        exportedWalletData?: ExportedWalletData) {
+export async function deserialize({
+    apiKey = '',
+    serialized,
+    askForPassword
+}: {
+    apiKey?: string
+    serialized: string
+    askForPassword: (attempts: number, reject: () => void) => Promise<string>
+}) {
+    try {
+        const serializedParsed = JSON.parse(serialized)
+        if(!Wallet.isSerializedWallet(serializedParsed)) throw new EncodingError('Invalid serialized')
 
-        if(secret instanceof Seed) {
-            return await SeedWallet.new(
-                new ChainGateClient(apiKey),
-                secret,
-                warnAboutUnencrypted,
-                encrypt,
-                exportedWalletData
-            )
+        const client = apiKey
+        const serializedWallet = serializedParsed as SerializedWallet
+
+        switch (serializedWallet.walletType){
+        case 'privateKey': return await PrivateKeyWallet.import(client, serializedWallet as SerializedPrivateKeyWallet, askForPassword)
+        case 'phrase': return await PhraseWallet.import(client, serializedWallet as SerializedSeedableWallet, askForPassword)
+        case 'seed': return await SeedWallet.import(client, serializedWallet as SerializedSeedableWallet, askForPassword)
         }
 
-        if(secret instanceof PrivateKey) {
-            return await ImportedPrivateKey.new(
-                new ChainGateClient(apiKey),
-                secret,
-                warnAboutUnencrypted,
-                encrypt,
-                exportedWalletData
-            )
-        }
-
-        if(secret instanceof Phrase) {
-            return await PhraseWallet.new(
-                new ChainGateClient(apiKey),
-                secret,
-                warnAboutUnencrypted,
-                encrypt,
-                exportedWalletData
-            )
-        }
+        throw new EncodingError('Invalid serialized')
+    } catch (ex) {
+        throw new EncodingError('Invalid serialized')
     }
+}
 
+export async function checkSerialized(serialized: string) {
+    try{
+        await deserialize({serialized, askForPassword: async () => {return ''}})
+        return true
+    }catch(_ex){
+        return false
+    }
 }

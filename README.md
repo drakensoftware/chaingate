@@ -54,9 +54,7 @@ Get your API key now for free at [https://chaingate.dev](https://chaingate.dev)
    2.3. [Encryption](#encryption)  
    2.4. [Keys and exporting](#keys-and-exporting)  
    2.4.1. [Accessing phrase, seed, or private keys](#accessing-phrase-seed-or-private-keys)  
-   2.4.2. [Export wallet](#export-wallet)  
-   2.4.2.1. [Export Wallet Data](#export-wallet-data)  
-   2.4.2.2. [Export Encrypted Keystore](#export-encrypted-keystore)  
+   2.4.2. [Export wallet](#export-wallet)
    2.5. [Addresses](#addresses)  
    2.5.1. [Generate Addresses](#1-generate-addresses)  
    2.5.2. [Check Balances](#2-check-balances)  
@@ -136,6 +134,17 @@ const { wallet: walletFromPkUint } = await initializeWallet.fromPrivateKey({
   apiKey: '1234-5678',
   privateKey: new Uint8Array([0xab, 0xcd, 0xed])
 })
+
+// 5. Initialize wallet from serialization
+const { wallet: walletFromSerialization } = await initializeWallet.fromPrivateKey({
+    apiKey: '1234-5678',
+    serialized: '{...}',
+    askForPassword: async (attempts, reject) => {
+        // Implement an interactive password prompt or any input flow
+        return prompt('Enter wallet password:')
+    }
+})
+
 ```
 
 ## Encryption
@@ -198,38 +207,12 @@ const publicKey = await wallet2.getPublicKey()
 const publicKeyHex = publicKey.hex
 ```
 
-### Export wallet
+### Export wallet (serialization)
 
-#### Export Wallet Data
-
-You can export wallet-related data (e.g., derivation paths, public keys) for backup or restoration:
+You can export wallet for backup or restoration:
 
 ```typescript
-const exportedData = await wallet.exportWalletData()
-console.log(exportedData.currenciesDerivationPaths)
-/*
-{
-  "bitcoin": "m/84'/0'/0'/0/0",
-  "ethereum": "m/44'/60'/0'/0/0"
-}
-*/
-```
-
-#### Export Encrypted Keystore
-
-ChainGate uses its own keystore format. If your wallet is encrypted, you can export an encrypted JSON for backup:
-
-```typescript
-import { WalletIsNotEncrypted } from 'chaingate'
-
-try {
-  const keystore = await wallet.exportKeys() // JSON with encryption details
-  console.log(keystore)
-} catch (e) {
-  if (e instanceof WalletIsNotEncrypted) {
-    console.error('Wallet must be encrypted first!')
-  }
-}
+const serializedWallet = await wallet.serialize()
 ```
 
 ## Addresses

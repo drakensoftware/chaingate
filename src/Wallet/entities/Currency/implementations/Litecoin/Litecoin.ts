@@ -1,10 +1,10 @@
 import {LitecoinApi} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../../Utils/Utils'
 import {Bech32Utxo} from '../../abstract/Bech32Utxo/Bech32Utxo'
-import {HDPrivateKeySign, PrivateKeySign} from '../../CurrencyParams'
+import {CurrencyProviders} from '../../CurrencyProviders'
 
 export class Litecoin extends Bech32Utxo<'ltc'> {
-    constructor(api: LitecoinApi,  currencyParams: PrivateKeySign | HDPrivateKeySign) {
+    constructor(api: LitecoinApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'LTC',
             id: 'litecoin',
@@ -16,7 +16,7 @@ export class Litecoin extends Bech32Utxo<'ltc'> {
             commonDerivationPaths: ['m/44\'/2\'/0\'/0/0', 'm/84\'/2\'/0\'/0/0', 'm/86\'/2\'/0\'/0/0']
         },
         api,
-        currencyParams,
+        currencyProviders,
         {
             bech32: 'ltc',
             pubKeyHash: 0x30,
