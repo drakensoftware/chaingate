@@ -37,7 +37,7 @@ export abstract class Currency{
         const totalUsd = amountFiat.mul(fiatRateUsd)
 
         //Calculate total in crypto
-        const cryptoData = markets.crypto.find(t => t.id === this.currencyInfo.id)
+        const cryptoData = markets.crypto.find(t => t.id === this.currencyInfo.nativeTokenId)
         if (!cryptoData) throw new Error('Crypto rate not found')
         const cryptoRateUsd = new Decimal(cryptoData.rateUsd)
         if (cryptoRateUsd.eq(0)) return new CurrencyAmount(this.currencyInfo, new Decimal(0), this.client)

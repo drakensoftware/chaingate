@@ -7,14 +7,16 @@ export class BitcoinTestnet extends Bech32Utxo<'btc'> {
 
     constructor(client: ChainGateClient, api: BitcoinTestnetApi,  currencyProviders: CurrencyProviders) {
         super({
-            symbol: 'BTC-TEST',
-            id: 'bitcoin-testnet',
+            symbol: 'btc',
+            id: 'bitcointestnet',
             name: 'Bitcoin Testnet',
             svgLogoUrl: buildUrlWithApiKey('https://api.chaingate.dev/bitcoin/testnet/logo'),
             decimals: 8,
             defaultDerivationPath: 'm/84\'/1\'/0\'/0/0',
             minimalUnitSymbol: 'satoshi',
-            commonDerivationPaths: ['m/44\'/1\'/0\'/0/0', 'm/84\'/1\'/0\'/0/0', 'm/86\'/1\'/0\'/0/0']
+            commonDerivationPaths: ['m/44\'/1\'/0\'/0/0', 'm/84\'/1\'/0\'/0/0', 'm/86\'/1\'/0\'/0/0'],
+            nativeTokenId: 'bitcointestnet',
+            nativeTokenName: 'Bitcoin Testnet'
         },
         client,
         api,

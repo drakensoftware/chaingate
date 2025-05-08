@@ -9,14 +9,16 @@ export class Dogecoin extends LegacyUtxo<'doge'> {
 
     constructor(client: ChainGateClient, api: BitcoinCashApi,  currencyProviders: CurrencyProviders) {
         super({
-            symbol: 'DOGE',
+            symbol: 'doge',
             id: 'dogecoin',
             name: 'Dogecoin',
             svgLogoUrl: buildUrlWithApiKey('https://api.chaingate.dev/dogecoin/logo'),
             decimals: 8,
             defaultDerivationPath: 'm/44\'/3\'/0\'/0/0',
             minimalUnitSymbol: 'satoshi',
-            commonDerivationPaths: ['m/44\'/3\'/0\'/0/0', 'm/84\'/3\'/0\'/0/0', 'm/86\'/3\'/0\'/0/0']
+            commonDerivationPaths: ['m/44\'/3\'/0\'/0/0', 'm/84\'/3\'/0\'/0/0', 'm/86\'/3\'/0\'/0/0'],
+            nativeTokenId: 'dogecoin',
+            nativeTokenName: 'Dogecoin'
         },
         client,
         api,

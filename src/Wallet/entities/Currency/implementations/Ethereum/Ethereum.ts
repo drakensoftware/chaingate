@@ -6,7 +6,7 @@ import {Evm} from '../../abstract/Evm/Evm'
 export class Ethereum extends Evm<'eth'> {
     constructor(client: ChainGateClient, api: EthereumApi, currencyProviders: CurrencyProviders) {
         super({
-            symbol: 'ETH',
+            symbol: 'eth',
             id: 'ethereum',
             name: 'Ethereum',
             svgLogoUrl: buildUrlWithApiKey('https://api.chaingate.dev/ethereum/logo'),
@@ -14,7 +14,9 @@ export class Ethereum extends Evm<'eth'> {
             decimals: 18,
             defaultDerivationPath: 'm/44\'/60\'/0\'/0/0',
             minimalUnitSymbol: 'wei',
-            commonDerivationPaths: ['m/44\'/60\'/0\'/0/0',]
+            commonDerivationPaths: ['m/44\'/60\'/0\'/0/0',],
+            nativeTokenId: 'ethereum',
+            nativeTokenName: 'Ethereum'
         }, client, api, currencyProviders)
     }
 }

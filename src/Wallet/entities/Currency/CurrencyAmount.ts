@@ -65,7 +65,7 @@ export class CurrencyAmount {
     async toFiat(fiatCurrency: typeof FiatCurrencies[number]) {
         const markets = await MarketsProvider.getMarketData(this.client)
 
-        const cryptoData = markets.crypto.find(t => t.id === this.currencyInfo.id)
+        const cryptoData = markets.crypto.find(t => t.id === this.currencyInfo.nativeTokenId)
         if (!cryptoData) throw new Error('Crypto rate not found')
         const cryptoRateUsd = new Decimal(cryptoData.rateUsd)
         const totalUsd = cryptoRateUsd.mul(this.baseAmount)

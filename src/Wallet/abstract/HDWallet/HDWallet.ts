@@ -8,7 +8,7 @@ import {Avalanche} from '../../entities/Currency/implementations/Avalanche'
 import {Base} from '../../entities/Currency/implementations/Base'
 import {BNBChain} from '../../entities/Currency/implementations/BNBChain'
 import {Ethereum} from '../../entities/Currency/implementations/Ethereum/Ethereum'
-import {FantomOpera} from '../../entities/Currency/implementations/FantomOpera'
+import {Sonic} from '../../entities/Currency/implementations/Sonic'
 import {Polygon} from '../../entities/Currency/implementations/Polygon'
 import {Bitcoin} from '../../entities/Currency/implementations/Bitcoin/Bitcoin'
 import {BitcoinTestnet} from '../../entities/Currency/implementations/BitcoinTestnet/BitcoinTestnet'
@@ -66,7 +66,7 @@ export abstract class HDWallet<DerivationResult, SupportedCurrencies extends All
             'base': CurrencyWithDerivationPaths(new Base(this.client, this.client.BaseApi, this.currencyProviders), this.derivationPaths),
             'bnbChain': CurrencyWithDerivationPaths(new BNBChain(this.client, this.client.BNBChainApi, this.currencyProviders), this.derivationPaths),
             'ethereum': CurrencyWithDerivationPaths(new Ethereum(this.client, this.client.EthereumApi, this.currencyProviders), this.derivationPaths),
-            'fantomOpera': CurrencyWithDerivationPaths(new FantomOpera(this.client, this.client.FantomOperaApi, this.currencyProviders), this.derivationPaths),
+            'sonic': CurrencyWithDerivationPaths(new Sonic(this.client, this.client.FantomOperaApi, this.currencyProviders), this.derivationPaths),
             'polygon': CurrencyWithDerivationPaths(new Polygon(this.client, this.client.PolygonApi, this.currencyProviders), this.derivationPaths),
             'bitcoin': CurrencyWithDerivationPaths(new Bitcoin(this.client, this.client.BitcoinApi, this.currencyProviders), this.derivationPaths),
             'bitcoinTestnet': CurrencyWithDerivationPaths(new BitcoinTestnet(this.client, this.client.BitcoinTestnetApi, this.currencyProviders), this.derivationPaths),

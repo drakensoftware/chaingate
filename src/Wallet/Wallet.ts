@@ -4,7 +4,7 @@ import {Avalanche} from './entities/Currency/implementations/Avalanche'
 import {Base} from './entities/Currency/implementations/Base'
 import {BNBChain} from './entities/Currency/implementations/BNBChain'
 import {Ethereum} from './entities/Currency/implementations/Ethereum/Ethereum'
-import {FantomOpera} from './entities/Currency/implementations/FantomOpera'
+import {Sonic} from './entities/Currency/implementations/Sonic'
 import {Polygon} from './entities/Currency/implementations/Polygon'
 import {Bitcoin} from './entities/Currency/implementations/Bitcoin/Bitcoin'
 import {BitcoinTestnet} from './entities/Currency/implementations/BitcoinTestnet/BitcoinTestnet'
@@ -23,7 +23,7 @@ export type SerializedWallet = {
 
 export const EvmCurrencies = [
     'arbitrum', 'avalanche', 'base',
-    'bnbChain', 'ethereum', 'fantomOpera',
+    'bnbChain', 'ethereum', 'sonic',
     'polygon'
 ] as const
 export const UtxoCurrencies = [
@@ -41,7 +41,7 @@ export type CurrencyMap = {
     'base': Base,
     'bnbChain': BNBChain,
     'ethereum': Ethereum,
-    'fantomOpera': FantomOpera,
+    'sonic': Sonic,
     'polygon': Polygon,
     'bitcoin': Bitcoin,
     'bitcoinTestnet': BitcoinTestnet,

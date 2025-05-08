@@ -7,4 +7,6 @@ export type CurrencyInfo = {
     minimalUnitSymbol: string,
     decimals: number,
     commonDerivationPaths: string[]
+    nativeTokenId: string
+    nativeTokenName: string
 }

@@ -6,14 +6,16 @@ import {CurrencyProviders} from '../../CurrencyProviders'
 export class Bitcoin extends Bech32Utxo<'btc'> {
     constructor(client: ChainGateClient, api: BitcoinApi,  currencyProviders: CurrencyProviders) {
         super({
-            symbol: 'BTC',
+            symbol: 'btc',
             id: 'bitcoin',
             name: 'Bitcoin',
             svgLogoUrl: buildUrlWithApiKey('https://api.chaingate.dev/bitcoin/logo'),
             decimals: 8,
             defaultDerivationPath: 'm/84\'/0\'/0\'/0/0',
             minimalUnitSymbol: 'satoshi',
-            commonDerivationPaths: ['m/44\'/0\'/0\'/0/0', 'm/84\'/0\'/0\'/0/0', 'm/86\'/0\'/0\'/0/0']
+            commonDerivationPaths: ['m/44\'/0\'/0\'/0/0', 'm/84\'/0\'/0\'/0/0', 'm/86\'/0\'/0\'/0/0'],
+            nativeTokenId: 'bitcoin',
+            nativeTokenName: 'Bitcoin'
         },
         client,
         api,

@@ -15,14 +15,16 @@ export class BitcoinCash extends Utxo<'bch'> {
 
     constructor(client: ChainGateClient, api: BitcoinCashApi,  currencyProviders: CurrencyProviders) {
         super({
-            symbol: 'BCH',
-            id: 'bitcoin-cash',
+            symbol: 'bch',
+            id: 'bitcoincash',
             name: 'Bitcoin Cash',
             svgLogoUrl: buildUrlWithApiKey('https://api.chaingate.dev/bitcoincash/logo'),
             decimals: 8,
             defaultDerivationPath: 'm/44\'/145\'/0\'/0/0',
             minimalUnitSymbol: 'satoshi',
-            commonDerivationPaths: ['m/44\'/145\'/0\'/0/0']
+            commonDerivationPaths: ['m/44\'/145\'/0\'/0/0'],
+            nativeTokenId: 'bitcoincash',
+            nativeTokenName: 'Bitcoin Cash'
         },
         client,
         api,

@@ -6,7 +6,7 @@ import {CurrencyProviders} from '../CurrencyProviders'
 export class Arbitrum extends Evm<'arb'> {
     constructor(client: ChainGateClient, api: ArbitrumApi, currencyProviders: CurrencyProviders) {
         super({
-            symbol: 'ARB',
+            symbol: 'arb',
             id: 'arbitrum',
             name: 'Arbitrum One',
             svgLogoUrl: buildUrlWithApiKey('https://api.chaingate.dev/arbitrum/logo'),
@@ -14,7 +14,9 @@ export class Arbitrum extends Evm<'arb'> {
             decimals: 18,
             defaultDerivationPath: 'm/44\'/60\'/0\'/0/0',
             minimalUnitSymbol: 'wei',
-            commonDerivationPaths: ['m/44\'/60\'/0\'/0/0',]
+            commonDerivationPaths: ['m/44\'/60\'/0\'/0/0',],
+            nativeTokenId: 'arbitrum',
+            nativeTokenName: 'Arbitrum'
         }, client, api, currencyProviders)
     }
 }

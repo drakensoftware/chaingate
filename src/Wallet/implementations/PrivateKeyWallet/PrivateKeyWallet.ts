@@ -9,7 +9,7 @@ import {Avalanche} from '../../entities/Currency/implementations/Avalanche'
 import {Base} from '../../entities/Currency/implementations/Base'
 import {BNBChain} from '../../entities/Currency/implementations/BNBChain'
 import {Ethereum} from '../../entities/Currency/implementations/Ethereum/Ethereum'
-import {FantomOpera} from '../../entities/Currency/implementations/FantomOpera'
+import {Sonic} from '../../entities/Currency/implementations/Sonic'
 import {Polygon} from '../../entities/Currency/implementations/Polygon'
 import {Bitcoin} from '../../entities/Currency/implementations/Bitcoin/Bitcoin'
 import {BitcoinTestnet} from '../../entities/Currency/implementations/BitcoinTestnet/BitcoinTestnet'
@@ -96,7 +96,7 @@ export class PrivateKeyWallet extends Wallet<AllCurrencies>{
             'base': new Base(this.client, this.client.BaseApi, this.currencyProviders),
             'bnbChain': new BNBChain(this.client, this.client.BNBChainApi, this.currencyProviders),
             'ethereum': new Ethereum(this.client, this.client.EthereumApi, this.currencyProviders),
-            'fantomOpera': new FantomOpera(this.client, this.client.FantomOperaApi, this.currencyProviders),
+            'sonic': new Sonic(this.client, this.client.FantomOperaApi, this.currencyProviders),
             'polygon': new Polygon(this.client, this.client.PolygonApi, this.currencyProviders),
             'bitcoin': new Bitcoin(this.client, this.client.BitcoinApi, this.currencyProviders),
             'bitcoinTestnet': new BitcoinTestnet(this.client, this.client.BitcoinTestnetApi, this.currencyProviders),
