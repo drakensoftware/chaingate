@@ -1,6 +1,6 @@
 {
   "name": "chaingate",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A complete TypeScript library for connecting to and making transactions on different blockchains",
   "keywords": [
     "blockchain",
@@ -82,7 +82,7 @@
     "assert": "^2.1.0",
     "bchaddrjs": "^0.5.2",
     "bitcore-lib-cash": "^10.8.0",
-    "chaingate-client": "^0.18.7",
+    "chaingate-client": "^0.20.3",
     "crypto-browserify": "^3.12.1",
     "decimal.js": "^10.5.0",
     "ethers": "^6.13.5",

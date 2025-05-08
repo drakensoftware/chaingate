@@ -61,18 +61,18 @@ export abstract class HDWallet<DerivationResult, SupportedCurrencies extends All
 
     public override currency<T extends AllCurrencies>(currency: T) {
         const currencyMap: CurrencyMap = {
-            'arbitrum': CurrencyWithDerivationPaths(new Arbitrum(this.apiClient.ArbitrumApi, this.currencyProviders), this.derivationPaths),
-            'avalanche': CurrencyWithDerivationPaths(new Avalanche(this.apiClient.AvalancheApi, this.currencyProviders), this.derivationPaths),
-            'base': CurrencyWithDerivationPaths(new Base(this.apiClient.BaseApi, this.currencyProviders), this.derivationPaths),
-            'bnbChain': CurrencyWithDerivationPaths(new BNBChain(this.apiClient.BNBChainApi, this.currencyProviders), this.derivationPaths),
-            'ethereum': CurrencyWithDerivationPaths(new Ethereum(this.apiClient.EthereumApi, this.currencyProviders), this.derivationPaths),
-            'fantomOpera': CurrencyWithDerivationPaths(new FantomOpera(this.apiClient.FantomOperaApi, this.currencyProviders), this.derivationPaths),
-            'polygon': CurrencyWithDerivationPaths(new Polygon(this.apiClient.PolygonApi, this.currencyProviders), this.derivationPaths),
-            'bitcoin': CurrencyWithDerivationPaths(new Bitcoin(this.apiClient.BitcoinApi, this.currencyProviders), this.derivationPaths),
-            'bitcoinTestnet': CurrencyWithDerivationPaths(new BitcoinTestnet(this.apiClient.BitcoinTestnetApi, this.currencyProviders), this.derivationPaths),
-            'dogecoin': CurrencyWithDerivationPaths(new Dogecoin(this.apiClient.DogecoinApi, this.currencyProviders), this.derivationPaths),
-            'litecoin': CurrencyWithDerivationPaths(new Litecoin(this.apiClient.LitecoinApi, this.currencyProviders), this.derivationPaths),
-            'bitcoinCash': CurrencyWithDerivationPaths(new BitcoinCash(this.apiClient.BitcoinCashApi, this.currencyProviders), this.derivationPaths)
+            'arbitrum': CurrencyWithDerivationPaths(new Arbitrum(this.client, this.client.ArbitrumApi, this.currencyProviders), this.derivationPaths),
+            'avalanche': CurrencyWithDerivationPaths(new Avalanche(this.client, this.client.AvalancheApi, this.currencyProviders), this.derivationPaths),
+            'base': CurrencyWithDerivationPaths(new Base(this.client, this.client.BaseApi, this.currencyProviders), this.derivationPaths),
+            'bnbChain': CurrencyWithDerivationPaths(new BNBChain(this.client, this.client.BNBChainApi, this.currencyProviders), this.derivationPaths),
+            'ethereum': CurrencyWithDerivationPaths(new Ethereum(this.client, this.client.EthereumApi, this.currencyProviders), this.derivationPaths),
+            'fantomOpera': CurrencyWithDerivationPaths(new FantomOpera(this.client, this.client.FantomOperaApi, this.currencyProviders), this.derivationPaths),
+            'polygon': CurrencyWithDerivationPaths(new Polygon(this.client, this.client.PolygonApi, this.currencyProviders), this.derivationPaths),
+            'bitcoin': CurrencyWithDerivationPaths(new Bitcoin(this.client, this.client.BitcoinApi, this.currencyProviders), this.derivationPaths),
+            'bitcoinTestnet': CurrencyWithDerivationPaths(new BitcoinTestnet(this.client, this.client.BitcoinTestnetApi, this.currencyProviders), this.derivationPaths),
+            'dogecoin': CurrencyWithDerivationPaths(new Dogecoin(this.client, this.client.DogecoinApi, this.currencyProviders), this.derivationPaths),
+            'litecoin': CurrencyWithDerivationPaths(new Litecoin(this.client, this.client.LitecoinApi, this.currencyProviders), this.derivationPaths),
+            'bitcoinCash': CurrencyWithDerivationPaths(new BitcoinCash(this.client, this.client.BitcoinCashApi, this.currencyProviders), this.derivationPaths)
         }
 
         return currencyMap[currency] as CurrencyMap[T] & ICurrencyWithDerivationPaths

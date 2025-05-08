@@ -1,10 +1,10 @@
-import {LitecoinApi} from 'chaingate-client'
+import {ChainGateClient, LitecoinApi} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../../Utils/Utils'
 import {Bech32Utxo} from '../../abstract/Bech32Utxo/Bech32Utxo'
 import {CurrencyProviders} from '../../CurrencyProviders'
 
 export class Litecoin extends Bech32Utxo<'ltc'> {
-    constructor(api: LitecoinApi,  currencyProviders: CurrencyProviders) {
+    constructor(client: ChainGateClient, api: LitecoinApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'LTC',
             id: 'litecoin',
@@ -15,6 +15,7 @@ export class Litecoin extends Bech32Utxo<'ltc'> {
             minimalUnitSymbol: 'satoshi',
             commonDerivationPaths: ['m/44\'/2\'/0\'/0/0', 'm/84\'/2\'/0\'/0/0', 'm/86\'/2\'/0\'/0/0']
         },
+        client,
         api,
         currencyProviders,
         {

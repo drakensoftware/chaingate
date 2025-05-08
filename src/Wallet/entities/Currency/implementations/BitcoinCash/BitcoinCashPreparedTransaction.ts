@@ -1,10 +1,10 @@
 import {bytesToHex, hexToBytes} from '../../../../../Utils/Utils'
-import {UtxoApi} from 'chaingate-client'
+import {ChainGateClient, UtxoApi} from 'chaingate-client'
 import bch from 'bitcore-lib-cash'
 import {toCashAddress, toLegacyAddress} from 'bchaddrjs'
 import {Address} from '../../../Address'
 import {TxVout, UtxoPreparedTransaction} from '../../abstract/Utxo/UtxoPreparedTransaction'
-import {CurrencyProviders, PrivateKeyProvider} from '../../CurrencyProviders'
+import {PrivateKeyProvider} from '../../CurrencyProviders'
 import {CurrencyInfo} from '../../CurrencyInfo'
 import {CurrencyAmount} from '../../CurrencyAmount'
 import {Txo} from '../../abstract/Utxo/Txo'
@@ -16,13 +16,13 @@ export class BitcoinCashPreparedTransaction<DefaultUnit extends string> extends 
 
     constructor(
         api: UtxoApi,
-        currencyProviders: CurrencyProviders,
+        client: ChainGateClient,
         currencyInfo: CurrencyInfo,
         fromAddress: Address,
         toAddress: Address,
         amount: CurrencyAmount,
         privateKeyProvider: PrivateKeyProvider) {
-        super(api, currencyProviders, currencyInfo, fromAddress, toAddress, amount, {
+        super(api, client, currencyInfo, fromAddress, toAddress, amount, {
             bech32: 'bc',
             pubKeyHash: 0x00,
             scriptHash: 0x05,

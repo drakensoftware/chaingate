@@ -1,4 +1,4 @@
-import {UtxoApi} from 'chaingate-client'
+import {ChainGateClient, UtxoApi} from 'chaingate-client'
 import * as btc from '@scure/btc-signer'
 import {LegacyUtxo} from '../LegacyUtxo/LegacyUtxo'
 import {CurrencyInfo} from '../../CurrencyInfo'
@@ -6,8 +6,8 @@ import {NetworkParams} from '../Utxo/NetworkParams'
 import {CurrencyProviders} from '../../CurrencyProviders'
 
 export class Bech32Utxo<DefaultUnitSpecifier extends string> extends LegacyUtxo<DefaultUnitSpecifier> {
-    constructor(currencyInfo: CurrencyInfo, api: UtxoApi, currencyProviders: CurrencyProviders, networkParams: NetworkParams) {
-        super(currencyInfo, api, currencyProviders, networkParams)
+    constructor(currencyInfo: CurrencyInfo, client: ChainGateClient, api: UtxoApi, currencyProviders: CurrencyProviders, networkParams: NetworkParams) {
+        super(currencyInfo, client, api, currencyProviders, networkParams)
     }
 
     async getAddress(addressType: 'legacy' | 'segwit' | 'taproot' = 'segwit'): Promise<string> {

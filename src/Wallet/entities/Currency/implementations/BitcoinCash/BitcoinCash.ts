@@ -1,4 +1,4 @@
-import {BitcoinCashApi} from 'chaingate-client'
+import {BitcoinCashApi, ChainGateClient} from 'chaingate-client'
 import {buildUrlWithApiKey, bytesToHex} from '../../../../../Utils/Utils'
 import bch from 'bitcore-lib-cash'
 import {toCashAddress, toLegacyAddress} from 'bchaddrjs'
@@ -6,16 +6,14 @@ import {Address} from '../../../Address'
 import {Utxo} from '../../abstract/Utxo/Utxo'
 import {CurrencyProviders} from '../../CurrencyProviders'
 import {CurrencyAmount} from '../../CurrencyAmount'
-import {
-    BitcoinCashPreparedTransaction
-} from './BitcoinCashPreparedTransaction'
+import {BitcoinCashPreparedTransaction} from './BitcoinCashPreparedTransaction'
 
 Object.defineProperty(global,  '_bitcoreCash', { 	get(){ 		return undefined 	}, 	set(){}, configurable: true })
 
 export class BitcoinCash extends Utxo<'bch'> {
     declare currencyProviders: CurrencyProviders
 
-    constructor(api: BitcoinCashApi,  currencyProviders: CurrencyProviders) {
+    constructor(client: ChainGateClient, api: BitcoinCashApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'BCH',
             id: 'bitcoin-cash',
@@ -26,6 +24,7 @@ export class BitcoinCash extends Utxo<'bch'> {
             minimalUnitSymbol: 'satoshi',
             commonDerivationPaths: ['m/44\'/145\'/0\'/0/0']
         },
+        client,
         api,
         currencyProviders,
         {
@@ -56,7 +55,7 @@ export class BitcoinCash extends Utxo<'bch'> {
 
         return new BitcoinCashPreparedTransaction(
             this.api,
-            this.currencyProviders,
+            this.client,
             this.currencyInfo,
             await this.getAddress(),
             toAddress,

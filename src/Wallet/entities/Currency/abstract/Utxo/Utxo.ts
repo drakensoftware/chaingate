@@ -1,4 +1,4 @@
-import {UtxoApi} from 'chaingate-client'
+import {ChainGateClient, UtxoApi} from 'chaingate-client'
 import Decimal from 'decimal.js'
 import {ConsumeFunction} from '../../../../../CGDriver'
 import {Address} from '../../../Address'
@@ -13,12 +13,12 @@ import {CurrencyProviders} from '../../CurrencyProviders'
 
 export abstract class Utxo<DefaultUnit extends string> extends Currency {
     declare protected readonly api: UtxoApi
-
     protected readonly networkParams: NetworkParams
 
-    protected constructor(currencyInfo: CurrencyInfo, api: UtxoApi, currencyProviders: CurrencyProviders, networkParams: NetworkParams) {
-        super(currencyInfo, api, currencyProviders)
+    protected constructor(currencyInfo: CurrencyInfo, client: ChainGateClient, api: UtxoApi, currencyProviders: CurrencyProviders, networkParams: NetworkParams) {
+        super(currencyInfo, client, currencyProviders)
         this.networkParams = networkParams
+        this.api = api
     }
 
     abstract getAddress() : Promise<string>
@@ -32,16 +32,16 @@ export abstract class Utxo<DefaultUnit extends string> extends Currency {
             address ?? await this.getAddress())
 
         return {
-            confirmed: new CurrencyAmount(this.currencyInfo, new Decimal(balance.confirmed)),
-            unconfirmed: new CurrencyAmount(this.currencyInfo, new Decimal(balance.unconfirmed))
+            confirmed: new CurrencyAmount(this.currencyInfo, new Decimal(balance.confirmed), this.client),
+            unconfirmed: new CurrencyAmount(this.currencyInfo, new Decimal(balance.unconfirmed), this.client),
         }
     }
 
     async amount(amountStr: string, unit: DefaultUnit | 'satoshi'): Promise<CurrencyAmount> {
         try{
             switch (unit){
-            default: return new CurrencyAmount(this.currencyInfo, new Decimal(amountStr))
-            case 'satoshi': return new CurrencyAmount(this.currencyInfo, new Decimal(amountStr).div(100_000_000))
+            default: return new CurrencyAmount(this.currencyInfo, new Decimal(amountStr), this.client)
+            case 'satoshi': return new CurrencyAmount(this.currencyInfo, new Decimal(amountStr).div(100_000_000), this.client)
             }
         } catch (_ex) { throw new CannotParseAmount(amountStr) }
     }

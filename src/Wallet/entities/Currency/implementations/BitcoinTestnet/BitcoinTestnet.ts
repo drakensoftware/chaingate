@@ -1,11 +1,11 @@
-import {BitcoinTestnetApi} from 'chaingate-client'
+import {BitcoinTestnetApi, ChainGateClient} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../../Utils/Utils'
 import {Bech32Utxo} from '../../abstract/Bech32Utxo/Bech32Utxo'
 import {CurrencyProviders} from '../../CurrencyProviders'
 
 export class BitcoinTestnet extends Bech32Utxo<'btc'> {
 
-    constructor(api: BitcoinTestnetApi,  currencyProviders: CurrencyProviders) {
+    constructor(client: ChainGateClient, api: BitcoinTestnetApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'BTC-TEST',
             id: 'bitcoin-testnet',
@@ -16,6 +16,7 @@ export class BitcoinTestnet extends Bech32Utxo<'btc'> {
             minimalUnitSymbol: 'satoshi',
             commonDerivationPaths: ['m/44\'/1\'/0\'/0/0', 'm/84\'/1\'/0\'/0/0', 'm/86\'/1\'/0\'/0/0']
         },
+        client,
         api,
         currencyProviders,
         {

@@ -1,4 +1,4 @@
-import {UtxoApi} from 'chaingate-client'
+import {ChainGateClient, UtxoApi} from 'chaingate-client'
 import {UtxoFee} from './UtxoFee'
 import {bytesToHex, hexToBytes} from '../../../../../Utils/Utils'
 import {ConsumeFunction} from '../../../../../CGDriver'
@@ -10,7 +10,7 @@ import {Txo} from './Txo'
 import {CurrencyPreparedTransaction} from '../../CurrencyPreparedTransaction'
 import {FeeLevel} from '../../FeeLevel'
 import {NetworkParams} from './NetworkParams'
-import {CurrencyProviders, PrivateKeyProvider} from '../../CurrencyProviders'
+import {PrivateKeyProvider} from '../../CurrencyProviders'
 import {CurrencyInfo} from '../../CurrencyInfo'
 import {UtxoConfirmedTransaction} from './UtxoConfirmedTransaction'
 import {toBase, toSatoshi} from './UtxoUtils'
@@ -45,7 +45,9 @@ type CreateTransactionResult = {
 }
 
 export abstract class UtxoPreparedTransaction<DefaultUnit extends string> extends CurrencyPreparedTransaction {
-    declare protected api: UtxoApi
+    private readonly api: UtxoApi
+    private readonly currencyInfo: CurrencyInfo
+    private readonly client: ChainGateClient
     declare protected _suggestedFees: Record<FeeLevel, UtxoFee>
 
     private readonly state: UtxoApiState
@@ -55,14 +57,17 @@ export abstract class UtxoPreparedTransaction<DefaultUnit extends string> extend
 
     protected constructor(
         api: UtxoApi,
-        currencyProviders: CurrencyProviders,
+        client: ChainGateClient,
         currencyInfo: CurrencyInfo,
         fromAddress: Address,
         toAddress: Address,
         amount: CurrencyAmount,
         networkParams: NetworkParams,
         privateKeyProvider: PrivateKeyProvider) {
-        super(api, currencyProviders, currencyInfo, fromAddress, toAddress, amount)
+        super(fromAddress, toAddress, amount)
+        this.api = api
+        this.client = client
+        this.currencyInfo = currencyInfo
         this.state = {utxos: [], page: 0, crawled: false}
         this.networkParams = networkParams
         this.privateKeyProvider = privateKeyProvider
@@ -87,15 +92,15 @@ export abstract class UtxoPreparedTransaction<DefaultUnit extends string> extend
     }
 
     async fee(fee: string | CurrencyAmount, unit: `${DefaultUnit}/kB` | `${DefaultUnit}/byte` | 'satoshi/kB' | 'satoshi/byte'): Promise<UtxoFee> {
-        if(typeof fee == 'string') fee = new CurrencyAmount(this.currencyInfo, new Decimal(fee))
+        if(typeof fee == 'string') fee = new CurrencyAmount(this.currencyInfo, new Decimal(fee), this.client)
 
         const feeBase = fee.baseAmount
         let feePerKb: CurrencyAmount
 
-        if(unit == 'satoshi/kB') feePerKb = new CurrencyAmount(this.currencyInfo, new Decimal(feeBase))
-        else if(unit == 'satoshi/byte') feePerKb = new CurrencyAmount(this.currencyInfo, new Decimal(feeBase).div(1e8).mul(1000))
-        else if(unit ==  `${this.currencyInfo.symbol}/kB`) feePerKb = new CurrencyAmount(this.currencyInfo, new Decimal(feeBase))
-        else if(unit ==  `${this.currencyInfo.symbol}/byte`) feePerKb = new CurrencyAmount(this.currencyInfo, new Decimal(feeBase).mul(1000))
+        if(unit == 'satoshi/kB') feePerKb = new CurrencyAmount(this.currencyInfo, new Decimal(feeBase), this.client)
+        else if(unit == 'satoshi/byte') feePerKb = new CurrencyAmount(this.currencyInfo, new Decimal(feeBase).div(1e8).mul(1000), this.client)
+        else if(unit ==  `${this.currencyInfo.symbol}/kB`) feePerKb = new CurrencyAmount(this.currencyInfo, new Decimal(feeBase), this.client)
+        else if(unit ==  `${this.currencyInfo.symbol}/byte`) feePerKb = new CurrencyAmount(this.currencyInfo, new Decimal(feeBase).mul(1000), this.client)
         else throw new Error('Unsupported unit')
 
         return this.feePerKb(feePerKb, null)
@@ -117,19 +122,19 @@ export abstract class UtxoPreparedTransaction<DefaultUnit extends string> extend
 
         return {
             low: {
-                feePerKb: new CurrencyAmount(this.currencyInfo, new Decimal(feeRateResponse.low.feePerKb)),
+                feePerKb: new CurrencyAmount(this.currencyInfo, new Decimal(feeRateResponse.low.feePerKb), this.client),
                 confirmationTimeSecs: feeRateResponse.low.confirmationTimeSecs
             },
             normal: {
-                feePerKb: new CurrencyAmount(this.currencyInfo, new Decimal(feeRateResponse.normal.feePerKb)),
+                feePerKb: new CurrencyAmount(this.currencyInfo, new Decimal(feeRateResponse.normal.feePerKb), this.client),
                 confirmationTimeSecs: feeRateResponse.normal.confirmationTimeSecs
             },
             high: {
-                feePerKb: new CurrencyAmount(this.currencyInfo, new Decimal(feeRateResponse.high.feePerKb)),
+                feePerKb: new CurrencyAmount(this.currencyInfo, new Decimal(feeRateResponse.high.feePerKb), this.client),
                 confirmationTimeSecs: feeRateResponse.high.confirmationTimeSecs
             },
             maximum: {
-                feePerKb: new CurrencyAmount(this.currencyInfo, new Decimal(feeRateResponse.maximum.feePerKb)),
+                feePerKb: new CurrencyAmount(this.currencyInfo, new Decimal(feeRateResponse.maximum.feePerKb), this.client),
                 confirmationTimeSecs: feeRateResponse.maximum.confirmationTimeSecs
             }
         }
@@ -147,7 +152,7 @@ export abstract class UtxoPreparedTransaction<DefaultUnit extends string> extend
             true,
             !!selected,
             confirmationTimeSecs,
-            selected ? new CurrencyAmount(this.currencyInfo, selected?.feeBase) : null
+            selected ? new CurrencyAmount(this.currencyInfo, selected?.feeBase, this.client) : null
         )
     }
 

@@ -1,4 +1,4 @@
-import {EvmApi} from 'chaingate-client'
+import {ChainGateClient, EvmApi} from 'chaingate-client'
 import {ethers, SigningKey, TransactionRequest} from 'ethers'
 import Decimal from 'decimal.js'
 import {ConsumeFunction} from '../../../../../CGDriver'
@@ -7,25 +7,23 @@ import {FeeLevel} from '../../FeeLevel'
 import {CurrencyPreparedTransaction} from '../../CurrencyPreparedTransaction'
 import {EvmFee} from './EvmFee'
 import {EvmCurrencyInfo} from './EvmCurrencyInfo'
-import {CurrencyProviders, PrivateKeyProvider} from '../../CurrencyProviders'
+import {PrivateKeyProvider} from '../../CurrencyProviders'
 import {CurrencyAmount} from '../../CurrencyAmount'
 import {EvmConfirmedTransaction} from './EvmConfirmedTransaction'
 import {EvmPossibleFees} from 'chaingate-client/api'
 import {NotEnoughFundsError} from '../../errors'
 
 export class EvmPreparedTransaction extends CurrencyPreparedTransaction{
-    declare protected api: EvmApi
+    private readonly api: EvmApi
+    private readonly currencyInfo: EvmCurrencyInfo
+    private readonly client: ChainGateClient
     declare protected _suggestedFees: Record<FeeLevel, EvmFee>
-
-    declare currencyInfo: EvmCurrencyInfo
-
     private readonly privateKeyProvider: PrivateKeyProvider
-
     readonly data: string
 
     constructor(
+        client: ChainGateClient,
         api: EvmApi,
-        currencyProviders: CurrencyProviders,
         currencyInfo: EvmCurrencyInfo,
         fromAddress: Address,
         toAddress: Address,
@@ -33,7 +31,10 @@ export class EvmPreparedTransaction extends CurrencyPreparedTransaction{
         data: string,
         privateKeyProvider: PrivateKeyProvider
     ){
-        super(api, currencyProviders, currencyInfo, fromAddress, toAddress, amount)
+        super(fromAddress, toAddress, amount)
+        this.client = client
+        this.api = api
+        this.currencyInfo = currencyInfo
         this.data = data
         this.privateKeyProvider = privateKeyProvider
     }
@@ -110,7 +111,8 @@ export class EvmPreparedTransaction extends CurrencyPreparedTransaction{
                     nonce.toString(),
                     this.amount.baseAmount.toString(),
                     this.data?.toString() ?? '0x'
-                ))
+                )),
+                this.client
             )
             const feeRateResponse = await ConsumeFunction(this.api, this.api.feeRate)
             this.processFeeLevels(feeRateResponse, estimatedGas, addressBalance, fees)
@@ -132,8 +134,8 @@ export class EvmPreparedTransaction extends CurrencyPreparedTransaction{
 
         for (const level of levels) {
             const { maxFeePerGas, maxPriorityFeePerGas, confirmationTimeSecs } = feeRateResponse[level]
-            const maxFee = new CurrencyAmount(this.currencyInfo, new Decimal(maxFeePerGas))
-            const maxPriorityFee = new CurrencyAmount(this.currencyInfo, new Decimal(maxPriorityFeePerGas))
+            const maxFee = new CurrencyAmount(this.currencyInfo, new Decimal(maxFeePerGas), this.client)
+            const maxPriorityFee = new CurrencyAmount(this.currencyInfo, new Decimal(maxPriorityFeePerGas), this.client)
 
             let amountFee: CurrencyAmount | null = null
             let isBalanceSufficient = false
@@ -157,8 +159,8 @@ export class EvmPreparedTransaction extends CurrencyPreparedTransaction{
     async fee(maxFeePerGas: string | CurrencyAmount, maxPriorityFeePerGas: string | CurrencyAmount): Promise<EvmFee> {
         const addressBalance = new Decimal((await ConsumeFunction(this.api, this.api.addressBalance, this.fromAddress)).confirmed)
 
-        if(typeof maxFeePerGas == 'string') maxFeePerGas = new CurrencyAmount(this.currencyInfo, new Decimal(maxFeePerGas))
-        if(typeof maxPriorityFeePerGas == 'string') maxPriorityFeePerGas = new CurrencyAmount(this.currencyInfo, new Decimal(maxPriorityFeePerGas))
+        if(typeof maxFeePerGas == 'string') maxFeePerGas = new CurrencyAmount(this.currencyInfo, new Decimal(maxFeePerGas), this.client)
+        if(typeof maxPriorityFeePerGas == 'string') maxPriorityFeePerGas = new CurrencyAmount(this.currencyInfo, new Decimal(maxPriorityFeePerGas), this.client)
 
         const nonce = new Decimal(await ConsumeFunction(
             this.api,
@@ -176,7 +178,7 @@ export class EvmPreparedTransaction extends CurrencyPreparedTransaction{
                 nonce.toString(),
                 this.amount.baseAmount.toString(),
                 this.data ? this.data.toString() : '0x'
-            )))
+            )), this.client)
 
             const totalGasFee = maxFeePerGas.mul(estimatedGas)
 

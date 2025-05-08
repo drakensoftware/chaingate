@@ -13,6 +13,7 @@ import {Litecoin} from './entities/Currency/implementations/Litecoin/Litecoin'
 import {BitcoinCash} from './entities/Currency/implementations/BitcoinCash/BitcoinCash'
 import {CurrencyProviders} from './entities/Currency/CurrencyProviders'
 import {Currency} from './entities/Currency/Currency'
+import {MarketsProvider} from '../MarketsProvider'
 
 export type SerializedWallet = {
     format: 'ChainGate Serialize Wallet Format Version 2'
@@ -50,13 +51,14 @@ export type CurrencyMap = {
 };
 
 export abstract class Wallet<SupportedCurrencies extends AllCurrencies> {
-    public readonly apiClient: ChainGateClient
+    public readonly client: ChainGateClient
     protected readonly currencyProviders: CurrencyProviders
+    protected readonly marketsProvider: MarketsProvider
 
     protected abstract supportedCurrencies: readonly SupportedCurrencies[]
 
-    protected constructor(apiClient: ChainGateClient, currencyProviders: CurrencyProviders) {
-        this.apiClient = apiClient
+    protected constructor(client: ChainGateClient, currencyProviders: CurrencyProviders) {
+        this.client = client
         this.currencyProviders = currencyProviders
     }
 

@@ -1,10 +1,10 @@
-import {AvalancheApi} from 'chaingate-client'
+import {AvalancheApi, ChainGateClient} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../Utils/Utils'
 import {Evm} from '../abstract/Evm/Evm'
 import {CurrencyProviders} from '../CurrencyProviders'
 
 export class Avalanche extends Evm<'avax'> {
-    constructor(api: AvalancheApi, currencyProviders: CurrencyProviders) {
+    constructor(client: ChainGateClient, api: AvalancheApi, currencyProviders: CurrencyProviders) {
         super({
             symbol: 'AVAX',
             id: 'avalanche',
@@ -15,6 +15,6 @@ export class Avalanche extends Evm<'avax'> {
             defaultDerivationPath: 'm/44\'/60\'/0\'/0/0',
             minimalUnitSymbol: 'wei',
             commonDerivationPaths: ['m/44\'/60\'/0\'/0/0',]
-        }, api, currencyProviders)
+        }, client, api, currencyProviders)
     }
 }

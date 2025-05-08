@@ -1,4 +1,4 @@
-import {BitcoinCashApi} from 'chaingate-client'
+import {BitcoinCashApi, ChainGateClient} from 'chaingate-client'
 import {buildUrlWithApiKey} from '../../../../../Utils/Utils'
 import * as btc from '@scure/btc-signer'
 import {LegacyUtxo} from '../../abstract/LegacyUtxo/LegacyUtxo'
@@ -7,7 +7,7 @@ import {CurrencyProviders} from '../../CurrencyProviders'
 export class Dogecoin extends LegacyUtxo<'doge'> {
     declare currencyProviders: CurrencyProviders
 
-    constructor(api: BitcoinCashApi,  currencyProviders: CurrencyProviders) {
+    constructor(client: ChainGateClient, api: BitcoinCashApi,  currencyProviders: CurrencyProviders) {
         super({
             symbol: 'DOGE',
             id: 'dogecoin',
@@ -18,6 +18,7 @@ export class Dogecoin extends LegacyUtxo<'doge'> {
             minimalUnitSymbol: 'satoshi',
             commonDerivationPaths: ['m/44\'/3\'/0\'/0/0', 'm/84\'/3\'/0\'/0/0', 'm/86\'/3\'/0\'/0/0']
         },
+        client,
         api,
         currencyProviders,
         {

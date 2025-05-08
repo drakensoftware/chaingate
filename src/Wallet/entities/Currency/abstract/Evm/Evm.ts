@@ -1,9 +1,9 @@
-import {EvmApi} from 'chaingate-client'
+import {ChainGateClient, EvmApi} from 'chaingate-client'
 import {ethers} from 'ethers'
 import {bytesToHex} from '../../../../../Utils/Utils'
 import Decimal from 'decimal.js'
 import {ConsumeFunction} from '../../../../../CGDriver'
-import { Address } from '../../../Address'
+import {Address} from '../../../Address'
 import {EvmCurrencyInfo} from './EvmCurrencyInfo'
 import {CurrencyProviders} from '../../CurrencyProviders'
 import {CurrencyAmount} from '../../CurrencyAmount'
@@ -16,9 +16,10 @@ export abstract class Evm<DefaultUnitSpecifier extends string> extends Currency 
     declare readonly currencyInfo: EvmCurrencyInfo
     declare currencyProviders: CurrencyProviders
 
-    protected constructor(currencyInfo: EvmCurrencyInfo, api: EvmApi, currencyProviders: CurrencyProviders) {
-        super(currencyInfo, api, currencyProviders)
+    protected constructor(currencyInfo: EvmCurrencyInfo, client: ChainGateClient, api: EvmApi, currencyProviders: CurrencyProviders) {
+        super(currencyInfo, client, currencyProviders)
         this.currencyInfo = currencyInfo
+        this.api = api
     }
 
     async getAddress(): Promise<string> {
@@ -32,7 +33,7 @@ export abstract class Evm<DefaultUnitSpecifier extends string> extends Currency 
             this.api,
             this.api.addressBalance,
             address)
-        return {confirmed: new CurrencyAmount(this.currencyInfo, new Decimal(balance.confirmed)), unconfirmed: new CurrencyAmount(this.currencyInfo, new Decimal(balance.unconfirmed))}
+        return {confirmed: new CurrencyAmount(this.currencyInfo, new Decimal(balance.confirmed), this.client), unconfirmed: new CurrencyAmount(this.currencyInfo, new Decimal(balance.unconfirmed), this.client)}
     }
 
     async createTransfer(toAddress: Address, amount: CurrencyAmount): Promise<EvmPreparedTransaction> {
@@ -44,8 +45,8 @@ export abstract class Evm<DefaultUnitSpecifier extends string> extends Currency 
         const privateKeyProvider = await this.currencyProviders.getPrivateKeyProvider(this.currencyInfo)
 
         return new EvmPreparedTransaction(
+            this.client,
             this.api,
-            this.currencyProviders,
             this.currencyInfo,
             await this.getAddress(),
             smartContractAddress,
@@ -66,11 +67,13 @@ export abstract class Evm<DefaultUnitSpecifier extends string> extends Currency 
             switch (unit){
             case 'wei': return new CurrencyAmount(
                 this.currencyInfo,
-                new Decimal(amountStr).div('1_000_000_000_000_000_000')
+                new Decimal(amountStr).div('1_000_000_000_000_000_000'),
+                this.client
             )
             default: return new CurrencyAmount(
                 this.currencyInfo,
-                new Decimal(amountStr)
+                new Decimal(amountStr),
+                this.client
             )
             }
         } catch (_ex) { throw new CannotParseAmount(amountStr) }

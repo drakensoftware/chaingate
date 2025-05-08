@@ -91,18 +91,18 @@ export class PrivateKeyWallet extends Wallet<AllCurrencies>{
 
     currency<T extends AllCurrencies>(currency: AllCurrencies): CurrencyMap[T] {
         const currencyMap: CurrencyMap = {
-            'arbitrum': new Arbitrum(this.apiClient.ArbitrumApi, this.currencyProviders),
-            'avalanche': new Avalanche(this.apiClient.AvalancheApi, this.currencyProviders),
-            'base': new Base(this.apiClient.BaseApi, this.currencyProviders),
-            'bnbChain': new BNBChain(this.apiClient.BNBChainApi, this.currencyProviders),
-            'ethereum': new Ethereum(this.apiClient.EthereumApi, this.currencyProviders),
-            'fantomOpera': new FantomOpera(this.apiClient.FantomOperaApi, this.currencyProviders),
-            'polygon': new Polygon(this.apiClient.PolygonApi, this.currencyProviders),
-            'bitcoin': new Bitcoin(this.apiClient.BitcoinApi, this.currencyProviders),
-            'bitcoinTestnet': new BitcoinTestnet(this.apiClient.BitcoinTestnetApi, this.currencyProviders),
-            'dogecoin': new Dogecoin(this.apiClient.DogecoinApi, this.currencyProviders),
-            'litecoin': new Litecoin(this.apiClient.LitecoinApi, this.currencyProviders),
-            'bitcoinCash': new BitcoinCash(this.apiClient.BitcoinCashApi, this.currencyProviders)
+            'arbitrum': new Arbitrum(this.client, this.client.ArbitrumApi, this.currencyProviders),
+            'avalanche': new Avalanche(this.client, this.client.AvalancheApi, this.currencyProviders),
+            'base': new Base(this.client, this.client.BaseApi, this.currencyProviders),
+            'bnbChain': new BNBChain(this.client, this.client.BNBChainApi, this.currencyProviders),
+            'ethereum': new Ethereum(this.client, this.client.EthereumApi, this.currencyProviders),
+            'fantomOpera': new FantomOpera(this.client, this.client.FantomOperaApi, this.currencyProviders),
+            'polygon': new Polygon(this.client, this.client.PolygonApi, this.currencyProviders),
+            'bitcoin': new Bitcoin(this.client, this.client.BitcoinApi, this.currencyProviders),
+            'bitcoinTestnet': new BitcoinTestnet(this.client, this.client.BitcoinTestnetApi, this.currencyProviders),
+            'dogecoin': new Dogecoin(this.client, this.client.DogecoinApi, this.currencyProviders),
+            'litecoin': new Litecoin(this.client, this.client.LitecoinApi, this.currencyProviders),
+            'bitcoinCash': new BitcoinCash(this.client, this.client.BitcoinCashApi, this.currencyProviders)
         }
 
         return currencyMap[currency] as CurrencyMap[T]
