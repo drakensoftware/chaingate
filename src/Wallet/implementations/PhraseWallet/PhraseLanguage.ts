@@ -1,5 +1,5 @@
 export type PhraseLanguage =
-    'czech'
+    | 'czech'
     | 'english'
     | 'french'
     | 'italian'

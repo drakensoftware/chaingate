@@ -1,10 +1,10 @@
-import {HDKey} from '@scure/bip32'
-import {Secret} from '../Secret'
-import {hexToBytes, isHex} from '../../../../Utils/Utils'
-import {ExtendedPublicKey} from './ExtendedPublicKey'
-import {ExtendedPrivateKey} from './ExtendedPrivateKey'
-import {PublicKey} from '../../PublicKey'
-import {PrivateKey} from './PrivateKey'
+import { HDKey } from '@scure/bip32'
+import { Secret } from '../Secret'
+import { hexToBytes, isHex } from '../../../../InternalUtils/Utils'
+import { ExtendedPublicKey } from './ExtendedPublicKey'
+import { ExtendedPrivateKey } from './ExtendedPrivateKey'
+import { PublicKey } from '../../PublicKey'
+import { PrivateKey } from './PrivateKey'
 
 export class SeedEncodingError extends Error {
     constructor(message: string) {
@@ -14,55 +14,51 @@ export class SeedEncodingError extends Error {
     }
 }
 
-export class Seed extends Secret{
+export class Seed extends Secret {
     private readonly seed: Uint8Array
 
     get raw(): Uint8Array {
         return this.seed
     }
 
-    async getExtendedPublicKey(derivationPath: string){
-        const publicKey =
-            derivationPath ?
-                HDKey.fromMasterSeed(this.raw).derive(derivationPath) :
-                HDKey.fromMasterSeed(this.raw)
+    async getExtendedPublicKey(derivationPath: string) {
+        const publicKey = derivationPath
+            ? HDKey.fromMasterSeed(this.raw).derive(derivationPath)
+            : HDKey.fromMasterSeed(this.raw)
 
         return new ExtendedPublicKey(publicKey.publicExtendedKey)
     }
 
-    async getExtendedPrivateKey(derivationPath: string){
-        const privateKey =
-            derivationPath ?
-                HDKey.fromMasterSeed(this.raw).derive(derivationPath) :
-                HDKey.fromMasterSeed(this.raw)
+    async getExtendedPrivateKey(derivationPath: string) {
+        const privateKey = derivationPath
+            ? HDKey.fromMasterSeed(this.raw).derive(derivationPath)
+            : HDKey.fromMasterSeed(this.raw)
 
         return new ExtendedPrivateKey(privateKey.privateExtendedKey)
     }
 
-    async getPublicKey(derivationPath: string){
-        const publicKey =
-            derivationPath ?
-                HDKey.fromMasterSeed(this.raw).derive(derivationPath) :
-                HDKey.fromMasterSeed(this.raw)
+    async getPublicKey(derivationPath: string) {
+        const publicKey = derivationPath
+            ? HDKey.fromMasterSeed(this.raw).derive(derivationPath)
+            : HDKey.fromMasterSeed(this.raw)
 
         return new PublicKey(publicKey.publicKey)
     }
 
-    async getPrivateKey(derivationPath: string){
-        const privateKey =
-            derivationPath ?
-                HDKey.fromMasterSeed(this.raw).derive(derivationPath) :
-                HDKey.fromMasterSeed(this.raw)
+    async getPrivateKey(derivationPath: string) {
+        const privateKey = derivationPath
+            ? HDKey.fromMasterSeed(this.raw).derive(derivationPath)
+            : HDKey.fromMasterSeed(this.raw)
 
         return new PrivateKey(privateKey.privateKey)
     }
 
-    async getMasterPublicKey(){
+    async getMasterPublicKey() {
         const publicKey = HDKey.fromMasterSeed(this.raw)
         return new ExtendedPublicKey(publicKey.publicExtendedKey)
     }
 
-    async getMasterPrivateKey(){
+    async getMasterPrivateKey() {
         const privateKey = HDKey.fromMasterSeed(this.raw)
         return new ExtendedPrivateKey(privateKey.privateExtendedKey)
     }
@@ -70,9 +66,9 @@ export class Seed extends Secret{
     constructor(source: Uint8Array | string) {
         super()
 
-        if(source instanceof Uint8Array) this.seed = source
-        else{
-            if(isHex(source)) this.seed = hexToBytes(source)
+        if (source instanceof Uint8Array) this.seed = source
+        else {
+            if (isHex(source)) this.seed = hexToBytes(source)
             else throw new SeedEncodingError('The string supplied is deemed to be invalid')
         }
     }

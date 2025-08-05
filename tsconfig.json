@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "outDir": "build/",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "outDir": "dist",
     "sourceMap": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
@@ -10,8 +12,9 @@
     "allowJs": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build", "dist"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "src/TestUtils"]
 }

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bitcoin Cash Get address balance 1`] = `"0.04540479"`;
+
+exports[`Bitcoin Cash Get address balance 2`] = `"0"`;
+
+exports[`Bitcoin Cash Sign message 1`] = `"IAlP8YWX4IPLSf6bE4K+n6sIl4Tm1PNLhjbxjTVgMr/0LLg2oB3bUUergxxFD8ukimcID++OWipO/ZHO6IOvrbg="`;
+
+exports[`Bitcoin Cash Transfer 1`] = `"f4aaf21360d242f139cc6d1aa2164c33856672268cdf2222110f7b4c7070d1c5"`;

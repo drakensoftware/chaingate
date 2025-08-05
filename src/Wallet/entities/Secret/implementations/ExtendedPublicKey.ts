@@ -1,6 +1,6 @@
-import {HDKey} from '@scure/bip32'
+import { HDKey } from '@scure/bip32'
 
-export class ExtendedPublicKey{
+export class ExtendedPublicKey {
     get raw() {
         return HDKey.fromExtendedKey(this.xpub).publicKey
     }

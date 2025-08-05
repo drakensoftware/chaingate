@@ -1,16 +1,15 @@
-import {bytesToHex} from '../../Utils/Utils'
+import { bytesToHex } from '../../InternalUtils/Utils'
 
 export class PublicKey {
     readonly raw: Uint8Array
     //readonly uncompressed: Uint8Array
 
-    public get hex(){
+    public get hex() {
         return bytesToHex(this.raw, false)
     }
 
-    constructor(compressed: Uint8Array){
+    constructor(compressed: Uint8Array) {
         this.raw = compressed
         //this.uncompressed = uncompressed
     }
-
 }

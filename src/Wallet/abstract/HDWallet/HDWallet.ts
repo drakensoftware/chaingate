@@ -1,36 +1,34 @@
-import {ChainGateClient} from 'chaingate-client'
-import {Seed} from '../../entities/Secret/implementations/Seed'
-import {CurrencyWithDerivationPaths, ICurrencyWithDerivationPaths} from './CurrencyWithDerivationPaths'
-import {AllCurrencies, CurrencyMap, Wallet} from '../../Wallet'
-import {CurrencyInfo} from '../../entities/Currency/CurrencyInfo'
-import {Arbitrum} from '../../entities/Currency/implementations/Arbitrum'
-import {Avalanche} from '../../entities/Currency/implementations/Avalanche'
-import {Base} from '../../entities/Currency/implementations/Base'
-import {BNBChain} from '../../entities/Currency/implementations/BNBChain'
-import {Ethereum} from '../../entities/Currency/implementations/Ethereum/Ethereum'
-import {Sonic} from '../../entities/Currency/implementations/Sonic'
-import {Polygon} from '../../entities/Currency/implementations/Polygon'
-import {Bitcoin} from '../../entities/Currency/implementations/Bitcoin/Bitcoin'
-import {BitcoinTestnet} from '../../entities/Currency/implementations/BitcoinTestnet/BitcoinTestnet'
-import {Dogecoin} from '../../entities/Currency/implementations/Dogecoin/Dogecoin'
-import {Litecoin} from '../../entities/Currency/implementations/Litecoin/Litecoin'
-import {BitcoinCash} from '../../entities/Currency/implementations/BitcoinCash/BitcoinCash'
-import {CurrencyProviders} from '../../entities/Currency/CurrencyProviders'
+import { Seed } from '../../entities/Secret/implementations/Seed'
+import { CurrencyWithDerivationPaths } from './CurrencyWithDerivationPaths'
+import { Wallet } from '../../Wallet'
+import { Transports } from '../../../Currencies/CurrencyWallet/Transports'
+import { AllCurrencies, CurrencyModules } from '../../../Currencies/CurrencyModules'
+import { Client } from '@hey-api/client-fetch'
+import { TtlCache } from '../../../InternalUtils/TtlCache'
+import { GlobalMarketsResponse } from '../../../Client'
 
+export type WalletOf<C extends keyof typeof CurrencyModules> = InstanceType<
+    (typeof CurrencyModules)[C]['wallet']
+>
 
-export abstract class HDWallet<DerivationResult, SupportedCurrencies extends AllCurrencies> extends Wallet<SupportedCurrencies> {
+export abstract class HDWallet<
+    DerivationResult,
+    SupportedCurrencies extends (typeof AllCurrencies)[number],
+> extends Wallet<SupportedCurrencies> {
     abstract getSeed(): Promise<Seed>
 
     protected derivationPaths: Map<string, string>
-    protected derivationResults : Map<string, DerivationResult>
+    protected derivationResults: Map<string, DerivationResult>
 
-    protected constructor(apiClient: ChainGateClient,
-        currencyProviders: CurrencyProviders
+    protected constructor(
+        client: Client,
+        transports: Transports,
+        markets: TtlCache<GlobalMarketsResponse>,
     ) {
-        super(apiClient, currencyProviders)
+        super(client, transports, markets)
 
         this.derivationPaths = new Map<string, string>()
-        this.derivationResults = new Map<string, DerivationResult>
+        this.derivationResults = new Map<string, DerivationResult>()
     }
 
     protected abstract deriveFromPath(derivationPath: string): Promise<DerivationResult>
@@ -43,38 +41,29 @@ export abstract class HDWallet<DerivationResult, SupportedCurrencies extends All
         return result
     }
 
-    protected async generateAllCurrencyDefaultDerivations(){
-        for(const currency of this.allCurrencies){
-            await this.deriveFromPathUsingCache(currency.currencyInfo.defaultDerivationPath)
-            for(const derivationPath of currency.currencyInfo.commonDerivationPaths)
+    protected async generateAllCurrencyDefaultDerivations() {
+        for (const currency of this.allCurrencies) {
+            await this.deriveFromPathUsingCache(currency.utils.currencyInfo.defaultDerivationPath)
+            for (const derivationPath of currency.utils.currencyInfo.commonDerivationPaths)
                 await this.deriveFromPathUsingCache(derivationPath)
         }
     }
 
-    protected setDerivationPath(currencyInfo: CurrencyInfo, derivationPath: string){
-        return this.derivationPaths.set(currencyInfo.id, derivationPath)
+    protected setDerivationPath<C extends SupportedCurrencies>(id: C, derivationPath: string) {
+        const currency = this.currency(id)
+        return this.derivationPaths.set(currency.utils.currencyInfo.id, derivationPath)
     }
 
-    protected getDerivationPath(currencyInfo: CurrencyInfo){
-        return this.derivationPaths.get(currencyInfo.id) ?? currencyInfo.defaultDerivationPath
+    protected getDerivationPath<C extends SupportedCurrencies>(id: C) {
+        const currency = this.currency(id)
+        return (
+            this.derivationPaths.get(currency.utils.currencyInfo.id) ??
+            currency.utils.currencyInfo.defaultDerivationPath
+        )
     }
 
-    public override currency<T extends AllCurrencies>(currency: T) {
-        const currencyMap: CurrencyMap = {
-            'arbitrum': CurrencyWithDerivationPaths(new Arbitrum(this.client, this.client.ArbitrumApi, this.currencyProviders), this.derivationPaths),
-            'avalanche': CurrencyWithDerivationPaths(new Avalanche(this.client, this.client.AvalancheApi, this.currencyProviders), this.derivationPaths),
-            'base': CurrencyWithDerivationPaths(new Base(this.client, this.client.BaseApi, this.currencyProviders), this.derivationPaths),
-            'bnbChain': CurrencyWithDerivationPaths(new BNBChain(this.client, this.client.BNBChainApi, this.currencyProviders), this.derivationPaths),
-            'ethereum': CurrencyWithDerivationPaths(new Ethereum(this.client, this.client.EthereumApi, this.currencyProviders), this.derivationPaths),
-            'sonic': CurrencyWithDerivationPaths(new Sonic(this.client, this.client.FantomOperaApi, this.currencyProviders), this.derivationPaths),
-            'polygon': CurrencyWithDerivationPaths(new Polygon(this.client, this.client.PolygonApi, this.currencyProviders), this.derivationPaths),
-            'bitcoin': CurrencyWithDerivationPaths(new Bitcoin(this.client, this.client.BitcoinApi, this.currencyProviders), this.derivationPaths),
-            'bitcoinTestnet': CurrencyWithDerivationPaths(new BitcoinTestnet(this.client, this.client.BitcoinTestnetApi, this.currencyProviders), this.derivationPaths),
-            'dogecoin': CurrencyWithDerivationPaths(new Dogecoin(this.client, this.client.DogecoinApi, this.currencyProviders), this.derivationPaths),
-            'litecoin': CurrencyWithDerivationPaths(new Litecoin(this.client, this.client.LitecoinApi, this.currencyProviders), this.derivationPaths),
-            'bitcoinCash': CurrencyWithDerivationPaths(new BitcoinCash(this.client, this.client.BitcoinCashApi, this.currencyProviders), this.derivationPaths)
-        }
-
-        return currencyMap[currency] as CurrencyMap[T] & ICurrencyWithDerivationPaths
+    override currency<C extends SupportedCurrencies>(id: C) {
+        const currency = super.currency(id)
+        return CurrencyWithDerivationPaths(currency, this.derivationPaths)
     }
 }

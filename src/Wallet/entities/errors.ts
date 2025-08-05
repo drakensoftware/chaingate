@@ -5,4 +5,3 @@ export class EncryptionError extends Error {
         this.name = this.constructor.name
     }
 }
-

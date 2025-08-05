@@ -1,6 +1,6 @@
-import {HDKey} from '@scure/bip32'
+import { HDKey } from '@scure/bip32'
 
-export class ExtendedPrivateKey{
+export class ExtendedPrivateKey {
     get raw() {
         return HDKey.fromExtendedKey(this.xpriv).privateKey
     }
@@ -10,4 +10,3 @@ export class ExtendedPrivateKey{
         this.xpriv = xpriv
     }
 }
-

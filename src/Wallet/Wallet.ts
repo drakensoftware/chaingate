@@ -1,19 +1,15 @@
-import {ChainGateClient} from 'chaingate-client'
-import {Arbitrum} from './entities/Currency/implementations/Arbitrum'
-import {Avalanche} from './entities/Currency/implementations/Avalanche'
-import {Base} from './entities/Currency/implementations/Base'
-import {BNBChain} from './entities/Currency/implementations/BNBChain'
-import {Ethereum} from './entities/Currency/implementations/Ethereum/Ethereum'
-import {Sonic} from './entities/Currency/implementations/Sonic'
-import {Polygon} from './entities/Currency/implementations/Polygon'
-import {Bitcoin} from './entities/Currency/implementations/Bitcoin/Bitcoin'
-import {BitcoinTestnet} from './entities/Currency/implementations/BitcoinTestnet/BitcoinTestnet'
-import {Dogecoin} from './entities/Currency/implementations/Dogecoin/Dogecoin'
-import {Litecoin} from './entities/Currency/implementations/Litecoin/Litecoin'
-import {BitcoinCash} from './entities/Currency/implementations/BitcoinCash/BitcoinCash'
-import {CurrencyProviders} from './entities/Currency/CurrencyProviders'
-import {Currency} from './entities/Currency/Currency'
-import {MarketsProvider} from '../MarketsProvider'
+import { Transports } from '../Currencies/CurrencyWallet/Transports'
+import { CurrencyWallet } from '../Currencies/CurrencyWallet/CurrencyWallet'
+import { AllCurrencies, CurrencyModules } from '../Currencies/CurrencyModules'
+import { Client } from '@hey-api/client-fetch'
+import { GlobalMarketsResponse } from '../Client'
+import { TtlCache } from '../InternalUtils/TtlCache'
+import { CurrencyUtils } from '../Currencies/CurrencyUtils/CurrencyUtils'
+
+export type WalletOf<C extends keyof typeof CurrencyModules> = InstanceType<
+    (typeof CurrencyModules)[C]['wallet']
+>
+export type InfoOf<C extends keyof typeof CurrencyModules> = (typeof CurrencyModules)[C]['info']
 
 export type SerializedWallet = {
     format: 'ChainGate Serialize Wallet Format Version 2'
@@ -21,80 +17,57 @@ export type SerializedWallet = {
     walletUniqueId: string
 }
 
-export const EvmCurrencies = [
-    'arbitrum', 'avalanche', 'base',
-    'bnbChain', 'ethereum', 'sonic',
-    'polygon'
-] as const
-export const UtxoCurrencies = [
-    'bitcoin', 'bitcoinTestnet', 'dogecoin', 'litecoin', 'bitcoinCash'
-] as const
-export const Currencies = [...EvmCurrencies, ...UtxoCurrencies]
-
-export type EvmCurrencies = typeof EvmCurrencies[number]
-export type UtxoCurrencies = typeof UtxoCurrencies[number]
-export type AllCurrencies = EvmCurrencies | UtxoCurrencies // Union type for all currencies
-
-export type CurrencyMap = {
-    'arbitrum': Arbitrum,
-    'avalanche': Avalanche,
-    'base': Base,
-    'bnbChain': BNBChain,
-    'ethereum': Ethereum,
-    'sonic': Sonic,
-    'polygon': Polygon,
-    'bitcoin': Bitcoin,
-    'bitcoinTestnet': BitcoinTestnet,
-    'dogecoin': Dogecoin,
-    'litecoin': Litecoin,
-    'bitcoinCash': BitcoinCash
-};
-
-export abstract class Wallet<SupportedCurrencies extends AllCurrencies> {
-    public readonly client: ChainGateClient
-    protected readonly currencyProviders: CurrencyProviders
-    protected readonly marketsProvider: MarketsProvider
-
+export abstract class Wallet<SupportedCurrencies extends (typeof AllCurrencies)[number]> {
     protected abstract supportedCurrencies: readonly SupportedCurrencies[]
 
-    protected constructor(client: ChainGateClient, currencyProviders: CurrencyProviders) {
+    public readonly client: Client
+    protected readonly transports: Transports
+    protected readonly markets: TtlCache<GlobalMarketsResponse>
+
+    protected constructor(
+        client: Client,
+        transports: Transports,
+        markets: TtlCache<GlobalMarketsResponse>,
+    ) {
         this.client = client
-        this.currencyProviders = currencyProviders
+        this.transports = transports
+        this.markets = markets
     }
 
-    public abstract currency<T extends SupportedCurrencies>(currency: T): CurrencyMap[T]
+    currency<C extends SupportedCurrencies>(id: C) {
+        const module = CurrencyModules[id]
+        const utils = new module.utils(this.client, this.markets)
+        const WalletClass = module.wallet as new (
+            utils: CurrencyUtils<InfoOf<C>>,
+            transports: Transports,
+        ) => CurrencyWallet<InfoOf<C>>
+        return new WalletClass(utils, this.transports) as WalletOf<C>
+    }
 
-    public get allCurrencies(): Currency[] {
-        return this.supportedCurrencies.map((currency) => this.currency(currency))
+    public get allCurrencies(): Array<CurrencyWallet<InfoOf<SupportedCurrencies>>> {
+        return this.supportedCurrencies.map((c) => this.currency(c))
     }
 
     abstract getWalletUniqueId(): Promise<string>
-
     protected abstract serializeInternal(): Promise<SerializedWallet>
-    async serialize(){
+
+    async serialize(): Promise<string> {
         return JSON.stringify(await this.serializeInternal())
     }
 
-    /**
-     * Retrieves the balances for all supported currencies.
-     *
-     * @returns A promise that resolves to an array of currency balances.
-     */
-    async getAllBalances(){
-        return await Promise.all(
-            this.allCurrencies.map(async (currency) => ({
-                currency: currency.currencyInfo,
-                balance: await currency.getBalance()
-            }))
+    async getAllBalances() {
+        return Promise.all(
+            this.allCurrencies.map(async (w) => ({
+                currency: w.utils.currencyInfo,
+                balance: await w.getBalance(),
+            })),
         )
     }
 
-    static isSerializedWallet(serialized: object){
-        if(!('format' in serialized)) return false
-        if(serialized.format != 'ChainGate Serialize Wallet Format Version 2') return false
-        if(!('walletType' in serialized)) return false
-        if(!('walletUniqueId' in serialized)) return false
-
-        return true
+    static isSerializedWallet(serialized: object): boolean {
+        if (!('format' in serialized)) return false
+        if (serialized.format !== 'ChainGate Serialize Wallet Format Version 2') return false
+        if (!('walletType' in serialized)) return false
+        return 'walletUniqueId' in serialized
     }
 }

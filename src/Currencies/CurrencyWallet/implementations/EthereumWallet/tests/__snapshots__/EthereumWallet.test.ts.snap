@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ethereum Call smart contract function 1`] = `"0x0000000000000000000000000000000000000000000000000858898f93629000"`;
+
+exports[`Ethereum Get address balance 1`] = `"0.00198349910279"`;
+
+exports[`Ethereum Get address balance 2`] = `"0"`;
+
+exports[`Ethereum Sign message 1`] = `"0xdbfe2f77a65c10d2b9a839ddf1a6b0849219b1554ca09ac51bf616c1e5d8c2ff341515f7724039219bec4258d299dccefc0caea1312e3922454ef892cdc3e0741b"`;
+
+exports[`Ethereum Transfer 1`] = `"0x72f9a6bbee6dc0277602df418e132cc3381f29a15ce2879e3928dadddce0b55a"`;
