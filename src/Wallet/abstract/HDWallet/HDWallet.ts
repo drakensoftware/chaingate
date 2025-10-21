@@ -3,9 +3,7 @@ import { CurrencyWithDerivationPaths } from './CurrencyWithDerivationPaths'
 import { Wallet } from '../../Wallet'
 import { Transports } from '../../../Currencies/CurrencyWallet/Transports'
 import { AllCurrencies, CurrencyModules } from '../../../Currencies/CurrencyModules'
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../../Client'
+import { ChainGateContext } from '../../../Currencies/CurrencyUtils/ChainGateContext'
 
 export type WalletOf<C extends keyof typeof CurrencyModules> = InstanceType<
     (typeof CurrencyModules)[C]['wallet']
@@ -20,12 +18,8 @@ export abstract class HDWallet<
     protected derivationPaths: Map<string, string>
     protected derivationResults: Map<string, DerivationResult>
 
-    protected constructor(
-        client: Client,
-        transports: Transports,
-        markets: TtlCache<GlobalMarketsResponse>,
-    ) {
-        super(client, transports, markets)
+    protected constructor(context: ChainGateContext, transports: Transports) {
+        super(context, transports)
 
         this.derivationPaths = new Map<string, string>()
         this.derivationResults = new Map<string, DerivationResult>()

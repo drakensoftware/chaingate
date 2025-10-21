@@ -1,8 +1,6 @@
 import { CurrencyUtils } from '../../CurrencyUtils'
-import { Client } from '@hey-api/client-fetch'
 import { CurrencyInfo } from '../../../CurrencyInfo'
 import {
-    GlobalMarketsResponse,
     utxoAddressBalance,
     utxoAddressHistory,
     utxoBlockByHash,
@@ -15,34 +13,46 @@ import {
     utxoTransactionDetails,
     utxoUtxosByAddress,
 } from '../../../../Client'
-import { TtlCache } from '../../../../InternalUtils/TtlCache'
 import { CurrencyAmount } from '../../CurrencyAmount'
 import { bytesToHex, hexToBytes } from '../../../../InternalUtils/Utils'
 import { toDecimal } from '../../../../InternalUtils/NumberLike'
 import { NetworkParams } from './NetworkParams'
+import { ChainGateContext } from '../../ChainGateContext'
+import Decimal from 'decimal.js'
+import * as btc from '@scure/btc-signer'
+
+type TxoCache = {
+    txid: string
+    n: number
+    amount: Decimal
+    script: Uint8Array
+    address: string
+}
 
 export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends CurrencyUtils<CI> {
     protected readonly network: UtxoNetworkKey
     protected readonly networkParams: NetworkParams
     protected readonly signHeader: string
+    protected readonly addressToNative: (arg: string) => string | null
 
     protected constructor(
-        client: Client,
+        context: ChainGateContext,
         currencyInfo: CI,
-        markets: TtlCache<GlobalMarketsResponse>,
         network: UtxoNetworkKey,
         networkParams: NetworkParams,
         signHeader: string,
+        addressToNative?: (arg: string) => string,
     ) {
-        super(client, currencyInfo, markets)
+        super(context, currencyInfo)
         this.network = network
         this.networkParams = networkParams
         this.signHeader = signHeader
+        this.addressToNative = addressToNative
     }
 
     public async addressUtxos(address: string, page = 0) {
         const response = await utxoUtxosByAddress({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { address, page },
         })
@@ -62,7 +72,7 @@ export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends Currenc
         address: string,
     ): Promise<{ confirmed: CurrencyAmount<CI>; unconfirmed: CurrencyAmount<CI> }> {
         const result = await utxoAddressBalance({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { address },
         })
@@ -75,7 +85,7 @@ export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends Currenc
 
     async addressHistory(address: string, page = 0) {
         const respose = await utxoAddressHistory({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { address, page },
         })
@@ -93,7 +103,7 @@ export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends Currenc
 
     async broadcastTransaction(transactionRaw: string | Uint8Array) {
         const result = await utxoBroadcastTransaction({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             body: {
                 transactionRaw:
@@ -107,7 +117,7 @@ export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends Currenc
 
     async transactionDetails(transactionId: string) {
         const result = await utxoTransactionDetails({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { transactionId },
         })
@@ -135,7 +145,7 @@ export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends Currenc
 
     async getFeeRate() {
         const result = await utxoFeeRate({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
         })
 
@@ -161,7 +171,7 @@ export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends Currenc
 
     async latestBlock() {
         const result = await utxoLatestBlock({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
         })
         return result.data
@@ -169,7 +179,7 @@ export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends Currenc
 
     async mempoolTransactions() {
         const result = await utxoMempool({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
         })
         return result.data
@@ -177,19 +187,54 @@ export abstract class UtxoCurrencyUtils<CI extends CurrencyInfo> extends Currenc
 
     async blockByHeight(blockHeight: number) {
         const result = await utxoBlockByHeight({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { blockHeight },
         })
         return result.data
     }
 
-    async blocByHash(blockHash: string) {
+    async blockByHash(blockHash: string) {
         const result = await utxoBlockByHash({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { blockHash },
         })
         return result.data
+    }
+
+    getUtxoCache(): Array<TxoCache> {
+        const key = `${this.currencyInfo.id}/utxoCache`
+        let utxoCache = this.context.extra.get(key) as Array<TxoCache> | undefined
+
+        if (!utxoCache) {
+            utxoCache = []
+            this.context.extra.set(key, utxoCache)
+        }
+
+        return utxoCache
+    }
+
+    getSpentTxoCache(): Array<TxoCache> {
+        const key = `${this.currencyInfo.id}/spentTxoCache`
+        let spentTxoCache = this.context.extra.get(key) as Array<TxoCache> | undefined
+
+        if (!spentTxoCache) {
+            spentTxoCache = []
+            this.context.extra.set(key, spentTxoCache)
+        }
+
+        return spentTxoCache
+    }
+
+    addressToScript(address: string): Uint8Array {
+        if (this.addressToNative) address = this.addressToNative(address)
+        const desc = btc.Address(this.networkParams).decode(address)
+        return new Uint8Array(btc.OutScript.encode(desc))
+    }
+
+    scriptToAddress(script: Uint8Array): string {
+        const out = btc.OutScript.decode(script)
+        return btc.Address(this.networkParams).encode(out)
     }
 }

@@ -1,31 +1,22 @@
-import { Client } from '@hey-api/client-fetch'
 import { CurrencyInfo } from '../CurrencyInfo'
 import { CurrencyAmount } from './CurrencyAmount'
-
-import { TtlCache } from '../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../Client'
 import { FiatCurrencies } from '../FiatCurrencies'
 import { NumberLike, toDecimal } from '../../InternalUtils/NumberLike'
 import { PublicKey } from '../../Wallet/entities/PublicKey'
 import { PrivateKey } from '../../Wallet/entities/Secret/implementations/PrivateKey'
+import { ChainGateContext } from './ChainGateContext'
 
 type DefaultUnit<T extends { symbol: string }> = T['symbol']
 
 type MinimalUnit<T extends { minimalUnitSymbol: string }> = T['minimalUnitSymbol']
 
 export abstract class CurrencyUtils<CI extends CurrencyInfo> {
-    protected readonly client: Client
-    protected readonly markets: TtlCache<GlobalMarketsResponse>
+    protected readonly context: ChainGateContext
     public readonly currencyInfo: CI
 
-    protected constructor(
-        client: Client,
-        currencyInfo: CI,
-        markets: TtlCache<GlobalMarketsResponse>,
-    ) {
-        this.client = client
+    protected constructor(context: ChainGateContext, currencyInfo: CI) {
+        this.context = context
         this.currencyInfo = currencyInfo
-        this.markets = markets
     }
 
     public abstract addressBalance(
@@ -46,7 +37,7 @@ export abstract class CurrencyUtils<CI extends CurrencyInfo> {
     ): Promise<boolean>
 
     protected buildAmount(baseAmount: NumberLike): CurrencyAmount<CI> {
-        return new CurrencyAmount(this.currencyInfo, toDecimal(baseAmount), this.markets)
+        return new CurrencyAmount(this.currencyInfo, toDecimal(baseAmount), this.context.markets)
     }
 
     public amount(amount: NumberLike, unit: DefaultUnit<CI> | MinimalUnit<CI>): CurrencyAmount<CI> {
@@ -68,7 +59,7 @@ export abstract class CurrencyUtils<CI extends CurrencyInfo> {
         fiatCurrency: (typeof FiatCurrencies)[number],
         useCache = true,
     ): Promise<CurrencyAmount<CI>> {
-        const markets = await this.markets.get(useCache)
+        const markets = await this.context.markets.get(useCache)
 
         // Calculate total in usd
         const fiatData = markets.fiat.find((t) => t.symbol === fiatCurrency)
@@ -87,7 +78,7 @@ export abstract class CurrencyUtils<CI extends CurrencyInfo> {
     }
 
     async fiatRate(fiatCurrency: (typeof FiatCurrencies)[number], useCache = true) {
-        const markets = await this.markets.get(useCache)
+        const markets = await this.context.markets.get(useCache)
 
         const cryptoData = markets.crypto.find((t) => t.id === this.currencyInfo.nativeTokenId)
         if (!cryptoData) throw new Error('Crypto rate not found')

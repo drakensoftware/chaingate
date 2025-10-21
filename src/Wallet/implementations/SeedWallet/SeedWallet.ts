@@ -5,18 +5,15 @@ import { Encrypted } from '../../entities/WalletEncryption/Encrypted'
 import { Encrypt } from '../../entities/WalletEncryption/WalletEncryption'
 import { hexToBytes, recordToMap, transformMap } from '../../../InternalUtils/Utils'
 import { ExtendedPublicKey } from '../../entities/Secret/implementations/ExtendedPublicKey'
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../../Client'
+import { ChainGateContext } from '../../../Currencies/CurrencyUtils/ChainGateContext'
 
 export class SeedWallet extends SeedableWallet {
     constructor(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         secret: Seed | Encrypted,
         askForPassword?: (attempts: number, reject: () => void) => Promise<string>,
     ) {
-        super(client, markets, secret, askForPassword)
+        super(context, secret, askForPassword)
     }
 
     protected async serializeInternal(): Promise<SerializedWallet> {
@@ -28,14 +25,13 @@ export class SeedWallet extends SeedableWallet {
     }
 
     static async new(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         seed: string | Uint8Array,
         warnAboutUnencrypted: boolean,
         encrypt?: Encrypt,
     ) {
         const newSeed = new Seed(seed)
-        const wallet = new SeedWallet(client, markets, newSeed, encrypt?.askForPassword)
+        const wallet = new SeedWallet(context, newSeed, encrypt?.askForPassword)
         wallet.walletUniqueId = newSeed.uniqueId
 
         await wallet.generateAllCurrencyDefaultDerivations()
@@ -47,8 +43,7 @@ export class SeedWallet extends SeedableWallet {
     }
 
     static async import(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         exported: SerializedSeedableWallet,
         askForPassword: (attempts: number, reject: () => void) => Promise<string>,
     ): Promise<SeedWallet> {
@@ -63,7 +58,7 @@ export class SeedWallet extends SeedableWallet {
 
         if (!(exported.walletType == 'seed')) throw new Error('Wallet format error')
 
-        const wallet = new SeedWallet(client, markets, encrypted, askForPassword)
+        const wallet = new SeedWallet(context, encrypted, askForPassword)
         wallet.walletUniqueId = exported.walletUniqueId
         wallet.derivationPaths = recordToMap(exported.derivationPaths)
 

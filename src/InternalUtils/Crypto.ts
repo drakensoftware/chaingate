@@ -43,7 +43,7 @@ async function pbkdf2Subtle(params: pbkdf2params): Promise<Uint8Array> {
     const derivedKeyBits = await crypto.subtle.deriveBits(
         {
             name: 'PBKDF2',
-            salt: params.salt,
+            salt: new Uint8Array(params.salt),
             iterations: params.iterations,
             hash: 'SHA-256',
         },

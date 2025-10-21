@@ -1,0 +1,29 @@
+diff --git a/node_modules/bchaddrjs/src/bchaddr.js b/node_modules/bchaddrjs/src/bchaddr.js
+index 10c96d6..f33d951 100644
+--- a/node_modules/bchaddrjs/src/bchaddr.js
++++ b/node_modules/bchaddrjs/src/bchaddr.js
+@@ -6,9 +6,21 @@
+  * file LICENSE or http://www.opensource.org/licenses/mit-license.php.
+  */
+ 
+-var bs58check = require('bs58check')
+-var cashaddr = require('cashaddrjs')
+-var Buffer = require('buffer/').Buffer
++// Replace bs58check with @scure/base
++var scureBase = require('@scure/base');
++var sha256 = require('@noble/hashes/sha256').sha256;
++var cashaddr = require('cashaddrjs');
++var Buffer = require('buffer/').Buffer;
++
++// Create base58check encoder/decoder using @scure/base
++var bs58check = {
++  decode: function(address) {
++    return Buffer.from(scureBase.base58check(sha256).decode(address));
++  },
++  encode: function(buffer) {
++    return scureBase.base58check(sha256).encode(buffer);
++  }
++};
+ 
+ /**
+  * General purpose Bitcoin Cash address detection and translation.<br />

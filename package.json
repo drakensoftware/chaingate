@@ -1,6 +1,6 @@
 {
   "name": "chaingate",
-  "version": "0.6.0",
+  "version": "0.7.1",
   "description": "A complete TypeScript library for connecting to and making transactions on different blockchains",
   "keywords": [
     "blockchain",
@@ -63,7 +63,8 @@
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "lint": "eslint src/",
-    "build-client": "openapi-ts && eslint --fix src/NetworkUtilsProvider/Client"
+    "build-client": "openapi-ts && eslint --fix src/NetworkUtilsProvider/Client",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -83,6 +84,7 @@
     "eslint-plugin-compat": "^4.2.0",
     "eslint-plugin-prettier": "^5.5.3",
     "jest": "^29.7.0",
+    "patch-package": "^8.0.1",
     "prettier": "^3.6.2",
     "rimraf": "^5.0.1",
     "ts-loader": "^9.5.2",
@@ -112,16 +114,14 @@
     "bchaddrjs": "^0.5.2",
     "bitcore-lib-cash": "^10.8.0",
     "bs58check": "^4.0.0",
-    "crypto-browserify": "^3.12.1",
     "decimal.js": "^10.5.0",
     "ethers": "^6.13.5",
+    "madge": "^8.0.0",
     "node-fetch": "^3.3.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "stream-browserify": "^3.0.0",
     "ts-jest": "^29.4.0",
     "url": "^0.11.4",
-    "vm-browserify": "^1.1.2",
     "webpack-cli": "^6.0.1",
     "wif": "^5.0.0"
   },

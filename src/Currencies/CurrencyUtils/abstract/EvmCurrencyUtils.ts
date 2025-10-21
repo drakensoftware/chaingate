@@ -1,5 +1,4 @@
 import { CurrencyUtils } from '../CurrencyUtils'
-import { Client } from '@hey-api/client-fetch'
 import { EvmCurrencyInfo } from '../../CurrencyInfo'
 import {
     evmAddressBalance,
@@ -14,9 +13,7 @@ import {
     EvmNetworkKey,
     evmNetworkStatus,
     evmTransactionDetails,
-    GlobalMarketsResponse,
 } from '../../../Client'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
 import { CurrencyAmount } from '../CurrencyAmount'
 import { Address } from '../../../Wallet/entities/Address'
 
@@ -25,18 +22,14 @@ import { NumberLike, toDecimal } from '../../../InternalUtils/NumberLike'
 import { PublicKey } from '../../../Wallet/entities/PublicKey'
 import { ethers, SigningKey, verifyMessage } from 'ethers'
 import { PrivateKey } from '../../../Wallet/entities/Secret/implementations/PrivateKey'
+import { ChainGateContext } from '../ChainGateContext'
 
 export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<CI> {
     declare currencyInfo: CI
     protected readonly network: EvmNetworkKey
 
-    constructor(
-        client: Client,
-        currencyInfo: CI,
-        markets: TtlCache<GlobalMarketsResponse>,
-        network: EvmNetworkKey,
-    ) {
-        super(client, currencyInfo, markets)
+    constructor(context: ChainGateContext, currencyInfo: CI, network: EvmNetworkKey) {
+        super(context, currencyInfo)
         this.network = network
     }
 
@@ -44,7 +37,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
         address: string,
     ): Promise<{ confirmed: CurrencyAmount<CI>; unconfirmed: CurrencyAmount<CI> }> {
         const result = await evmAddressBalance({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { address },
         })
@@ -57,7 +50,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async addressTransactionCount(address: string) {
         const result = await evmAddressTransactionCount({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { address },
         })
@@ -66,7 +59,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async callSmartContractRaw(smartContractAddress: Address, data: string) {
         const result = await evmCallSmartContractFunction({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             body: { contract: smartContractAddress, data },
         })
@@ -81,7 +74,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
         data: string,
     ) {
         const result = await evmEstimateGas({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: {
                 addressFrom,
@@ -96,7 +89,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async broadcastTransaction(transactionRaw: string | Uint8Array) {
         const result = await evmBroadcastTransaction({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             body: {
                 transactionRaw:
@@ -110,7 +103,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async transactionDetails(transactionId: string) {
         const result = await evmTransactionDetails({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { transactionId },
         })
@@ -133,7 +126,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async getFeeRate() {
         const result = await evmFeeRate({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
         })
         return result.data
@@ -141,7 +134,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async networkStatus() {
         const result = await evmNetworkStatus({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
         })
         return result.data
@@ -171,7 +164,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async latestBlock() {
         const result = await evmLatestBlock({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
         })
         return result.data
@@ -179,7 +172,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async blockByHeight(blockHeight: number) {
         const result = await evmBlockByHeight({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { blockHeight },
         })
@@ -188,7 +181,7 @@ export class EvmCurrencyUtils<CI extends EvmCurrencyInfo> extends CurrencyUtils<
 
     async blockByHash(blockHash: string) {
         const result = await evmBlockByHash({
-            client: this.client,
+            client: this.context.client,
             path: { network: this.network },
             query: { blockHash },
         })

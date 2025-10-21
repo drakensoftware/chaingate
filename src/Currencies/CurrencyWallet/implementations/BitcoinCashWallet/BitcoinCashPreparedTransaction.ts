@@ -4,7 +4,7 @@ import { toCashAddress, toLegacyAddress } from 'bchaddrjs'
 import { Address } from '../../../../Wallet/entities/Address'
 import { Txo, TxVout, UtxoTransaction } from '../../abstract/UtxoWallet/UtxoTransaction'
 import { PrivateKeyProvider } from '../../Transports'
-import { toSatoshi } from '../../abstract/UtxoWallet/UtxoUtils'
+import { toSatoshi } from '../../abstract/UtxoWallet/utils'
 import { UtxoCurrencyUtils } from '../../../CurrencyUtils/abstract/UtxoCurrencyUtils/UtxoCurrencyUtils'
 import { BitcoinCashInfo } from '../../../CurrencyInfo'
 import { CurrencyAmount } from '../../../CurrencyUtils'
@@ -37,11 +37,8 @@ export class BitcoinCashPreparedTransaction extends UtxoTransaction<typeof Bitco
                 wif: 0x80,
             },
             privateKeyProvider,
+            (address) => toLegacyAddress(address),
         )
-    }
-
-    protected toLegacyAddress(address: Address): string {
-        return toLegacyAddress(address)
     }
 
     protected async sign(inputs: Txo[], outputs: TxVout[]): Promise<Uint8Array> {

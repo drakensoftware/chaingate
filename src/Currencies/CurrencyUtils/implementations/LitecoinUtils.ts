@@ -1,15 +1,12 @@
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../../Client'
+import { ChainGateContext } from '../ChainGateContext'
 import { LitecoinInfo } from '../../CurrencyInfo'
 import { Bech32UtxoCurrencyUtils } from '../abstract/Bech32UtxoCurrencyUtils/Bech32UtxoCurrencyUtils'
 
 export class LitecoinUtils extends Bech32UtxoCurrencyUtils<typeof LitecoinInfo> {
-    constructor(client: Client, markets: TtlCache<GlobalMarketsResponse>) {
+    constructor(context: ChainGateContext) {
         super(
-            client,
+            context,
             LitecoinInfo,
-            markets,
             'litecoin',
             {
                 bech32: 'ltc',

@@ -11,9 +11,7 @@ import { Seed } from '../entities/Secret/implementations/Seed'
 import { bytesToHex, mapToRecord, transformMap } from '../../InternalUtils/Utils'
 import { Secret } from '../entities/Secret/Secret'
 import { AllCurrencies } from '../../Currencies/CurrencyModules'
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../Client'
+import { ChainGateContext } from '../../Currencies/CurrencyUtils/ChainGateContext'
 
 export type SerializedSeedableWallet = SerializedWallet & {
     secret: {
@@ -38,8 +36,7 @@ export abstract class SeedableWallet extends HDWallet<
     protected walletUniqueId: string
 
     protected constructor(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         secret: Secret | Encrypted,
         askForPassword?: (attempts: number, reject: () => void) => Promise<string>,
     ) {
@@ -58,7 +55,7 @@ export abstract class SeedableWallet extends HDWallet<
                 return seed.getPrivateKey.bind(seed, derivationPath)
             },
         }
-        super(client, transports, markets)
+        super(context, transports)
         this.walletEncryption = new WalletEncryption(
             secret instanceof Encrypted ? secret : secret.raw,
             askForPassword,

@@ -1,10 +1,8 @@
 import { Transports } from '../Currencies/CurrencyWallet/Transports'
 import { CurrencyWallet } from '../Currencies/CurrencyWallet/CurrencyWallet'
 import { AllCurrencies, CurrencyModules } from '../Currencies/CurrencyModules'
-import { Client } from '@hey-api/client-fetch'
-import { GlobalMarketsResponse } from '../Client'
-import { TtlCache } from '../InternalUtils/TtlCache'
 import { CurrencyUtils } from '../Currencies/CurrencyUtils/CurrencyUtils'
+import { ChainGateContext } from '../Currencies/CurrencyUtils/ChainGateContext'
 
 export type WalletOf<C extends keyof typeof CurrencyModules> = InstanceType<
     (typeof CurrencyModules)[C]['wallet']
@@ -20,23 +18,20 @@ export type SerializedWallet = {
 export abstract class Wallet<SupportedCurrencies extends (typeof AllCurrencies)[number]> {
     protected abstract supportedCurrencies: readonly SupportedCurrencies[]
 
-    public readonly client: Client
+    public get client() {
+        return this.context.client
+    }
+    protected readonly context: ChainGateContext
     protected readonly transports: Transports
-    protected readonly markets: TtlCache<GlobalMarketsResponse>
 
-    protected constructor(
-        client: Client,
-        transports: Transports,
-        markets: TtlCache<GlobalMarketsResponse>,
-    ) {
-        this.client = client
+    protected constructor(context: ChainGateContext, transports: Transports) {
+        this.context = context
         this.transports = transports
-        this.markets = markets
     }
 
     currency<C extends SupportedCurrencies>(id: C) {
         const module = CurrencyModules[id]
-        const utils = new module.utils(this.client, this.markets)
+        const utils = new module.utils(this.context)
         const WalletClass = module.wallet as new (
             utils: CurrencyUtils<InfoOf<C>>,
             transports: Transports,

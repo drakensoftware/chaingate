@@ -6,7 +6,7 @@ import { Address } from '../../../../Wallet/entities/Address'
 import { PrivateKeyProvider } from '../../Transports'
 import { Txo, TxVout, UtxoTransaction } from '../UtxoWallet/UtxoTransaction'
 import { NetworkParams } from '../UtxoWallet/NetworkParams'
-import { toSatoshi } from '../UtxoWallet/UtxoUtils'
+import { toSatoshi } from '../UtxoWallet/utils'
 import { CurrencyInfo } from '../../../CurrencyInfo'
 import { CurrencyAmount } from '../../../CurrencyUtils'
 import { UtxoCurrencyUtils } from '../../../CurrencyUtils/abstract/UtxoCurrencyUtils/UtxoCurrencyUtils'
@@ -21,10 +21,6 @@ export class LegacyUtxoPreparedTransaction<CI extends CurrencyInfo> extends Utxo
         privateKeyProvider: PrivateKeyProvider,
     ) {
         super(utils, fromAddress, toAddress, amount, networkParams, privateKeyProvider)
-    }
-
-    protected toLegacyAddress(address: Address): string {
-        return address
     }
 
     protected async sign(inputs: Txo[], outputs: TxVout[]): Promise<Uint8Array> {

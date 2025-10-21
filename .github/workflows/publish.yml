@@ -30,7 +30,7 @@ jobs:
       - name: Build (ESM + CJS)
         run: npm run build
 
-      - name: Publish to npm with provenance
+      - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --provenance

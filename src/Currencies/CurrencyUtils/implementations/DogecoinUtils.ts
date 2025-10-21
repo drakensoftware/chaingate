@@ -1,7 +1,5 @@
 import { UtxoCurrencyUtils } from '../abstract/UtxoCurrencyUtils/UtxoCurrencyUtils'
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../../Client'
+import { ChainGateContext } from '../ChainGateContext'
 import { DogecoinInfo } from '../../CurrencyInfo'
 import { PublicKey } from '../../../Wallet/entities/PublicKey'
 import { PrivateKey } from '../../../Wallet/entities/Secret/implementations/PrivateKey'
@@ -12,11 +10,10 @@ import {
 } from '../../CurrencyWallet/abstract/UtxoWallet/MessageSigner'
 
 export class DogecoinUtils extends UtxoCurrencyUtils<typeof DogecoinInfo> {
-    constructor(client: Client, markets: TtlCache<GlobalMarketsResponse>) {
+    constructor(context: ChainGateContext) {
         super(
-            client,
+            context,
             DogecoinInfo,
-            markets,
             'dogecoin',
             {
                 bech32: null,

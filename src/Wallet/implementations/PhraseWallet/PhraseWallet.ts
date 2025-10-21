@@ -6,18 +6,15 @@ import { Phrase } from '../../entities/Secret/implementations/Phrase'
 import { Encrypt } from '../../entities/WalletEncryption/WalletEncryption'
 import { hexToBytes, recordToMap, transformMap } from '../../../InternalUtils/Utils'
 import { ExtendedPublicKey } from '../../entities/Secret/implementations/ExtendedPublicKey'
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../../Client'
+import { ChainGateContext } from '../../../Currencies/CurrencyUtils/ChainGateContext'
 
 export class PhraseWallet extends SeedableWallet {
     constructor(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         secret: Phrase | Encrypted,
         askForPassword?: (attempts: number, reject: () => void) => Promise<string>,
     ) {
-        super(client, markets, secret, askForPassword)
+        super(context, secret, askForPassword)
     }
 
     protected async serializeInternal(): Promise<SerializedWallet> {
@@ -34,14 +31,13 @@ export class PhraseWallet extends SeedableWallet {
     }
 
     static async new(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         phrase: string,
         warnAboutUnencrypted: boolean,
         encrypt?: Encrypt,
     ) {
         const newPhrase = await Phrase.new(phrase)
-        const wallet = new PhraseWallet(client, markets, newPhrase, encrypt?.askForPassword)
+        const wallet = new PhraseWallet(context, newPhrase, encrypt?.askForPassword)
         wallet.walletUniqueId = newPhrase.uniqueId
 
         await wallet.generateAllCurrencyDefaultDerivations()
@@ -53,8 +49,7 @@ export class PhraseWallet extends SeedableWallet {
     }
 
     static async import(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         serialized: SerializedSeedableWallet,
         askForPassword: (attempts: number, reject: () => void) => Promise<string>,
     ): Promise<PhraseWallet> {
@@ -69,7 +64,7 @@ export class PhraseWallet extends SeedableWallet {
 
         if (!(serialized.walletType == 'phrase')) throw new Error('Wallet format error')
 
-        const wallet = new PhraseWallet(client, markets, encrypted, askForPassword)
+        const wallet = new PhraseWallet(context, encrypted, askForPassword)
         wallet.walletUniqueId = serialized.walletUniqueId
         wallet.derivationPaths = recordToMap(serialized.derivationPaths)
 

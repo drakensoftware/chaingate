@@ -1,7 +1,5 @@
-import { Client } from '@hey-api/client-fetch'
 import { CurrencyInfo } from '../../../CurrencyInfo'
-import { GlobalMarketsResponse, UtxoNetworkKey } from '../../../../Client'
-import { TtlCache } from '../../../../InternalUtils/TtlCache'
+import { UtxoNetworkKey } from '../../../../Client'
 import { UtxoCurrencyUtils } from '../UtxoCurrencyUtils/UtxoCurrencyUtils'
 import { PublicKey } from '../../../../Wallet/entities/PublicKey'
 import * as btc from '@scure/btc-signer'
@@ -11,6 +9,7 @@ import {
     getSignedMessagePublicKey,
     signMessage,
 } from '../../../CurrencyWallet/abstract/UtxoWallet/MessageSigner'
+import { ChainGateContext } from '../../ChainGateContext'
 
 export type AddressTypeSupported = 'legacy-p2pkh' | 'legacy-p2pk' | 'segwit-p2wpkh' | 'taproot-p2tr'
 
@@ -30,14 +29,13 @@ export abstract class Bech32UtxoCurrencyUtils<
     CI extends CurrencyInfo,
 > extends UtxoCurrencyUtils<CI> {
     protected constructor(
-        client: Client,
+        context: ChainGateContext,
         currencyInfo: CI,
-        markets: TtlCache<GlobalMarketsResponse>,
         network: UtxoNetworkKey,
         networkParams: NetworkParams,
         signHeader: string,
     ) {
-        super(client, currencyInfo, markets, network, networkParams, signHeader)
+        super(context, currencyInfo, network, networkParams, signHeader)
     }
 
     publicKeyToAddress(

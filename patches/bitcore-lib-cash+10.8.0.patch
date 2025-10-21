@@ -1,0 +1,127 @@
+diff --git a/node_modules/bitcore-lib-cash/lib/crypto/hash.js b/node_modules/bitcore-lib-cash/lib/crypto/hash.js
+index 189e8f3..d2c27da 100644
+--- a/node_modules/bitcore-lib-cash/lib/crypto/hash.js
++++ b/node_modules/bitcore-lib-cash/lib/crypto/hash.js
+@@ -1,6 +1,11 @@
+ 'use strict';
+ 
+-var crypto = require('crypto');
++// Replace Node.js crypto with @noble/hashes (CommonJS syntax)
++var nobleSha256 = require('@noble/hashes/sha256').sha256;
++var nobleSha512 = require('@noble/hashes/sha512').sha512;
++var nobleSha1 = require('@noble/hashes/sha1').sha1;
++var nobleRipemd160 = require('@noble/hashes/ripemd160').ripemd160;
++
+ var BufferUtil = require('../util/buffer');
+ var $ = require('../util/preconditions');
+ 
+@@ -8,16 +13,14 @@ var Hash = module.exports;
+ 
+ Hash.sha1 = function(buf) {
+   $.checkArgument(BufferUtil.isBuffer(buf));
+-  return crypto.createHash('sha1').update(buf).digest();
++  return Buffer.from(nobleSha1(buf));
+ };
+-
+ Hash.sha1.blocksize = 512;
+ 
+ Hash.sha256 = function(buf) {
+   $.checkArgument(BufferUtil.isBuffer(buf));
+-  return crypto.createHash('sha256').update(buf).digest();
++  return Buffer.from(nobleSha256(buf));
+ };
+-
+ Hash.sha256.blocksize = 512;
+ 
+ Hash.sha256sha256 = function(buf) {
+@@ -27,7 +30,7 @@ Hash.sha256sha256 = function(buf) {
+ 
+ Hash.ripemd160 = function(buf) {
+   $.checkArgument(BufferUtil.isBuffer(buf));
+-  return crypto.createHash('ripemd160').update(buf).digest();
++  return Buffer.from(nobleRipemd160(buf));
+ };
+ 
+ Hash.sha256ripemd160 = function(buf) {
+@@ -37,9 +40,8 @@ Hash.sha256ripemd160 = function(buf) {
+ 
+ Hash.sha512 = function(buf) {
+   $.checkArgument(BufferUtil.isBuffer(buf));
+-  return crypto.createHash('sha512').update(buf).digest();
++  return Buffer.from(nobleSha512(buf));
+ };
+-
+ Hash.sha512.blocksize = 1024;
+ 
+ Hash.hmac = function(hashf, data, key) {
+@@ -53,7 +55,7 @@ Hash.hmac = function(hashf, data, key) {
+ 
+   if (key.length > blocksize) {
+     key = hashf(key);
+-  } else if (key < blocksize) {
++  } else if (key.length < blocksize) {
+     var fill = Buffer.alloc(blocksize);
+     fill.fill(0);
+     key.copy(fill);
+diff --git a/node_modules/bitcore-lib-cash/lib/crypto/random.js b/node_modules/bitcore-lib-cash/lib/crypto/random.js
+index 9938b37..db11236 100644
+--- a/node_modules/bitcore-lib-cash/lib/crypto/random.js
++++ b/node_modules/bitcore-lib-cash/lib/crypto/random.js
+@@ -5,27 +5,39 @@ function Random() {
+ 
+ /* secure random bytes that sometimes throws an error due to lack of entropy */
+ Random.getRandomBuffer = function(size) {
+-  if (process.browser)
++  // Detect browser environment
++  var isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined';
++
++  if (isBrowser)
+     return Random.getRandomBufferBrowser(size);
+   else
+     return Random.getRandomBufferNode(size);
+ };
+ 
+ Random.getRandomBufferNode = function(size) {
+-  var crypto = require('crypto');
+-  return crypto.randomBytes(size);
++  // Use @noble/hashes which works in both Node.js and browser
++  var randomBytes = require('@noble/hashes/utils').randomBytes;
++  return Buffer.from(randomBytes(size));
+ };
+ 
+ Random.getRandomBufferBrowser = function(size) {
+-  if (!window.crypto && !window.msCrypto)
++  if (typeof window === 'undefined') {
++    throw new Error('Not in browser environment');
++  }
++
++  if (!window.crypto && !window.msCrypto) {
+     throw new Error('window.crypto not available');
++  }
+ 
+-  if (window.crypto && window.crypto.getRandomValues)
+-    var crypto = window.crypto;
+-  else if (window.msCrypto && window.msCrypto.getRandomValues) //internet explorer
+-    var crypto = window.msCrypto;
+-  else
++  var crypto;
++  if (window.crypto && window.crypto.getRandomValues) {
++    crypto = window.crypto;
++  } else if (window.msCrypto && window.msCrypto.getRandomValues) {
++    // Internet Explorer
++    crypto = window.msCrypto;
++  } else {
+     throw new Error('window.crypto.getRandomValues not available');
++  }
+ 
+   var bbuf = new Uint8Array(size);
+   crypto.getRandomValues(bbuf);
+@@ -40,7 +52,7 @@ Random.getPseudoRandomBuffer = function(size) {
+   var b = Buffer.alloc(size);
+   var r;
+ 
+-  for (var i = 0; i <= size; i++) {
++  for (var i = 0; i < size; i++) {
+     var j = Math.floor(i / 4);
+     var k = i - j * 4;
+     if (k === 0) {

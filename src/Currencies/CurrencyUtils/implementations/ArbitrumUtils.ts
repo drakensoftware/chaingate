@@ -1,11 +1,9 @@
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../../Client'
+import { ChainGateContext } from '../ChainGateContext'
 import { ArbitrumInfo } from '../../CurrencyInfo'
 import { EvmCurrencyUtils } from '../abstract/EvmCurrencyUtils'
 
 export class ArbitrumUtils extends EvmCurrencyUtils<typeof ArbitrumInfo> {
-    constructor(client: Client, markets: TtlCache<GlobalMarketsResponse>) {
-        super(client, ArbitrumInfo, markets, 'arbitrum')
+    constructor(context: ChainGateContext) {
+        super(context, ArbitrumInfo, 'arbitrum')
     }
 }

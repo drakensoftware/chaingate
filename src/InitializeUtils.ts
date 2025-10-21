@@ -1,11 +1,10 @@
 import { CurrencyUtilsProvider } from './CurrencyUtilsProvider'
-import { createClientAndMarkets } from './InitializeWallet'
+import { createChainGateContext } from './InitializeWallet'
 
-export async function initalizeUtils({
+export async function initializeUtils({
     apiKey = '',
 }: {
     apiKey?: string
 } = {}) {
-    const { client, markets } = createClientAndMarkets(apiKey)
-    return new CurrencyUtilsProvider(client, markets)
+    return new CurrencyUtilsProvider(createChainGateContext(apiKey))
 }

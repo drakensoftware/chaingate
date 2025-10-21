@@ -13,12 +13,9 @@ import {
     LitecoinInfo,
     PolygonInfo,
 } from './CurrencyInfo'
-import { Client } from '@hey-api/client-fetch'
 import { CurrencyUtils } from './CurrencyUtils/CurrencyUtils'
 import { Transports } from './CurrencyWallet/Transports'
 import { CurrencyWallet } from './CurrencyWallet/CurrencyWallet'
-import { TtlCache } from '../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../Client'
 import {
     ArbitrumUtils,
     AvalancheUtils,
@@ -47,6 +44,7 @@ import {
     LitecoinWallet,
     PolygonWallet,
 } from './CurrencyWallet'
+import { ChainGateContext } from './CurrencyUtils/ChainGateContext'
 
 export const AllCurrencies = [
     'bitcoin',
@@ -69,7 +67,7 @@ type CurrencyModule<
     CW extends CurrencyWallet<CI> = CurrencyWallet<CI>,
 > = {
     info: CI
-    utils: new (client: Client, markets: TtlCache<GlobalMarketsResponse>) => CU
+    utils: new (context: ChainGateContext) => CU
     wallet: new (utils: CU, transports: Transports) => CW
 }
 

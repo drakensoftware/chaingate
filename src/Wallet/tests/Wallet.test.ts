@@ -13,6 +13,7 @@ describe('Wallet', () => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             encrypt: {
                 password: '1234',
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 askForPassword: async (_attempts, _reject) => {
                     return '1234'
                 },

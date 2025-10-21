@@ -1,5 +1,5 @@
 import path from 'path'
-import {fileURLToPath} from 'url'
+import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -24,19 +24,16 @@ const config = {
             {
                 test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
                 type: 'asset',
-            }
+            },
         ],
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.jsx', '.js', '...'],
-        fallback: {
-            'stream': 'stream-browserify',
-            'crypto': 'crypto-browserify',
-            'vm': 'vm-browserify',
-            'assert': 'assert'
-        },
-        plugins: []
-    }
+        fallback: {},
+        plugins: [],
+    },
 }
 
-export default () => { return config }
+export default () => {
+    return config
+}

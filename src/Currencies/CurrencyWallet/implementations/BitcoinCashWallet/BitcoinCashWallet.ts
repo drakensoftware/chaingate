@@ -1,6 +1,3 @@
-import { bytesToHex } from '../../../../InternalUtils/Utils'
-import bch from 'bitcore-lib-cash'
-import { toCashAddress, toLegacyAddress } from 'bchaddrjs'
 import { Address } from '../../../../Wallet/entities/Address'
 import { UtxoWallet } from '../../abstract/UtxoWallet/UtxoWallet'
 import { Transports } from '../../Transports'

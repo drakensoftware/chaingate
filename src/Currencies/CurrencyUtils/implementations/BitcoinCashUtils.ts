@@ -1,13 +1,11 @@
 import { UtxoCurrencyUtils } from '../abstract/UtxoCurrencyUtils/UtxoCurrencyUtils'
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../../Client'
+import { ChainGateContext } from '../ChainGateContext'
 import { BitcoinCashInfo } from '../../CurrencyInfo'
 import { PrivateKey } from '../../../Wallet/entities/Secret/implementations/PrivateKey'
 import { PublicKey } from '../../../Wallet/entities/PublicKey'
 import bch from 'bitcore-lib-cash'
 import { bytesToHex } from '../../../InternalUtils/Utils'
-import { toCashAddress, toLegacyAddress } from 'bchaddrjs'
+import { toCashAddress, toLegacyAddress, toLegacyAddress as bchToLegacyAddress } from 'bchaddrjs'
 import {
     getSignedMessagePublicKey,
     signMessage,
@@ -18,11 +16,10 @@ import { createBase58check } from '@scure/base'
 export type AddressTypeSupported = 'legacy' | 'cashaddr' | 'bitpay'
 
 export class BitcoinCashUtils extends UtxoCurrencyUtils<typeof BitcoinCashInfo> {
-    constructor(client: Client, markets: TtlCache<GlobalMarketsResponse>) {
+    constructor(context: ChainGateContext) {
         super(
-            client,
+            context,
             BitcoinCashInfo,
-            markets,
             'bitcoincash',
             {
                 bech32: 'bitcoincash' as string | null, // HRP usado en direcciones CashAddr
@@ -31,6 +28,7 @@ export class BitcoinCashUtils extends UtxoCurrencyUtils<typeof BitcoinCashInfo> 
                 wif: 0x80,
             },
             '\x18Bitcoin Signed Message:\n',
+            (address) => toLegacyAddress(address),
         )
     }
 
@@ -99,5 +97,13 @@ export class BitcoinCashUtils extends UtxoCurrencyUtils<typeof BitcoinCashInfo> 
         } catch {
             return false
         }
+    }
+
+    toLegacyAddress(address: string): string {
+        return bchToLegacyAddress(address)
+    }
+
+    toNativeAddress(address: string): string {
+        return toCashAddress(address)
     }
 }

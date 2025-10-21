@@ -1,17 +1,18 @@
-import React, { createContext, useContext } from 'react'
+import React, { useContext } from 'react'
 import { CurrencyUtilsProvider } from '../CurrencyUtilsProvider'
-import { createClientAndMarkets } from '../InitializeWallet'
+import { createChainGateContext } from '../InitializeWallet'
+import { createContext as createReactContext } from 'react'
 
 type UtilsContextType = CurrencyUtilsProvider
 
-const UtilsContextInternal = createContext<UtilsContextType | undefined>(undefined)
+const UtilsContextInternal = createReactContext<UtilsContextType | undefined>(undefined)
 
 export const UtilsContext: React.FC<{
     children: React.ReactNode
     apiKey: string
 }> = ({ children, apiKey }) => {
-    const { markets, client } = createClientAndMarkets(apiKey)
-    const utils = new CurrencyUtilsProvider(client, markets)
+    const context = createChainGateContext(apiKey)
+    const utils = new CurrencyUtilsProvider(context)
 
     return <UtilsContextInternal.Provider value={utils}>{children}</UtilsContextInternal.Provider>
 }

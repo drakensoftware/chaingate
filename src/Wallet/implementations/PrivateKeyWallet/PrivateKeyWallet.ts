@@ -10,9 +10,7 @@ import {
 } from '../../entities/WalletEncryption/WalletEncryption'
 import { SerializedWallet, Wallet } from '../../Wallet'
 import { AllCurrencies } from '../../../Currencies/CurrencyModules'
-import { Client } from '@hey-api/client-fetch'
-import { TtlCache } from '../../../InternalUtils/TtlCache'
-import { GlobalMarketsResponse } from '../../../Client'
+import { ChainGateContext } from '../../../Currencies/CurrencyUtils/ChainGateContext'
 
 export type SerializedPrivateKeyWallet = SerializedWallet & {
     secret: {
@@ -43,8 +41,7 @@ export class PrivateKeyWallet extends Wallet<(typeof AllCurrencies)[number]> {
     }
 
     protected constructor(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         secret: PrivateKey | Encrypted,
         askForPassword?: (attempts: number, reject: () => void) => Promise<string>,
     ) {
@@ -58,7 +55,7 @@ export class PrivateKeyWallet extends Wallet<(typeof AllCurrencies)[number]> {
                 return this.getPublicKey.bind(this)
             },
         }
-        super(client, transports, markets)
+        super(context, transports)
         this.walletEncryption = new WalletEncryption(
             secret instanceof PrivateKey ? secret.raw : secret,
             askForPassword,
@@ -66,14 +63,13 @@ export class PrivateKeyWallet extends Wallet<(typeof AllCurrencies)[number]> {
     }
 
     static async new(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         privateKey: Uint8Array | string,
         warnAboutUnencrypted: boolean,
         encrypt?: Encrypt,
     ) {
         const newPrivateKey = new PrivateKey(privateKey)
-        const wallet = new PrivateKeyWallet(client, markets, newPrivateKey, encrypt?.askForPassword)
+        const wallet = new PrivateKeyWallet(context, newPrivateKey, encrypt?.askForPassword)
         wallet.walletUniqueId = newPrivateKey.uniqueId
 
         wallet.publicKey = newPrivateKey.publicKey
@@ -85,8 +81,7 @@ export class PrivateKeyWallet extends Wallet<(typeof AllCurrencies)[number]> {
     }
 
     static async import(
-        client: Client,
-        markets: TtlCache<GlobalMarketsResponse>,
+        context: ChainGateContext,
         exported: SerializedPrivateKeyWallet,
         askForPassword: (attempts: number, reject: () => void) => Promise<string>,
     ): Promise<PrivateKeyWallet> {
@@ -101,7 +96,7 @@ export class PrivateKeyWallet extends Wallet<(typeof AllCurrencies)[number]> {
 
         if (!(exported.walletType == 'privateKey')) throw new Error('Wallet format error')
 
-        const wallet = new PrivateKeyWallet(client, markets, encrypted, askForPassword)
+        const wallet = new PrivateKeyWallet(context, encrypted, askForPassword)
         wallet.walletUniqueId = exported.walletUniqueId
         wallet.publicKey = new PublicKey(hexToBytes(exported.publicKey))
         return wallet

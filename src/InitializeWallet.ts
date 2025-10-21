@@ -2,9 +2,9 @@ import { PhraseLanguage } from './Wallet/implementations/PhraseWallet/PhraseLang
 import { PhraseNumOfWords } from './Wallet/implementations/PhraseWallet/PhraseNumOfWords'
 import { generateNewPhrase } from './Wallet/implementations/PhraseWallet/PhraseGenerator'
 import { Phrase } from './Wallet/entities/Secret/implementations/Phrase'
-import { PhraseWallet } from './Wallet/implementations/PhraseWallet/PhraseWallet'
+import { PhraseWallet } from './Wallet'
 import { SerializedWallet, Wallet } from './Wallet/Wallet'
-import { SeedWallet } from './Wallet/implementations/SeedWallet/SeedWallet'
+import { SeedWallet } from './Wallet'
 import {
     PrivateKeyWallet,
     SerializedPrivateKeyWallet,
@@ -19,10 +19,11 @@ import { PrivateKey } from './Wallet/entities/Secret/implementations/PrivateKey'
 import { createClient, createConfig } from '@hey-api/client-fetch'
 import { ClientOptions, globalMarkets, GlobalMarketsResponse } from './Client'
 import { TtlCache } from './InternalUtils/TtlCache'
+import { ChainGateContext } from './Currencies/CurrencyUtils/ChainGateContext'
 
 export { PhraseLanguage, PhraseNumOfWords }
 
-export function createClientAndMarkets(apiKey: string) {
+export function createChainGateContext(apiKey: string): ChainGateContext {
     const client = createClient(
         createConfig<ClientOptions>({
             baseUrl: 'https://api.chaingate.dev',
@@ -39,7 +40,9 @@ export function createClientAndMarkets(apiKey: string) {
             }),
         30,
     )
-    return { client, markets }
+
+    const extra = new Map<string, object>()
+    return { client, markets, extra }
 }
 
 export async function create({
@@ -55,20 +58,12 @@ export async function create({
     encrypt?: Encrypt
     warnAboutUnencrypted?: boolean
 } = {}) {
-    const client = createClientAndMarkets(apiKey)
+    const context = createChainGateContext(apiKey)
     const phrase = generateNewPhrase(phraseLanguage, phraseNumOfWords)
 
     let wallet
-    if (encrypt)
-        wallet = await PhraseWallet.new(
-            client.client,
-            client.markets,
-            phrase,
-            warnAboutUnencrypted,
-            encrypt,
-        )
-    else
-        wallet = await PhraseWallet.new(client.client, client.markets, phrase, warnAboutUnencrypted)
+    if (encrypt) wallet = await PhraseWallet.new(context, phrase, warnAboutUnencrypted, encrypt)
+    else wallet = await PhraseWallet.new(context, phrase, warnAboutUnencrypted)
 
     return { phrase, wallet }
 }
@@ -84,8 +79,8 @@ export async function fromPhrase({
     encrypt?: Encrypt
     warnAboutUnencrypted?: boolean
 }) {
-    const client = createClientAndMarkets(apiKey)
-    return PhraseWallet.new(client.client, client.markets, phrase, warnAboutUnencrypted, encrypt)
+    const context = createChainGateContext(apiKey)
+    return PhraseWallet.new(context, phrase, warnAboutUnencrypted, encrypt)
 }
 
 export async function checkPhrase(phrase: string) {
@@ -108,8 +103,8 @@ export async function fromSeed({
     encrypt?: Encrypt
     warnAboutUnencrypted?: boolean
 }) {
-    const client = createClientAndMarkets(apiKey)
-    return SeedWallet.new(client.client, client.markets, seed, warnAboutUnencrypted, encrypt)
+    const context = createChainGateContext(apiKey)
+    return SeedWallet.new(context, seed, warnAboutUnencrypted, encrypt)
 }
 
 export async function checkSeed(seed: string | Uint8Array) {
@@ -132,14 +127,8 @@ export async function fromPrivateKey({
     encrypt?: Encrypt
     warnAboutUnencrypted?: boolean
 }) {
-    const client = createClientAndMarkets(apiKey)
-    return await PrivateKeyWallet.new(
-        client.client,
-        client.markets,
-        privateKey,
-        warnAboutUnencrypted,
-        encrypt,
-    )
+    const context = createChainGateContext(apiKey)
+    return await PrivateKeyWallet.new(context, privateKey, warnAboutUnencrypted, encrypt)
 }
 
 export async function checkPrivateKey(privateKey: string | Uint8Array) {
@@ -164,7 +153,7 @@ export async function fromKeystore({
     encrypt?: Encrypt
     warnAboutUnencrypted?: boolean
 }): Promise<PhraseWallet | SeedWallet | PrivateKeyWallet> {
-    const client = createClientAndMarkets(apiKey)
+    const context = createChainGateContext(apiKey)
     try {
         const obj = JSON.parse(keystore)
         let decrypted
@@ -178,28 +167,10 @@ export async function fromKeystore({
         try {
             const phraseText = new TextDecoder().decode(decrypted)
             if (!Phrase.isValidPhrase(phraseText))
-                return PrivateKeyWallet.new(
-                    client.client,
-                    client.markets,
-                    decrypted,
-                    warnAboutUnencrypted,
-                    encrypt,
-                )
-            return PhraseWallet.new(
-                client.client,
-                client.markets,
-                phraseText,
-                warnAboutUnencrypted,
-                encrypt,
-            )
+                return PrivateKeyWallet.new(context, decrypted, warnAboutUnencrypted, encrypt)
+            return PhraseWallet.new(context, phraseText, warnAboutUnencrypted, encrypt)
         } catch (_ex) {
-            return PrivateKeyWallet.new(
-                client.client,
-                client.markets,
-                decrypted,
-                warnAboutUnencrypted,
-                encrypt,
-            )
+            return PrivateKeyWallet.new(context, decrypted, warnAboutUnencrypted, encrypt)
         }
     } catch (ex) {
         if (ex instanceof IncorrectPassword) throw ex
@@ -225,7 +196,7 @@ export async function deserialize({
     serialized: string
     askForPassword: (attempts: number, reject: () => void) => Promise<string>
 }) {
-    const client = createClientAndMarkets(apiKey)
+    const context = createChainGateContext(apiKey)
     try {
         const serializedParsed = JSON.parse(serialized)
         if (!Wallet.isSerializedWallet(serializedParsed))
@@ -236,22 +207,19 @@ export async function deserialize({
         switch (serializedWallet.walletType) {
             case 'privateKey':
                 return await PrivateKeyWallet.import(
-                    client.client,
-                    client.markets,
+                    context,
                     serializedWallet as SerializedPrivateKeyWallet,
                     askForPassword,
                 )
             case 'phrase':
                 return await PhraseWallet.import(
-                    client.client,
-                    client.markets,
+                    context,
                     serializedWallet as SerializedSeedableWallet,
                     askForPassword,
                 )
             case 'seed':
                 return await SeedWallet.import(
-                    client.client,
-                    client.markets,
+                    context,
                     serializedWallet as SerializedSeedableWallet,
                     askForPassword,
                 )

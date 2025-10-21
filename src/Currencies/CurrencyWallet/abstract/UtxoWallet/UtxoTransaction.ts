@@ -8,7 +8,7 @@ import { FeeLevel } from '../../FeeLevel'
 import { NetworkParams } from './NetworkParams'
 import { PrivateKeyProvider } from '../../Transports'
 import { UtxoBroadcastedTransaction } from './UtxoBroadcastedTransaction'
-import { toBase, toSatoshi } from './UtxoUtils'
+import { toBase, toSatoshi } from './utils'
 import { toDecimal } from '../../../../InternalUtils/NumberLike'
 import { CurrencyAmount } from '../../../CurrencyUtils'
 import { UtxoCurrencyUtils } from '../../../CurrencyUtils/abstract/UtxoCurrencyUtils/UtxoCurrencyUtils'
@@ -50,6 +50,8 @@ export abstract class UtxoTransaction<CI extends CurrencyInfo> extends Transacti
     protected readonly privateKeyProvider: PrivateKeyProvider
     protected readonly networkParams: NetworkParams
 
+    protected readonly addressToNative: (arg: string) => string | null
+
     protected constructor(
         utils: UtxoCurrencyUtils<CI>,
         fromAddress: Address,
@@ -57,12 +59,14 @@ export abstract class UtxoTransaction<CI extends CurrencyInfo> extends Transacti
         amount: CurrencyAmount<CI>,
         networkParams: NetworkParams,
         privateKeyProvider: PrivateKeyProvider,
+        addressToNative?: (arg: string) => string,
     ) {
         super(fromAddress, toAddress, amount)
         this.utils = utils
         this.state = { utxos: [], page: 0, crawled: false }
         this.networkParams = networkParams
         this.privateKeyProvider = privateKeyProvider
+        this.addressToNative = addressToNative
     }
 
     async broadcast(fee: FeeLevel | UtxoFee<CI>): Promise<UtxoBroadcastedTransaction<CI>> {
@@ -76,6 +80,32 @@ export abstract class UtxoTransaction<CI extends CurrencyInfo> extends Transacti
 
         // Broadcast transaction
         const broadcastTx = await this.utils.broadcastTransaction(txSigned)
+
+        // Add vins to spent cache
+        const spentTxoCache = this.utils.getSpentTxoCache()
+        for (const vin of transaction.vins) {
+            spentTxoCache.push({
+                txid: vin.txid,
+                n: vin.n,
+                amount: vin.amount,
+                address: this.fromAddress,
+                script: vin.script,
+            })
+        }
+
+        // Add vouts to utxo cache
+        const utxoCache = this.utils.getUtxoCache()
+        for (const [n, vout] of transaction.vouts.entries()) {
+            const script = this.utils.addressToScript(vout.address)
+
+            utxoCache.push({
+                txid: broadcastTx.transactionId,
+                n: n,
+                amount: vout.amount,
+                address: vout.address,
+                script: script,
+            })
+        }
 
         return new UtxoBroadcastedTransaction(this.utils, broadcastTx.transactionId)
     }
@@ -152,6 +182,13 @@ export abstract class UtxoTransaction<CI extends CurrencyInfo> extends Transacti
 
             // Push all new UTXOs into the state's UTXOs array
             for (const utxo of utxosByAddress.utxos) {
+                // If the output is already spent by this wallet, take it out
+                if (
+                    this.utils.getSpentTxoCache().find((t) => t.txid === utxo.txid && t.n == utxo.n)
+                )
+                    continue
+
+                // Otherwise, add to utxos
                 this.state.utxos.push({
                     txid: utxo.txid,
                     amount: utxo.amount.baseAmount,
@@ -161,10 +198,24 @@ export abstract class UtxoTransaction<CI extends CurrencyInfo> extends Transacti
             }
 
             // Check again if we now have enough
-            if (this.createTransaction(feePerKb)) break
+            if (this.createTransaction(feePerKb)) return
 
             // Increment the page so next time we fetch the next "page"
             this.state.page++
+        }
+
+        // Add cached UTXOs (used only as a last resort to avoid spending unconfirmed outputs)
+        for (const utxo of this.utils
+            .getUtxoCache()
+            .filter((t) => t.address === this.fromAddress)) {
+            if (this.state.utxos.some((t) => t.txid === utxo.txid && t.n === utxo.n)) continue
+
+            this.state.utxos.push({
+                txid: utxo.txid,
+                amount: utxo.amount,
+                script: utxo.script,
+                n: utxo.n,
+            })
         }
     }
 
@@ -182,13 +233,17 @@ export abstract class UtxoTransaction<CI extends CurrencyInfo> extends Transacti
 
         const vouts = [
             {
-                address: this.toLegacyAddress(this.toAddress),
+                address: this.addressToNative
+                    ? this.addressToNative(this.toAddress)
+                    : this.toAddress,
                 amount: BigInt(this.amount.minimalUnitAmount.toString()),
             },
         ]
 
         const selected = btc.selectUTXO(vins, vouts, 'default', {
-            changeAddress: this.toLegacyAddress(this.fromAddress),
+            changeAddress: this.addressToNative
+                ? this.addressToNative(this.fromAddress)
+                : this.fromAddress,
             feePerByte: BigInt(feePerKb.minimalUnitAmount.div(1000).round().toString()),
             bip69: true,
             createTx: true,
@@ -216,6 +271,5 @@ export abstract class UtxoTransaction<CI extends CurrencyInfo> extends Transacti
         }
     }
 
-    protected abstract toLegacyAddress(address: Address): string
     protected abstract sign(inputs: Txo[], outputs: TxVout[]): Promise<Uint8Array>
 }
