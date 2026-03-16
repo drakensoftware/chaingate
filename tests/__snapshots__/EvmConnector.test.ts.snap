@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EvmConnector (Ethereum) > gets address balance 1`] = `"0.007696426773984"`;
+
+exports[`EvmConnector (Ethereum) > gets address balance 2`] = `"0"`;
+
+exports[`EvmConnector (Ethereum) > transfer - enough funds and broadcast 1`] = `"0x63ef99c109eb230c049419eb1ea4401e2b5fa0ace8147539f58ef01ab65427ad"`;

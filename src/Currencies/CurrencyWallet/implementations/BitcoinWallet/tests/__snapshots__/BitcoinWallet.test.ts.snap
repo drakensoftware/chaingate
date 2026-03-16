@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Bitcoin Get address balance 1`] = `"0.00019957"`;
-
-exports[`Bitcoin Get address balance 2`] = `"0"`;
-
-exports[`Bitcoin Sign message 1`] = `"IGGnuyc8HOq6tWYLvcMKpe/MvhiDWUu1uQRj0wx30bVSTSeYYRWM1B6T1NfpzF18q8Mc+dLZM3qmjWPvmiE9Dv4="`;
-
-exports[`Bitcoin Transfer 1`] = `"224bf8eeea9d302064a6a9c7c5a1d4b23732ff808c1ad063ce302aae5490428a"`;

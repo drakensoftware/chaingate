@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Dogecoin Get address balance 1`] = `"54.0347862"`;
-
-exports[`Dogecoin Get address balance 2`] = `"0"`;
-
-exports[`Dogecoin Sign message 1`] = `"H1/mj2Onjjvolqnj8cUVLiayB+Z9qubbAKNNsDdZ8BWuBaSD/W/1gIB8GudoRpC1fNK+tn2vZVtgaHjfr/1AfOs="`;
-
-exports[`Dogecoin Transfer 1`] = `"a24ac0687d7f2a2fed48db5027d43c357e7f16bf5e7b95d5dcafd6c160bbaaa7"`;

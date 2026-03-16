@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Litecoin Get address balance 1`] = `"0.19662761"`;
-
-exports[`Litecoin Get address balance 2`] = `"0"`;
-
-exports[`Litecoin Transfer 1`] = `"146b2f9d65010a88ffdab0782f332f423ac9031f8142d9d09f56e6aee236a4ab"`;

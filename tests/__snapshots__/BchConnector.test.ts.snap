@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`BchConnector (Bitcoin Cash) > gets address balance 1`] = `"0.04460027"`;
+
+exports[`BchConnector (Bitcoin Cash) > gets address balance 2`] = `"0"`;
+
+exports[`BchConnector (Bitcoin Cash) > transfer - enough funds and broadcast 1`] = `"b3d4f1b823e0aeb3a97d82095d9371756afaa2a6bd3aceb353b4a3acf14da133"`;

@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EvmRpcConnector (Avalanche via RPC) > gets address balance 1`] = `"0.33702294"`;
+
+exports[`EvmRpcConnector (Avalanche via RPC) > transfer - enough funds and broadcast 1`] = `"0xbaac02ff06b847df28dd4d5681331a26d82fb5c9fc174eda4c1c7f88c58b723c"`;

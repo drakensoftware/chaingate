@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UtxoConnector (Bitcoin Testnet) > gets address balance 1`] = `"0.005"`;
+
+exports[`UtxoConnector (Bitcoin Testnet) > gets address balance 2`] = `"0"`;
+
+exports[`UtxoConnector (Bitcoin Testnet) > transfer - enough funds and broadcast 1`] = `"aded3b958550bd6af5cff19f28f33724d6d3734b2957bab2d419f985e44ecedd"`;
+
+exports[`UtxoConnector (Bitcoin) > gets address balance 1`] = `"0.00018675"`;
+
+exports[`UtxoConnector (Bitcoin) > gets address balance 2`] = `"0"`;
+
+exports[`UtxoConnector (Bitcoin) > transfer - enough funds and broadcast 1`] = `"0ec9bafa66ba0f4a826432a2706876a95a94b72853bf9515ad895eb99fcd10a8"`;
+
+exports[`UtxoConnector (Dogecoin) > gets address balance 1`] = `"50.693707"`;
+
+exports[`UtxoConnector (Dogecoin) > gets address balance 2`] = `"0"`;
+
+exports[`UtxoConnector (Dogecoin) > transfer - enough funds and broadcast 1`] = `"7f61952373a3e3c964be627d5c73d8848ac996a9fb99eb9a4ffbb34c11f0ccbd"`;
+
+exports[`UtxoConnector (Litecoin) > gets address balance 1`] = `"0.19261351"`;
+
+exports[`UtxoConnector (Litecoin) > gets address balance 2`] = `"0"`;
+
+exports[`UtxoConnector (Litecoin) > transfer - enough funds and broadcast 1`] = `"312ab2fc105ebd1dbbf27962f7c65eba028c9c30d26b00e5397bb4164dc8cfa9"`;

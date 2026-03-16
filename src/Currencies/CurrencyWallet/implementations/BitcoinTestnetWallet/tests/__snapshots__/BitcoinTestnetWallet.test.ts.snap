@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Bitcoin Testnet Get address balance 1`] = `"0.00063501"`;
-
-exports[`Bitcoin Testnet Get address balance 2`] = `"0"`;
-
-exports[`Bitcoin Testnet Transfer 1`] = `"556d7a74d78108f96943edbb7a8ae2b4747f6e915939d3b4ef9b5e784222bd7e"`;
