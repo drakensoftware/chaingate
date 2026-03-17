@@ -1,12 +1,11 @@
 {
   "name": "chaingate",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "Multi-chain cryptocurrency SDK for TypeScript — unified API for Bitcoin, Ethereum, Litecoin, Dogecoin, Bitcoin Cash, Polygon, Arbitrum, and any EVM-compatible chain. Create wallets, query balances, send transactions, and manage tokens and NFTs across UTXO and EVM networks with a single library.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "patches",
     "LICENSE",
     "README.md"
   ],
@@ -62,7 +61,6 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "postinstall": "patch-package",
     "build": "tsc",
     "test": "vitest run",
     "lint": "eslint src/ tests/",
@@ -79,8 +77,6 @@
     "@pollyjs/adapter-fetch": "^6.0.7",
     "@pollyjs/core": "^6.0.6",
     "@pollyjs/persister-fs": "^6.0.6",
-    "@types/bchaddrjs": "^0.4.3",
-    "@types/bitcore-lib-cash": "^8.23.8",
     "@types/pollyjs__adapter-fetch": "^2.0.1",
     "@types/pollyjs__core": "^4.3.3",
     "@types/pollyjs__persister-fs": "^2.0.1",
@@ -105,22 +101,14 @@
       "prettier --write"
     ]
   },
-  "overrides": {
-    "bitcore-lib-cash": {
-      "bn.js": "4.12.3",
-      "elliptic": "6.6.1"
-    }
-  },
   "dependencies": {
     "@noble/curves": "^2.0.1",
     "@noble/hashes": "^2.0.1",
+    "@scure/base": "^2.0.0",
     "@scure/bip32": "^2.0.1",
     "@scure/bip39": "^2.0.1",
     "@scure/btc-signer": "^2.0.1",
-    "bchaddrjs": "^0.5.2",
-    "bitcore-lib-cash": "^10.10.5",
     "decimal.js": "^10.6.0",
-    "patch-package": "^8.0.1",
     "wif": "^5.0.0"
   }
 }

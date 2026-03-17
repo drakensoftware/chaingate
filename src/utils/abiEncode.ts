@@ -1,6 +1,6 @@
 /**
  * Minimal ABI encoding utilities for ERC-20, ERC-721 and ERC-1155 transfer
- * calldata. No external ABI libraries are needed.
+ * calldata.
  *
  * All functions return a hex string with `0x` prefix ready to be used as
  * transaction `data`.

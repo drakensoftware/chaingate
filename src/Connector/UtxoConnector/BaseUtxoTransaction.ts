@@ -19,6 +19,7 @@ import type { UtxoNetworkParams } from '../../ChainGate/networks/types';
 import { NotEnoughFundsError, TransactionAlreadySentError } from '../../errors';
 import { BroadcastedUtxoTransaction } from './BroadcastedUtxoTransaction';
 import { hexToBytes, bytesToHex } from '../../utils';
+import { Amount } from '../../utils/Amount';
 
 // ---------------------------------------------------------------------------
 // Shared types
@@ -56,7 +57,7 @@ export interface UtxoRecommendedFees {
 /** Internal UTXO representation. */
 export interface Txo {
   txid: string;
-  amount: bigint; // in satoshis
+  amount: Amount;
   n: number;
   script: Uint8Array;
 }
@@ -131,24 +132,28 @@ export abstract class BaseUtxoTransaction {
   }
 
   /**
+   * Returns the estimated virtual size (vbytes) of this transaction at the
+   * current fee rate, or `null` if there are not enough funds.
+   */
+  public estimatedSizeBytes(): number | null {
+    const selected = this.selectUtxos(this.currentFeePerKbSat);
+    if (!selected) return null;
+    return Math.ceil(selected.weight / 4);
+  }
+
+  /**
    * Sets the fee for this transaction.
    *
-   * Pass a tier name (`'low'`, `'normal'`, `'high'`, `'maximum'`) to use a
-   * recommended fee, or pass an object with a custom `feePerKbSat` value
-   * in satoshis per kilobyte.
+   * Pass a tier object from {@link recommendedFees} or an object with a
+   * custom `feePerKbSat` value in satoshis per kilobyte.
    *
    * @throws {@link TransactionAlreadySentError} if the transaction has already been sent.
    */
-  public setFee(feeOrTier: UtxoFeeTier | UtxoFee): void {
+  public setFee(fee: UtxoRecommendedFee | UtxoFee): void {
     if (this.sent) {
       throw new TransactionAlreadySentError();
     }
-    if (typeof feeOrTier === 'string') {
-      const tier = this.feeRates[feeOrTier];
-      this.currentFeePerKbSat = tier.feePerKbSat;
-    } else {
-      this.currentFeePerKbSat = feeOrTier.feePerKbSat;
-    }
+    this.currentFeePerKbSat = fee.feePerKbSat;
   }
 
   /**
@@ -192,7 +197,7 @@ export abstract class BaseUtxoTransaction {
         cache.addUnspent(this.fromAddress, {
           txid: txId,
           n: i,
-          amount: selected.outputs[i].amount,
+          amount: this.explorer.amountFromSat(selected.outputs[i].amount),
           script: fromScript,
         });
       }
@@ -243,7 +248,7 @@ export abstract class BaseUtxoTransaction {
 
         this.state.utxos.push({
           txid: utxo.txid,
-          amount: utxo.amount.min(),
+          amount: utxo.amount,
           n: utxo.n,
           script: hexToBytes(utxo.script),
         });
@@ -259,9 +264,12 @@ export abstract class BaseUtxoTransaction {
   // -------------------------------------------------------------------------
 
   /** Attempts to select UTXOs and compute outputs. Returns null if insufficient. */
-  protected selectUtxos(
-    feePerKbSat: bigint,
-  ): { inputs: Txo[]; outputs: Array<{ address: string; amount: bigint }>; fee: bigint } | null {
+  protected selectUtxos(feePerKbSat: bigint): {
+    inputs: Txo[];
+    outputs: Array<{ address: string; amount: bigint }>;
+    fee: bigint;
+    weight: number;
+  } | null {
     if (this.state.utxos.length === 0) return null;
 
     const vins = this.state.utxos.map((utxo) => ({
@@ -269,7 +277,7 @@ export abstract class BaseUtxoTransaction {
       index: utxo.n,
       witnessUtxo: {
         script: utxo.script,
-        amount: utxo.amount,
+        amount: utxo.amount.min(),
       },
     }));
 
@@ -289,7 +297,7 @@ export abstract class BaseUtxoTransaction {
 
     const inputs: Txo[] = selected.inputs.map((input) => ({
       txid: bytesToHex(input.txid!),
-      amount: input.witnessUtxo!.amount,
+      amount: this.explorer.amountFromSat(input.witnessUtxo!.amount),
       n: input.index ?? 0,
       script: input.witnessUtxo!.script,
     }));
@@ -302,7 +310,7 @@ export abstract class BaseUtxoTransaction {
       return { address: output.address!, amount: output.amount };
     });
 
-    return { inputs, outputs, fee: selected.fee ?? 0n };
+    return { inputs, outputs, fee: selected.fee ?? 0n, weight: selected.weight };
   }
 }
 
@@ -405,7 +413,7 @@ class TempUtxoSelector {
 
         this.state.utxos.push({
           txid: utxo.txid,
-          amount: utxo.amount.min(),
+          amount: utxo.amount,
           n: utxo.n,
           script: hexToBytes(utxo.script),
         });
@@ -422,7 +430,7 @@ class TempUtxoSelector {
     const vins = this.state.utxos.map((utxo) => ({
       txid: hexToBytes(utxo.txid),
       index: utxo.n,
-      witnessUtxo: { script: utxo.script, amount: utxo.amount },
+      witnessUtxo: { script: utxo.script, amount: utxo.amount.min() },
     }));
 
     const vouts = [{ address: this.toAddress, amount: this.valueSat }];

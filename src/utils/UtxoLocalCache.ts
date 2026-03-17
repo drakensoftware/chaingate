@@ -1,10 +1,12 @@
+import type { Amount } from './Amount';
+
 /**
  * A UTXO that is tracked locally (either as spent or as a new unspent change output).
  */
 export interface CachedUtxo {
   txid: string;
   n: number;
-  amount: bigint;
+  amount: Amount;
   script: Uint8Array;
 }
 

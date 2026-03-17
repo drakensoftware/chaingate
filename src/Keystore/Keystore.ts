@@ -3,8 +3,8 @@
  *
  * A keystore is a JSON-encrypted container for a secret (typically a private
  * key or mnemonic phrase). Two formats are supported:
- * - **V1 (Legacy)**: PBKDF2 + AES-128-CTR + blake2b MAC.
- * - **V3 (Web3)**: scrypt + AES-128-CTR + keccak-256 MAC.
+ * - **V1 (Legacy)**
+ * - **V3 (Web3)**
  */
 export abstract class Keystore {
   /**

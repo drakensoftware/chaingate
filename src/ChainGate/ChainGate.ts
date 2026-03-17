@@ -8,7 +8,7 @@ import { EvmConnector } from '../Connector/EvmConnector/EvmConnector';
 import { EvmRpcConnector } from '../Connector/EvmRpcConnector/EvmRpcConnector';
 import { EvmRpcExplorer } from '../Connector/EvmRpcConnector/EvmRpcExplorer';
 import { UtxoConnector } from '../Connector/UtxoConnector/UtxoConnector';
-import { BchConnector } from '../Connector/UtxoConnector/BchConnector';
+import { BchConnector } from '../Connector/UtxoConnector/BchConnector/BchConnector';
 import { UnsupportedOperationError, RateLimitError, RateLimitQuotaError } from '../errors';
 import {
   createNetworkCollection,

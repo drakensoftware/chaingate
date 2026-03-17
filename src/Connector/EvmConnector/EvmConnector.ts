@@ -10,6 +10,7 @@ import { hexToBytes } from '../../utils';
 import { UnsupportedOperationError } from '../../errors';
 import type { EvmAddressHistoryResponse, EvmAddressTxCountResponse } from '../../Client';
 import { Amount } from '../../utils/Amount';
+import type { BaseValue } from '../../utils/Amount';
 import type { EvmNetworkDescriptor } from '../../ChainGate/networks';
 import { EvmTransaction } from './EvmTransaction';
 import {
@@ -207,22 +208,26 @@ export class EvmConnector extends Connector<Wallet, EvmExplorer, EvmNetworkDescr
   /**
    * Creates an ERC-20 token transfer transaction.
    *
+   * Token decimals are fetched automatically from the contract, so you only
+   * need to specify the amount in human-readable units (e.g. `'1.5'` for 1.5
+   * tokens).
+   *
    * The returned {@link EvmTransaction} can be inspected, have its fee adjusted,
    * and then signed + broadcast — just like a native ETH transfer.
    *
    * @param contractAddress - Token contract address (with `0x` prefix).
-   * @param amount - Amount of tokens in the token's smallest unit. Create via
-   *   the `Amount` returned by {@link EvmConnector.addressTokenBalances} or
-   *   construct manually.
+   * @param amount - Amount of tokens in human-readable units (e.g. `'10'`,
+   *   `1.5`, `'0.001'`). Decimals are resolved automatically.
    * @param toAddress - Recipient address.
    *
    * @throws {@link UnsupportedOperationError} if the wallet is view-only.
    *
    * @example
    * ```ts
+   * // Send 10 USDC — decimals are resolved automatically
    * const tx = await eth.transferToken(
-   *   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
-   *   usdcAmount,
+   *   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+   *   '10',
    *   '0xRecipient...',
    * );
    * tx.fee('high');
@@ -231,14 +236,24 @@ export class EvmConnector extends Connector<Wallet, EvmExplorer, EvmNetworkDescr
    */
   public async transferToken(
     contractAddress: string,
-    amount: Amount,
+    amount: BaseValue,
     toAddress: string,
     options?: AddressOptions,
   ): Promise<EvmTransaction> {
     const { index = 0, derivationPath } = options ?? {};
-    const fromAddress = await this.address(options);
+    const [fromAddress, tokenData] = await Promise.all([
+      this.address(options),
+      this.explorer.getTokenData(contractAddress),
+    ]);
     const getPrivateKey = this.createPrivateKeyGetter(index, derivationPath);
-    const data = encodeErc20Transfer(toAddress, amount.min());
+    const decimals = tokenData.decimals ?? 0;
+    const tokenAmount = Amount.fromDecimal(
+      amount,
+      decimals,
+      { symbol: tokenData.symbol ?? '', name: tokenData.name ?? '', network: this.network.id },
+      this.explorer.global.marketsCache,
+    );
+    const data = encodeErc20Transfer(toAddress, tokenAmount.min());
 
     return EvmTransaction.create({
       explorer: this.explorer,

@@ -15,9 +15,8 @@ describe('EvmConnector Token Transfers (Ethereum)', () => {
 
     const recipient = await eth.address({ index: 1 });
 
-    // Transfer 1 TT token (18 decimals)
-    const amount = cg.networks.ethereum.amount('1');
-    const tx = await eth.transferToken(ETH_ERC20, amount, recipient);
+    // Transfer 1 TT token — decimals are resolved automatically
+    const tx = await eth.transferToken(ETH_ERC20, '1', recipient);
 
     const fees = tx.recommendedFees();
     expect(fees.normal.enoughFunds).toBe(true);
@@ -69,10 +68,9 @@ describe('EvmConnector Token Transfers (Ethereum)', () => {
     const eth = cg.connect(cg.networks.ethereum, wallet);
 
     // Use index 5 — this derived address has no ETH for gas
-    const amount = cg.networks.ethereum.amount('1');
     const tx = await eth.transferToken(
       ETH_ERC20,
-      amount,
+      '1',
       '0x1853be2c350EB9588bdC2Af73bDAA0C4B8Ac3583',
       { index: 5 },
     );

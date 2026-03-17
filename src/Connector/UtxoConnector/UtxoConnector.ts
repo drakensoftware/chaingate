@@ -11,6 +11,8 @@ import { Amount } from '../../utils/Amount';
 import { hexToBytes } from '../../utils';
 import type { UtxoAddressType, UtxoNetworkDescriptor } from '../../ChainGate/networks';
 import { UtxoTransaction } from './UtxoTransaction';
+import { CustomUtxoTransaction, signCustomUtxoTransaction } from './CustomUtxoTransaction';
+import type { CustomUtxoTransactionParams } from './CustomUtxoTransaction';
 import { createPrivateKeyGetter } from './utxoConnectorUtils';
 
 /** Options for resolving a UTXO wallet address. */
@@ -178,6 +180,29 @@ export class UtxoConnector extends Connector<Wallet, UtxoExplorer, UtxoNetworkDe
       valueSat,
       networkParams: this.network.networkParams,
       getPrivateKey,
+    });
+  }
+
+  /**
+   * Creates a custom UTXO transaction with caller-defined inputs and outputs.
+   *
+   * @param params - Inputs and outputs for the transaction.
+   * @throws {@link UnsupportedOperationError} if the wallet is view-only.
+   */
+  public createTransaction(
+    params: CustomUtxoTransactionParams,
+    options?: UtxoAddressOptions,
+  ): CustomUtxoTransaction {
+    const { index, derivationPath } = this.resolveAddressOptions(options);
+    const getPrivateKey = createPrivateKeyGetter(this.wallet, index, derivationPath);
+
+    return new CustomUtxoTransaction({
+      explorer: this.explorer,
+      networkParams: this.network.networkParams,
+      inputs: params.inputs,
+      outputs: params.outputs,
+      getPrivateKey,
+      signTransaction: signCustomUtxoTransaction,
     });
   }
 }

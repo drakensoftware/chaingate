@@ -4,8 +4,8 @@ import type { EvmNetwork } from '../../Explorer/EvmExplorer';
 export type Network = UtxoNetwork | EvmNetwork;
 
 /**
- * Bitcoin-style network parameters used by `@scure/btc-signer` for address
- * encoding/decoding and transaction signing.
+ * Bitcoin-style network parameters for address encoding/decoding and
+ * transaction signing.
  */
 export interface UtxoNetworkParams {
   bech32: string;
@@ -69,6 +69,6 @@ export type NetworkInfo = {
 
 /** @internal Full network info including internal fields not exposed via the public API. */
 export type NetworkInfoInternal = NetworkInfo & {
-  /** Bitcoin-style network params used by `@scure/btc-signer`. @internal */
+  /** Bitcoin-style network params. @internal */
   networkParams?: UtxoNetworkParams;
 };

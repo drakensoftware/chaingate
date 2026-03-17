@@ -1,8 +1,7 @@
 /**
- * EIP-1559 (type-2) transaction serialization and signing using @noble/curves.
+ * EIP-1559 (type-2) transaction serialization and signing.
  *
  * Produces the signed raw transaction hex ready for broadcast.
- * No external transaction libraries are needed.
  */
 
 import { secp256k1 } from '@noble/curves/secp256k1.js';

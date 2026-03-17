@@ -2,7 +2,7 @@ import { Amount } from '../../utils/Amount';
 import type { AmountData, BaseValue } from '../../utils/Amount';
 import type { MarketsResponse } from '../../Client';
 import type { TTLCache } from '../../utils/TTLCache';
-import { publicKeyToEthAddress } from '../../utils/crypto';
+import { publicKeyToEthAddress, isValidEvmAddress } from '../../utils/crypto';
 import { signEvmMessage, verifyEvmMessage } from '../../utils/messageSigning';
 import type { EvmAddressType, AddressTypeConfig } from './types';
 
@@ -91,6 +91,19 @@ export class EvmRpcNetworkDescriptor {
    */
   public publicKeyToAddress(publicKey: Uint8Array): string {
     return publicKeyToEthAddress(publicKey);
+  }
+
+  /**
+   * Checks whether a string is a valid EVM address.
+   *
+   * Accepts both checksummed and all-lowercase/all-uppercase forms.
+   * When the address uses mixed case, the EIP-55 checksum is verified.
+   *
+   * @param address - The address string to validate.
+   * @returns `true` if the address is valid.
+   */
+  public isValidAddress(address: string): boolean {
+    return isValidEvmAddress(address);
   }
 
   /**

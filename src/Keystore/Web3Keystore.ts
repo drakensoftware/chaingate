@@ -28,12 +28,7 @@ export interface Web3KeystoreData {
   version: 3;
 }
 
-/**
- * Web3 (V3) keystore.
- *
- * Uses scrypt (or PBKDF2) for key derivation, AES-128-CTR for decryption, and
- * keccak-256 for MAC verification. Implemented from scratch without ethers.js.
- */
+/** Web3 (V3) keystore. */
 export class Web3Keystore implements Keystore {
   private readonly keystoreData: Web3KeystoreData;
 

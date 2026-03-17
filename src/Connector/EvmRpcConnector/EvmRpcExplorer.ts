@@ -144,6 +144,18 @@ export class EvmRpcExplorer {
     };
   }
 
+  /**
+   * Returns the number of decimals for an ERC-20 token contract.
+   */
+  public async getTokenDecimals(contractAddress: string): Promise<number> {
+    // decimals() selector: 0x313ce567
+    const result = await this.call<string>('eth_call', [
+      { to: contractAddress, data: '0x313ce567' },
+      'latest',
+    ]);
+    return Number(BigInt(result));
+  }
+
   // ---------------------------------------------------------------------------
   // Internal
   // ---------------------------------------------------------------------------

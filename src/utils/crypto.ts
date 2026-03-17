@@ -56,3 +56,28 @@ function toEip55Checksum(address: string): string {
   }
   return checksummed;
 }
+
+// Matches exactly 40 hex characters, with or without 0x prefix.
+const EVM_ADDRESS_RE = /^(0x)?[0-9a-fA-F]{40}$/;
+
+/**
+ * Checks whether a string is a valid EVM address.
+ *
+ * Accepts both checksummed and all-lowercase/all-uppercase forms.
+ * When the address uses mixed case, the EIP-55 checksum is verified.
+ *
+ * @param address - The address string to validate.
+ * @returns `true` if the address is valid.
+ */
+export function isValidEvmAddress(address: string): boolean {
+  if (!EVM_ADDRESS_RE.test(address)) return false;
+
+  // Strip 0x prefix for checksum evaluation.
+  const raw = address.startsWith('0x') || address.startsWith('0X') ? address.slice(2) : address;
+
+  // All-lowercase or all-uppercase is valid without checksum verification.
+  if (raw === raw.toLowerCase() || raw === raw.toUpperCase()) return true;
+
+  // Mixed case → verify EIP-55 checksum.
+  return toEip55Checksum(raw) === `0x${raw}`;
+}

@@ -1,6 +1,6 @@
-import type { UtxoExplorer } from '../../Explorer/UtxoExplorer';
-import type { UtxoNetworkParams } from '../../ChainGate/networks/types';
-import { BaseUtxoTransaction, buildRecommendedFees } from './BaseUtxoTransaction';
+import type { UtxoExplorer } from '../../../Explorer/UtxoExplorer';
+import type { UtxoNetworkParams } from '../../../ChainGate/networks/types';
+import { BaseUtxoTransaction, buildRecommendedFees } from '../BaseUtxoTransaction';
 import type {
   Txo,
   UtxoApiState,
@@ -8,10 +8,9 @@ import type {
   UtxoFeeTier,
   UtxoRecommendedFee,
   UtxoRecommendedFees,
-} from './BaseUtxoTransaction';
-import { bytesToHex, hexToBytes } from '../../utils';
-import bitcoreCash from 'bitcore-lib-cash';
-import * as bchaddrjs from 'bchaddrjs';
+} from '../BaseUtxoTransaction';
+import { toLegacyAddress } from './cashaddr';
+import { signBchTransaction } from './bch';
 
 // Re-export unified fee types under BCH-specific aliases.
 export type BchFee = UtxoFee;
@@ -22,16 +21,12 @@ export type BchRecommendedFees = UtxoRecommendedFees;
 /**
  * An unsigned Bitcoin Cash transaction prepared by {@link BchConnector.transfer}.
  *
- * Addresses are stored internally in **legacy** format so `@scure/btc-signer`
- * can handle UTXO selection.  Signing uses `bitcore-lib-cash` (which handles
- * `SIGHASH_FORKID` internally) with addresses converted back to CashAddr.
- *
  * @example
  * ```ts
  * const amount = cg.networks.bitcoincash.amount('0.01');
  * const tx = await bch.transfer(amount, 'bitcoincash:qq...');
  * const fees = tx.recommendedFees();
- * tx.setFee('high');
+ * tx.setFee(fees.high);
  * const broadcasted = await tx.signAndBroadcast();
  * ```
  */
@@ -59,8 +54,8 @@ export class BchTransaction extends BaseUtxoTransaction {
 
     // Convert addresses to legacy format for @scure/btc-signer compatibility
     // (it doesn't understand CashAddr encoding).
-    const fromAddress = bchaddrjs.toLegacyAddress(rawFrom);
-    const toAddress = bchaddrjs.toLegacyAddress(rawTo);
+    const fromAddress = toLegacyAddress(rawFrom);
+    const toAddress = toLegacyAddress(rawTo);
 
     // Fetch fee rates.
     const feeRateResult = await explorer.getFeeRate();
@@ -92,47 +87,25 @@ export class BchTransaction extends BaseUtxoTransaction {
   }
 
   // ---------------------------------------------------------------------------
-  // Transaction signing via bitcore-lib-cash
+  // Transaction signing
   // ---------------------------------------------------------------------------
 
-  /**
-   * Signs the transaction using `bitcore-lib-cash`.
-   *
-   * Inputs use legacy addresses / raw scripts.
-   * Output addresses are converted to CashAddr for `bitcore-lib-cash`.
-   */
+  /** Signs the transaction and returns the serialized raw bytes. */
   protected signTransaction(
     inputs: Txo[],
     outputs: Array<{ address: string; amount: bigint }>,
     privateKey: Uint8Array,
   ): Uint8Array {
-    let transaction = new bitcoreCash.Transaction();
-
-    transaction = transaction.from(
-      inputs.map(
-        (input) =>
-          new bitcoreCash.Transaction.UnspentOutput({
-            txId: input.txid,
-            outputIndex: input.n,
-            script: bitcoreCash.Script.fromHex(bytesToHex(input.script)),
-            satoshis: Number(input.amount),
-          }),
-      ),
+    return signBchTransaction(
+      inputs.map((input) => ({
+        txid: input.txid,
+        n: input.n,
+        script: input.script,
+        amount: input.amount.min(),
+      })),
+      outputs,
+      privateKey,
+      this.networkParams,
     );
-
-    for (const output of outputs) {
-      const cashAddr = bchaddrjs.toCashAddress(output.address);
-      transaction = transaction.addOutput(
-        new bitcoreCash.Transaction.Output({
-          satoshis: Number(output.amount),
-          script: bitcoreCash.Script.fromAddress(bitcoreCash.Address.fromString(cashAddr)),
-        }),
-      );
-    }
-
-    const privateKeyHex = bytesToHex(privateKey);
-    transaction = transaction.sign(privateKeyHex);
-
-    return hexToBytes(transaction.serialize());
   }
 }

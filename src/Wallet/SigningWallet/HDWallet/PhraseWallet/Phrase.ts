@@ -8,7 +8,8 @@ import { wordlist as korean } from '@scure/bip39/wordlists/korean.js';
 import { wordlist as portuguese } from '@scure/bip39/wordlists/portuguese.js';
 import { wordlist as simplifiedChinese } from '@scure/bip39/wordlists/simplified-chinese.js';
 import { wordlist as spanish } from '@scure/bip39/wordlists/spanish.js';
-import { wordlist as traditionalChinese } from '@scure/bip39/wordlists/traditional-chinese.js';
+// Local copy — @scure/bip39@2.0.1 has a broken exports map for this wordlist
+import { wordlist as traditionalChinese } from '../../../../wordlists/traditional-chinese';
 import { Secret, EncryptedState } from '../../../Secret';
 import { bytesToHex } from '../../../../utils';
 import { Seed } from '../SeedWallet/Seed';

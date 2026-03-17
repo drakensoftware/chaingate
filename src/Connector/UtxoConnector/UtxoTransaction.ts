@@ -32,7 +32,7 @@ export type { UtxoFee, UtxoFeeTier, UtxoRecommendedFee, UtxoRecommendedFees };
  * console.log(fees.normal.enoughFunds);
  *
  * // Override with a specific tier
- * tx.setFee('high');
+ * tx.setFee(fees.high);
  *
  * // Or set a custom fee rate
  * tx.setFee({ feePerKbSat: 50_000n });
@@ -87,7 +87,7 @@ export class UtxoTransaction extends BaseUtxoTransaction {
   // Transaction signing via @scure/btc-signer
   // ---------------------------------------------------------------------------
 
-  /** Signs a transaction using @scure/btc-signer. */
+  /** Signs the transaction and returns the serialized raw bytes. */
   protected signTransaction(
     inputs: Txo[],
     outputs: Array<{ address: string; amount: bigint }>,
@@ -98,7 +98,7 @@ export class UtxoTransaction extends BaseUtxoTransaction {
       index: vin.n,
       witnessUtxo: {
         script: vin.script,
-        amount: vin.amount,
+        amount: vin.amount.min(),
       },
     }));
 

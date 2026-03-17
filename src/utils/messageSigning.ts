@@ -1,7 +1,6 @@
 /**
  * Message signing and verification for EVM (EIP-191) and UTXO (Bitcoin-style)
- * networks. Implemented with `@noble/curves` and `@noble/hashes` — no ethers.js
- * dependency.
+ * networks.
  */
 
 import { secp256k1 } from '@noble/curves/secp256k1.js';
@@ -48,12 +47,11 @@ function eip191Hash(message: string | Uint8Array): Uint8Array {
 
 /**
  * Signs a message using EIP-191 personal sign (the same scheme as MetaMask's
- * `personal_sign` and ethers.js `Wallet.signMessage`).
+ * `personal_sign`).
  *
  * @param message - The message to sign (string or raw bytes).
- * @param privateKey - The 32-byte secp256k1 private key.
- * @returns The 65-byte signature as a hex string with `0x` prefix
- *   (`0x` + r(32) + s(32) + v(1), where v is 27 or 28).
+ * @param privateKey - The 32-byte private key.
+ * @returns The 65-byte signature as a hex string with `0x` prefix.
  */
 export function signEvmMessage(message: string | Uint8Array, privateKey: Uint8Array): string {
   const hash = eip191Hash(message);
@@ -152,13 +150,12 @@ function magicHash(
 }
 
 /**
- * Signs a message using the Bitcoin message signing standard (double-SHA256
- * magic hash + secp256k1 recoverable signature).
+ * Signs a message using the Bitcoin message signing standard.
  *
  * @param message - The message to sign (string or raw bytes).
- * @param privateKey - The 32-byte secp256k1 private key.
+ * @param privateKey - The 32-byte private key.
  * @param prefix - The chain-specific sign header. Defaults to Bitcoin's prefix.
- * @returns The signature as a base64 string (65 bytes: recovery flag + compact sig).
+ * @returns The signature as a base64 string (65 bytes).
  */
 export function signUtxoMessage(
   message: Uint8Array | string,

@@ -86,7 +86,7 @@ function gradeToFee(
  * console.log(fees.normal.maxFeePerGas);
  *
  * // Override with a specific tier
- * tx.setFee('high');
+ * tx.setFee(fees.high);
  *
  * // Or set a manual fee with optional gas limit override
  * tx.setFee({ maxFeePerGas: 30_000_000_000n, maxPriorityFeePerGas: 2_000_000_000n, gasLimit: 50_000n });
@@ -175,30 +175,22 @@ export class EvmTransaction {
   /**
    * Sets the fee for this transaction.
    *
-   * Pass a tier name (`'low'`, `'normal'`, `'high'`, `'maximum'`) to use a
-   * recommended fee, or pass an object with manual `maxFeePerGas`,
-   * `maxPriorityFeePerGas` (in wei), and an optional `gasLimit` override.
+   * Pass a tier object from {@link recommendedFees} or an object with manual
+   * `maxFeePerGas`, `maxPriorityFeePerGas` (in wei), and an optional
+   * `gasLimit` override.
    *
    * @throws {@link TransactionAlreadySentError} if the transaction has already been sent.
    */
-  public setFee(feeOrTier: EvmFeeTier | EvmFee): void {
+  public setFee(fee: EvmRecommendedFee | EvmFee): void {
     if (this.sent) {
       throw new TransactionAlreadySentError();
     }
-    if (typeof feeOrTier === 'string') {
-      const tier = this.feeRates[feeOrTier];
-      this.currentFee = {
-        maxFeePerGas: tier.maxFeePerGas,
-        maxPriorityFeePerGas: tier.maxPriorityFeePerGas,
-      };
-    } else {
-      this.currentFee = {
-        maxFeePerGas: feeOrTier.maxFeePerGas,
-        maxPriorityFeePerGas: feeOrTier.maxPriorityFeePerGas,
-      };
-      if (feeOrTier.gasLimit !== undefined) {
-        this.gasLimit = feeOrTier.gasLimit;
-      }
+    this.currentFee = {
+      maxFeePerGas: fee.maxFeePerGas,
+      maxPriorityFeePerGas: fee.maxPriorityFeePerGas,
+    };
+    if ('gasLimit' in fee && fee.gasLimit !== undefined) {
+      this.gasLimit = fee.gasLimit;
     }
   }
 

@@ -58,6 +58,14 @@ export class UtxoExplorer {
     this.global = global;
   }
 
+  /**
+   * Creates an Amount from a raw satoshi bigint value.
+   * @internal
+   */
+  public amountFromSat(sat: bigint): Amount {
+    return new Amount(sat, UTXO_DECIMALS, this.nativeData(), this.global.marketsCache);
+  }
+
   /** Returns the native coin data for this network. */
   private nativeData(): AmountData {
     const info = NETWORKS_INFO[this.network];

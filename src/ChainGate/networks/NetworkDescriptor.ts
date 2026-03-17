@@ -89,11 +89,11 @@ export class NetworkDescriptor<TAddressType extends AddressType = AddressType> {
    * Derives a blockchain address from a compressed public key.
    *
    * Each network subclass implements the appropriate derivation algorithm:
-   * - **UTXO** networks: segwit, legacy, or taproot via `@scure/btc-signer`.
-   * - **Bitcoin Cash**: CashAddr or legacy via `bitcore-lib-cash`.
-   * - **EVM** networks: EIP-55 checksummed address via keccak-256.
+   * - **UTXO** networks: segwit, legacy, or taproot.
+   * - **Bitcoin Cash**: CashAddr or legacy.
+   * - **EVM** networks: EIP-55 checksummed address.
    *
-   * @param publicKey - Compressed (33-byte) secp256k1 public key.
+   * @param publicKey - Compressed (33-byte) public key.
    * @param addressType - Address encoding to use. Defaults to the network's
    *   {@link defaultAddressType}.
    * @returns The derived address string.
@@ -103,6 +103,24 @@ export class NetworkDescriptor<TAddressType extends AddressType = AddressType> {
     void addressType;
     throw new UnsupportedOperationError(
       `publicKeyToAddress is not implemented for network "${this.id}".`,
+    );
+  }
+
+  /**
+   * Checks whether a string is a valid address for this network.
+   *
+   * Each network subclass implements the appropriate validation:
+   * - **UTXO** networks: base58check and bech32/bech32m decoding.
+   * - **Bitcoin Cash**: CashAddr and legacy Base58Check formats.
+   * - **EVM** networks: hex format and EIP-55 checksum.
+   *
+   * @param address - The address string to validate.
+   * @returns `true` if the address is valid for this network.
+   */
+  public isValidAddress(address: string): boolean {
+    void address;
+    throw new UnsupportedOperationError(
+      `isValidAddress is not implemented for network "${this.id}".`,
     );
   }
 

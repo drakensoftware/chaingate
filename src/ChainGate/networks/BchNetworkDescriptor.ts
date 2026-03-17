@@ -1,10 +1,13 @@
-import bitcoreCash from 'bitcore-lib-cash';
-import * as bchaddrjs from 'bchaddrjs';
 import type { MarketsResponse } from '../../Client';
 import type { TTLCache } from '../../utils/TTLCache';
-import { bytesToHex } from '../../utils/encoding';
 import { UnsupportedOperationError } from '../../errors';
 import { signUtxoMessage, recoverUtxoPublicKey } from '../../utils/messageSigning';
+import { publicKeyToHash160 } from '../../Connector/UtxoConnector/BchConnector/bch';
+import {
+  hashToCashAddress,
+  toLegacyAddress,
+  toCashAddress,
+} from '../../Connector/UtxoConnector/BchConnector/cashaddr';
 import { NetworkDescriptor } from './NetworkDescriptor';
 import type { NetworkInfoInternal, UtxoNetworkParams, BchAddressType } from './types';
 
@@ -28,19 +31,43 @@ export class BchNetworkDescriptor extends NetworkDescriptor<BchAddressType> {
   public override publicKeyToAddress(publicKey: Uint8Array, addressType?: BchAddressType): string {
     const type = addressType ?? this.defaultAddressType;
 
-    const publicKeyBch = new bitcoreCash.PublicKey(bytesToHex(publicKey));
-    const cashAddr = bitcoreCash.Address.fromPublicKey(
-      publicKeyBch,
-      bitcoreCash.Networks.mainnet,
-    ).toCashAddress();
+    // HASH160(publicKey) = RIPEMD160(SHA256(publicKey))
+    const hash160 = publicKeyToHash160(publicKey);
+    const cashAddr = hashToCashAddress(hash160, 'p2pkh');
 
     switch (type) {
       case 'cashaddr':
         return cashAddr;
       case 'legacy':
-        return bchaddrjs.toLegacyAddress(cashAddr);
+        return toLegacyAddress(cashAddr);
       default:
         throw new UnsupportedOperationError(`Unsupported BCH address type: ${type as string}`);
+    }
+  }
+
+  /**
+   * Checks whether a string is a valid Bitcoin Cash address.
+   *
+   * Accepts both CashAddr (e.g. `bitcoincash:qq...`) and legacy Base58Check formats.
+   *
+   * @param address - The address string to validate.
+   * @returns `true` if the address is valid.
+   */
+  public override isValidAddress(address: string): boolean {
+    // Try CashAddr decoding (with or without prefix).
+    try {
+      toLegacyAddress(address);
+      return true;
+    } catch {
+      // Not a valid CashAddr — try legacy below.
+    }
+
+    // Try legacy Base58Check → CashAddr conversion.
+    try {
+      toCashAddress(address);
+      return true;
+    } catch {
+      return false;
     }
   }
 

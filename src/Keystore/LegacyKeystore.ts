@@ -28,12 +28,7 @@ interface DerivedKey {
   passwordCheck: Uint8Array;
 }
 
-/**
- * Legacy (V1) keystore.
- *
- * Uses PBKDF2 for key derivation, AES-128-CTR for decryption, and blake2b for
- * MAC verification. Does **not** require ethers.js or any heavy dependency.
- */
+/** Legacy (V1) keystore. */
 export class LegacyKeystore implements Keystore {
   private readonly keystoreData: LegacyKeystoreData;
   private _derivedKey: DerivedKey | undefined;

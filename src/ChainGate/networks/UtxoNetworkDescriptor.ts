@@ -72,8 +72,7 @@ export class UtxoNetworkDescriptor extends NetworkDescriptor<UtxoAddressType> {
   }
 
   /**
-   * Signs a message using the Bitcoin message signing standard (double-SHA256
-   * magic hash + secp256k1 recoverable signature).
+   * Signs a message using the Bitcoin message signing standard.
    *
    * @param message - The message to sign (string or raw bytes).
    * @param privateKey - The 32-byte secp256k1 private key.
@@ -125,6 +124,16 @@ export class UtxoNetworkDescriptor extends NetworkDescriptor<UtxoAddressType> {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Checks whether a string is a valid address for this UTXO network.
+   *
+   * @param address - The address string to validate.
+   * @returns `true` if the address is valid for this network.
+   */
+  public override isValidAddress(address: string): boolean {
+    return this.identifyAddressType(address) !== 'unknown';
   }
 
   /**

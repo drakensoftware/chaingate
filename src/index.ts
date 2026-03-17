@@ -165,15 +165,21 @@ export type {
 } from './Connector/UtxoConnector/BaseUtxoTransaction';
 export { BroadcastedUtxoTransaction } from './Connector/UtxoConnector/BroadcastedUtxoTransaction';
 export type { UtxoConfirmationDetails } from './Connector/UtxoConnector/BroadcastedUtxoTransaction';
-export { BchConnector } from './Connector/UtxoConnector/BchConnector';
-export type { BchAddressOptions } from './Connector/UtxoConnector/BchConnector';
-export { BchTransaction } from './Connector/UtxoConnector/BchTransaction';
+export { CustomUtxoTransaction } from './Connector/UtxoConnector/CustomUtxoTransaction';
+export type {
+  UtxoCustomInput,
+  UtxoCustomOutput,
+  CustomUtxoTransactionParams,
+} from './Connector/UtxoConnector/CustomUtxoTransaction';
+export { BchConnector } from './Connector/UtxoConnector/BchConnector/BchConnector';
+export type { BchAddressOptions } from './Connector/UtxoConnector/BchConnector/BchConnector';
+export { BchTransaction } from './Connector/UtxoConnector/BchConnector/BchTransaction';
 export type {
   BchFee,
   BchFeeTier,
   BchRecommendedFee,
   BchRecommendedFees,
-} from './Connector/UtxoConnector/BchTransaction';
+} from './Connector/UtxoConnector/BchConnector/BchTransaction';
 
 // UTXO Cache
 export { UtxoLocalCache } from './utils/UtxoLocalCache';
@@ -182,7 +188,7 @@ export type { CachedUtxo } from './utils/UtxoLocalCache';
 // Utils
 export { Amount } from './utils/Amount';
 export type { AmountData, BaseValue, DecimalLike, OwnedNft, FiatCurrency } from './utils/Amount';
-export { publicKeyToEthAddress } from './utils/crypto';
+export { publicKeyToEthAddress, isValidEvmAddress } from './utils/crypto';
 export {
   encodeErc20Transfer,
   encodeErc721SafeTransferFrom,

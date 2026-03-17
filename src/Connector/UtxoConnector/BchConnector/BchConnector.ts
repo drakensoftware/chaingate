@@ -1,17 +1,25 @@
-import { Connector } from '../Connector';
-import type { AddressOptions } from '../Connector';
-import { UtxoExplorer } from '../../Explorer/UtxoExplorer';
-import type { Wallet } from '../../Wallet/Wallet';
-import { HDWallet } from '../../Wallet/SigningWallet/HDWallet/HDWallet';
-import { PrivateKeyWallet } from '../../Wallet/SigningWallet/PrivateKeyWallet/PrivateKeyWallet';
-import { XpubWallet } from '../../Wallet/ViewOnlyWallet/XpubWallet/XpubWallet';
-import { PublicKeyWallet } from '../../Wallet/ViewOnlyWallet/PublicKeyWallet/PublicKeyWallet';
-import { UnsupportedOperationError } from '../../errors';
-import { Amount } from '../../utils/Amount';
-import { hexToBytes } from '../../utils';
-import type { BchAddressType, BchNetworkDescriptor } from '../../ChainGate/networks';
+import { Connector } from '../../Connector';
+import type { AddressOptions } from '../../Connector';
+import { UtxoExplorer } from '../../../Explorer/UtxoExplorer';
+import type { Wallet } from '../../../Wallet/Wallet';
+import { HDWallet } from '../../../Wallet/SigningWallet/HDWallet/HDWallet';
+import { PrivateKeyWallet } from '../../../Wallet/SigningWallet/PrivateKeyWallet/PrivateKeyWallet';
+import { XpubWallet } from '../../../Wallet/ViewOnlyWallet/XpubWallet/XpubWallet';
+import { PublicKeyWallet } from '../../../Wallet/ViewOnlyWallet/PublicKeyWallet/PublicKeyWallet';
+import { UnsupportedOperationError } from '../../../errors';
+import { Amount } from '../../../utils/Amount';
+import { hexToBytes } from '../../../utils';
+import type { BchAddressType, BchNetworkDescriptor } from '../../../ChainGate/networks';
 import { BchTransaction } from './BchTransaction';
-import { createPrivateKeyGetter } from './utxoConnectorUtils';
+import { CustomUtxoTransaction } from '../CustomUtxoTransaction';
+import type {
+  CustomUtxoTransactionParams,
+  UtxoCustomInput,
+  UtxoCustomOutput,
+} from '../CustomUtxoTransaction';
+import { signBchTransaction } from './bch';
+import { toLegacyAddress } from './cashaddr';
+import { createPrivateKeyGetter } from '../utxoConnectorUtils';
 
 /** Options for resolving a Bitcoin Cash wallet address. */
 export interface BchAddressOptions extends AddressOptions {
@@ -169,4 +177,62 @@ export class BchConnector extends Connector<Wallet, UtxoExplorer, BchNetworkDesc
       getPrivateKey,
     });
   }
+
+  /**
+   * Creates a custom BCH transaction with caller-defined inputs and outputs.
+   *
+   * Addresses may be provided in CashAddr or legacy format.
+   *
+   * @param params - Inputs and outputs for the transaction.
+   * @throws {@link UnsupportedOperationError} if the wallet is view-only.
+   */
+  public createTransaction(
+    params: CustomUtxoTransactionParams,
+    options?: BchAddressOptions,
+  ): CustomUtxoTransaction {
+    const { index, derivationPath } = this.resolveAddressOptions(options);
+    const getPrivateKey = createPrivateKeyGetter(this.wallet, index, derivationPath);
+
+    // Convert output addresses to legacy for signing compatibility.
+    const legacyOutputs: UtxoCustomOutput[] = params.outputs.map((o) => ({
+      address: toLegacyAddress(o.address),
+      amount: o.amount,
+    }));
+
+    return new CustomUtxoTransaction({
+      explorer: this.explorer,
+      networkParams: this.network.networkParams,
+      inputs: params.inputs,
+      outputs: legacyOutputs,
+      getPrivateKey,
+      signTransaction: signCustomBchTransaction,
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// BCH-specific custom signing adapter
+// ---------------------------------------------------------------------------
+
+/** @internal */
+function signCustomBchTransaction(
+  inputs: UtxoCustomInput[],
+  outputs: UtxoCustomOutput[],
+  privateKey: Uint8Array,
+  networkParams: import('../../../ChainGate/networks/types').UtxoNetworkParams,
+): Uint8Array {
+  return signBchTransaction(
+    inputs.map((i) => ({
+      txid: i.txid,
+      n: i.index,
+      script: hexToBytes(i.script),
+      amount: i.amount.min(),
+    })),
+    outputs.map((o) => ({
+      address: o.address,
+      amount: o.amount.min(),
+    })),
+    privateKey,
+    networkParams,
+  );
 }

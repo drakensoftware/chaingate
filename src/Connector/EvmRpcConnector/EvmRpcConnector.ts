@@ -7,7 +7,9 @@ import { XpubWallet } from '../../Wallet/ViewOnlyWallet/XpubWallet/XpubWallet';
 import { PublicKeyWallet } from '../../Wallet/ViewOnlyWallet/PublicKeyWallet/PublicKeyWallet';
 import { hexToBytes } from '../../utils';
 import { UnsupportedOperationError } from '../../errors';
-import type { Amount } from '../../utils/Amount';
+import { Amount } from '../../utils/Amount';
+import type { BaseValue } from '../../utils/Amount';
+import Decimal from 'decimal.js';
 import type { EvmRpcNetworkDescriptor } from '../../ChainGate/networks';
 import { EvmRpcTransaction } from './EvmRpcTransaction';
 import {
@@ -158,20 +160,26 @@ export class EvmRpcConnector {
   /**
    * Creates an ERC-20 token transfer transaction.
    *
+   * Token decimals are fetched automatically from the contract, so you only
+   * need to specify the amount in human-readable units (e.g. `'1.5'` for 1.5
+   * tokens).
+   *
    * The returned {@link EvmRpcTransaction} can be inspected, have its fee
    * adjusted, and then signed + broadcast — just like a native coin transfer.
    *
    * @param contractAddress - Token contract address (with `0x` prefix).
-   * @param amount - Amount of tokens in the token's smallest unit.
+   * @param amount - Amount of tokens in human-readable units (e.g. `'10'`,
+   *   `1.5`, `'0.001'`). Decimals are resolved automatically.
    * @param toAddress - Recipient address.
    *
    * @throws {@link UnsupportedOperationError} if the wallet is view-only.
    *
    * @example
    * ```ts
+   * // Send 10 tokens — decimals are resolved automatically
    * const tx = await conn.transferToken(
    *   '0xTokenContract...',
-   *   tokenAmount,
+   *   '10',
    *   '0xRecipient...',
    * );
    * const broadcasted = await tx.signAndBroadcast();
@@ -179,14 +187,20 @@ export class EvmRpcConnector {
    */
   public async transferToken(
     contractAddress: string,
-    amount: Amount,
+    amount: BaseValue,
     toAddress: string,
     options?: AddressOptions,
   ): Promise<EvmRpcTransaction> {
     const { index = 0, derivationPath } = options ?? {};
-    const fromAddress = await this.address(options);
+    const [fromAddress, decimals] = await Promise.all([
+      this.address(options),
+      this.explorer.getTokenDecimals(contractAddress),
+    ]);
     const getPrivateKey = this.createPrivateKeyGetter(index, derivationPath);
-    const data = encodeErc20Transfer(toAddress, amount.min());
+    const rawAmount = BigInt(
+      new Decimal(amount.toString()).mul(new Decimal(10).pow(decimals)).toFixed(0),
+    );
+    const data = encodeErc20Transfer(toAddress, rawAmount);
 
     return EvmRpcTransaction.create({
       explorer: this.explorer,

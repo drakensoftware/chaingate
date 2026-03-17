@@ -1,5 +1,10 @@
 export { isHex, hexToBytes, bytesToHex, isBase58 } from './encoding';
-export { privateKeyToPublicKey, compressPublicKey, publicKeyToEthAddress } from './crypto';
+export {
+  privateKeyToPublicKey,
+  compressPublicKey,
+  publicKeyToEthAddress,
+  isValidEvmAddress,
+} from './crypto';
 export {
   encodeErc20Transfer,
   encodeErc721SafeTransferFrom,

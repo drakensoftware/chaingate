@@ -45,6 +45,9 @@ import type {
   GetEvmNetworkNftMetadataImageErrors,
   GetEvmNetworkNftMetadataImageResponses,
   GetEvmNetworkNftMetadataResponses,
+  GetEvmNetworkOwnedTokensData,
+  GetEvmNetworkOwnedTokensErrors,
+  GetEvmNetworkOwnedTokensResponses,
   GetEvmNetworkTokenDataData,
   GetEvmNetworkTokenDataErrors,
   GetEvmNetworkTokenDataResponses,
@@ -178,7 +181,7 @@ export const getEvmNetworkAddressHistory = <ThrowOnError extends boolean = false
 /**
  * Get address token balances
  *
- * Returns all ERC-20/ERC-721/ERC-1155 token balances for an EVM address. Uses an ephemeral Solidity contract executed via eth_call to batch-inspect all contracts the address has interacted with. Token metadata is enriched from TrustWallet and on-chain sources. Requires the Meteorex indexer to be available for the network.
+ * Returns all ERC-20/ERC-721/ERC-1155 token balances for an EVM address. Discovers contracts the address has interacted with and returns balances enriched with token metadata. For ERC-721 contracts that implement ERC721Enumerable, owned token IDs and tokenURIs are included. ERC-721 contracts without ERC721Enumerable will return the balance but not owned token IDs — use /ownedTokens to enumerate those.
  */
 export const getEvmNetworkAddressTokenBalances = <ThrowOnError extends boolean = false>(
   options: Options<GetEvmNetworkAddressTokenBalancesData, ThrowOnError>,
@@ -442,6 +445,30 @@ export const getEvmNetworkNetworkStatus = <ThrowOnError extends boolean = false>
       },
     ],
     url: '/evm/{network}/networkStatus',
+    ...options,
+  });
+
+/**
+ * Get owned ERC-721 tokens
+ *
+ * Enumerates ERC-721 token IDs owned by a wallet for a specific contract. Works with any ERC-721 contract, including those that do not implement the ERC721Enumerable extension. Returns the token balance, standard, metadata, and a list of owned token IDs with their tokenURIs.
+ */
+export const getEvmNetworkOwnedTokens = <ThrowOnError extends boolean = false>(
+  options: Options<GetEvmNetworkOwnedTokensData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetEvmNetworkOwnedTokensResponses,
+    GetEvmNetworkOwnedTokensErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'query',
+        name: 'api_key',
+        type: 'apiKey',
+      },
+    ],
+    url: '/evm/{network}/ownedTokens',
     ...options,
   });
 

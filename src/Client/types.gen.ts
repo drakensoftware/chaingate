@@ -561,6 +561,65 @@ export type EvmNftMetadataResponse = {
   } | null;
 };
 
+export type EvmOwnedTokensParams = {
+  /**
+   * ERC-721 contract address
+   */
+  contractAddress: string;
+  /**
+   * Wallet address to check ownership for
+   */
+  address: string;
+};
+
+export type EvmOwnedTokensResponse = {
+  /**
+   * The ERC-721 contract address
+   */
+  contractAddress: string;
+  /**
+   * The queried wallet address
+   */
+  wallet: string;
+  /**
+   * Token standard (ERC-20, ERC-721, ERC-1155, or unknown)
+   */
+  standard: string;
+  /**
+   * Raw balance (token count for ERC-721)
+   */
+  balance: string;
+  /**
+   * Human-readable balance (divided by 10^decimals)
+   */
+  balanceFormatted?: string | null;
+  /**
+   * Owned NFT tokens with tokenURIs
+   */
+  ownedTokens: Array<EvmOwnedTokenItem>;
+  /**
+   * Token metadata
+   */
+  token: {
+    /**
+     * Token name
+     */
+    name?: string | null;
+    /**
+     * Token symbol
+     */
+    symbol?: string | null;
+    /**
+     * Token decimals
+     */
+    decimals?: number | null;
+    /**
+     * Token logo URL
+     */
+    logoUrl?: string | null;
+  };
+};
+
 export type EvmTokenDataParams = {
   /**
    * Token contract address
@@ -1440,6 +1499,17 @@ export type EvmFeeGradeSchema = {
   gasPriceGwei?: string | null;
 };
 
+export type EvmOwnedTokenItem = {
+  /**
+   * Token ID
+   */
+  id: string;
+  /**
+   * Raw tokenURI from the contract (null if not implemented). Use /nft/metadata to decode.
+   */
+  uri?: string | null;
+};
+
 export type GetEvmNetworkAddressBalanceData = {
   body?: never;
   path: {
@@ -2136,6 +2206,67 @@ export type GetEvmNetworkNetworkStatusResponses = {
 
 export type GetEvmNetworkNetworkStatusResponse =
   GetEvmNetworkNetworkStatusResponses[keyof GetEvmNetworkNetworkStatusResponses];
+
+export type GetEvmNetworkOwnedTokensData = {
+  body?: never;
+  path: {
+    /**
+     * Blockchain network identifier
+     */
+    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+  };
+  query: {
+    /**
+     * ERC-721 contract address
+     */
+    contractAddress: string;
+    /**
+     * Wallet address to check ownership for
+     */
+    address: string;
+  };
+  url: '/evm/{network}/ownedTokens';
+};
+
+export type GetEvmNetworkOwnedTokensErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    error?: string;
+  };
+  /**
+   * Unauthorized — invalid API key
+   */
+  401: {
+    error?: string;
+  };
+  /**
+   * Too Many Requests
+   */
+  429: {
+    error?: string;
+  };
+  /**
+   * Internal Server Error
+   */
+  500: {
+    error?: string;
+  };
+};
+
+export type GetEvmNetworkOwnedTokensError =
+  GetEvmNetworkOwnedTokensErrors[keyof GetEvmNetworkOwnedTokensErrors];
+
+export type GetEvmNetworkOwnedTokensResponses = {
+  /**
+   * Successful response
+   */
+  200: EvmOwnedTokensResponse;
+};
+
+export type GetEvmNetworkOwnedTokensResponse =
+  GetEvmNetworkOwnedTokensResponses[keyof GetEvmNetworkOwnedTokensResponses];
 
 export type GetEvmNetworkTokenDataData = {
   body?: never;

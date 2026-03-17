@@ -29,9 +29,8 @@ describe('EvmRpcConnector Token Transfers (Avalanche via RPC)', () => {
 
     const recipient = await conn.address({ index: 1 });
 
-    // Transfer 1 TT token (18 decimals)
-    const amount = network.amount('1');
-    const tx = await conn.transferToken(AVAX_ERC20, amount, recipient);
+    // Transfer 1 TT token — decimals are resolved automatically
+    const tx = await conn.transferToken(AVAX_ERC20, '1', recipient);
 
     expect(tx.enoughFunds()).toBe(true);
     const fee = tx.currentFee();
@@ -85,10 +84,9 @@ describe('EvmRpcConnector Token Transfers (Avalanche via RPC)', () => {
     const conn = cg.connect(network, wallet);
 
     // Use index 5 — this derived address has no AVAX for gas
-    const amount = network.amount('1');
     const tx = await conn.transferToken(
       AVAX_ERC20,
-      amount,
+      '1',
       '0x1853be2c350EB9588bdC2Af73bDAA0C4B8Ac3583',
       { index: 5 },
     );

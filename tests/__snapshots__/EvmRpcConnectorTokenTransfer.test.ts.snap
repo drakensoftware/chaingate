@@ -4,4 +4,4 @@ exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferErc1155 -
 
 exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferNft - ERC-721 safeTransferFrom succeeds 1`] = `"0x89c8c3904fb62ab8652cd03192e1fa29639cba1fd52e3161d401f6e52287b015"`;
 
-exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferToken - ERC-20 transfer succeeds 1`] = `"0xa80e0b1b02a1cb672aa66a4a4afc4b7f9474606d29bd83ce2981a344e860d311"`;
+exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferToken - ERC-20 transfer succeeds 1`] = `"0xdc4d4bbe85547fc521fb9b029c45d219ca2455dcac9e9941ab378b7c02752212"`;
