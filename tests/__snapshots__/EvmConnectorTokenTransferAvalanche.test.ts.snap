@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EvmConnector Token Transfers (Avalanche) > transferErc1155 - ERC-1155 safeTransferFrom succeeds 1`] = `"0x39d580edfc7efec20884f161fce4376e7976e228fff0b5c32fcc726b099a2356"`;
+
+exports[`EvmConnector Token Transfers (Avalanche) > transferNft - ERC-721 safeTransferFrom succeeds 1`] = `"0x5c5834f11ace1c5dd5977074772a8d8a7e0cc3cb5a8e0341bad35c63078a664b"`;
+
+exports[`EvmConnector Token Transfers (Avalanche) > transferToken - ERC-20 transfer succeeds 1`] = `"0x4c464790bb13aa97c91a3372069a333cc75cafe8243aca4fb45143c39bad39c7"`;

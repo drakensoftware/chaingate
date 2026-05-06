@@ -4,4 +4,4 @@ exports[`EvmConnector (Ethereum) > gets address balance 1`] = `"0.00769642677398
 
 exports[`EvmConnector (Ethereum) > gets address balance 2`] = `"0"`;
 
-exports[`EvmConnector (Ethereum) > transfer - enough funds and broadcast 1`] = `"0x63ef99c109eb230c049419eb1ea4401e2b5fa0ace8147539f58ef01ab65427ad"`;
+exports[`EvmConnector (Ethereum) > transfer - enough funds and broadcast 1`] = `"0x9f26a7518a86000d9eb00af0cf031c7706d0b4500779ed1e725f5b09b13e0627"`;

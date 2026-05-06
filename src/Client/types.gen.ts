@@ -561,6 +561,17 @@ export type EvmNftMetadataResponse = {
   } | null;
 };
 
+export type EvmNonceParams = {
+  address: string;
+};
+
+export type EvmNonceResponse = {
+  /**
+   * Next nonce to use when sending a transaction
+   */
+  nonce: string;
+};
+
 export type EvmOwnedTokensParams = {
   /**
    * ERC-721 contract address
@@ -1516,7 +1527,7 @@ export type GetEvmNetworkAddressBalanceData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     address: string;
@@ -1570,7 +1581,7 @@ export type GetEvmNetworkAddressHistoryData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     address: string;
@@ -1625,7 +1636,7 @@ export type GetEvmNetworkAddressTokenBalancesData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     /**
@@ -1682,7 +1693,7 @@ export type GetEvmNetworkAddressTransactionCountData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     address: string;
@@ -1736,7 +1747,7 @@ export type GetEvmNetworkBlockByHashData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     blockHash: string;
@@ -1790,7 +1801,7 @@ export type GetEvmNetworkBlockByHeightData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     blockHeight: string;
@@ -1844,7 +1855,7 @@ export type PostEvmNetworkBroadcastTransactionData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query?: never;
   url: '/evm/{network}/broadcastTransaction';
@@ -1896,7 +1907,7 @@ export type PostEvmNetworkCallSmartContractFunctionData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query?: never;
   url: '/evm/{network}/callSmartContractFunction';
@@ -1948,7 +1959,7 @@ export type GetEvmNetworkEstimateGasData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     addressFrom: string;
@@ -2006,7 +2017,7 @@ export type GetEvmNetworkFeeRateData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query?: never;
   url: '/evm/{network}/feeRate';
@@ -2058,7 +2069,7 @@ export type GetEvmNetworkLatestBlockData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query?: never;
   url: '/evm/{network}/latestBlock';
@@ -2110,7 +2121,7 @@ export type GetEvmNetworkLogoData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query?: never;
   url: '/evm/{network}/logo';
@@ -2161,7 +2172,7 @@ export type GetEvmNetworkNetworkStatusData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query?: never;
   url: '/evm/{network}/networkStatus';
@@ -2207,13 +2218,66 @@ export type GetEvmNetworkNetworkStatusResponses = {
 export type GetEvmNetworkNetworkStatusResponse =
   GetEvmNetworkNetworkStatusResponses[keyof GetEvmNetworkNetworkStatusResponses];
 
+export type GetEvmNetworkNonceData = {
+  body?: never;
+  path: {
+    /**
+     * Blockchain network identifier
+     */
+    network: 'ethereum' | 'avalanche';
+  };
+  query: {
+    address: string;
+  };
+  url: '/evm/{network}/nonce';
+};
+
+export type GetEvmNetworkNonceErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    error?: string;
+  };
+  /**
+   * Unauthorized — invalid API key
+   */
+  401: {
+    error?: string;
+  };
+  /**
+   * Too Many Requests
+   */
+  429: {
+    error?: string;
+  };
+  /**
+   * Internal Server Error
+   */
+  500: {
+    error?: string;
+  };
+};
+
+export type GetEvmNetworkNonceError = GetEvmNetworkNonceErrors[keyof GetEvmNetworkNonceErrors];
+
+export type GetEvmNetworkNonceResponses = {
+  /**
+   * Successful response
+   */
+  200: EvmNonceResponse;
+};
+
+export type GetEvmNetworkNonceResponse =
+  GetEvmNetworkNonceResponses[keyof GetEvmNetworkNonceResponses];
+
 export type GetEvmNetworkOwnedTokensData = {
   body?: never;
   path: {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     /**
@@ -2274,7 +2338,7 @@ export type GetEvmNetworkTokenDataData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     /**
@@ -2331,7 +2395,7 @@ export type GetEvmNetworkTokenLogoData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     /**
@@ -2388,7 +2452,7 @@ export type GetEvmNetworkTransactionDetailsData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     transactionId: string;
@@ -2442,7 +2506,7 @@ export type GetEvmNetworkNftMetadataData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     /**
@@ -2503,7 +2567,7 @@ export type GetEvmNetworkNftMetadataAnimationData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     /**
@@ -2564,7 +2628,7 @@ export type GetEvmNetworkNftMetadataImageData = {
     /**
      * Blockchain network identifier
      */
-    network: 'ethereum' | 'arbitrum' | 'avalanche' | 'base' | 'bnb' | 'sonic' | 'polygon';
+    network: 'ethereum' | 'avalanche';
   };
   query: {
     /**

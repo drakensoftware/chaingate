@@ -40,7 +40,7 @@ export class UtxoExplorer {
   /** @internal */
   readonly baseUrl: string;
   /** @internal */
-  readonly apiKey: string;
+  readonly apiKey: string | undefined;
   /** @internal */
   readonly global: ChainGateGlobal;
 
@@ -48,7 +48,7 @@ export class UtxoExplorer {
     client: Client,
     network: UtxoNetwork,
     baseUrl: string,
-    apiKey: string,
+    apiKey: string | undefined,
     global: ChainGateGlobal,
   ) {
     this.client = client;
@@ -292,7 +292,8 @@ export class UtxoExplorer {
    * Returns the URL endpoint for the SVG logo of this UTXO network.
    */
   public getLogoUrl(): string {
-    return `${this.baseUrl}/utxo/${this.network}/logo?api_key=${this.apiKey}`;
+    const suffix = this.apiKey ? `?api_key=${encodeURIComponent(this.apiKey)}` : '';
+    return `${this.baseUrl}/utxo/${this.network}/logo${suffix}`;
   }
 
   /**

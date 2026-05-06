@@ -37,11 +37,16 @@ export class GlobalExplorer {
   /** @internal */
   private readonly baseUrl: string;
   /** @internal */
-  private readonly apiKey: string;
+  private readonly apiKey: string | undefined;
   /** @internal */
   private readonly global: ChainGateGlobal;
 
-  constructor(client: Client, baseUrl: string, apiKey: string, global: ChainGateGlobal) {
+  constructor(
+    client: Client,
+    baseUrl: string,
+    apiKey: string | undefined,
+    global: ChainGateGlobal,
+  ) {
     this.client = client;
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
@@ -81,6 +86,7 @@ export class GlobalExplorer {
    * networks without dedicated `/evm` or `/utxo` endpoints.
    */
   public getNetworkLogoUrl(network: GlobalLogoNetwork): string {
-    return `${this.baseUrl}/global/logo/${network}?api_key=${this.apiKey}`;
+    const suffix = this.apiKey ? `?api_key=${encodeURIComponent(this.apiKey)}` : '';
+    return `${this.baseUrl}/global/logo/${network}${suffix}`;
   }
 }

@@ -45,6 +45,9 @@ import type {
   GetEvmNetworkNftMetadataImageErrors,
   GetEvmNetworkNftMetadataImageResponses,
   GetEvmNetworkNftMetadataResponses,
+  GetEvmNetworkNonceData,
+  GetEvmNetworkNonceErrors,
+  GetEvmNetworkNonceResponses,
   GetEvmNetworkOwnedTokensData,
   GetEvmNetworkOwnedTokensErrors,
   GetEvmNetworkOwnedTokensResponses,
@@ -445,6 +448,30 @@ export const getEvmNetworkNetworkStatus = <ThrowOnError extends boolean = false>
       },
     ],
     url: '/evm/{network}/networkStatus',
+    ...options,
+  });
+
+/**
+ * Get next transaction nonce
+ *
+ * Returns the next nonce for an EVM address.
+ */
+export const getEvmNetworkNonce = <ThrowOnError extends boolean = false>(
+  options: Options<GetEvmNetworkNonceData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetEvmNetworkNonceResponses,
+    GetEvmNetworkNonceErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'query',
+        name: 'api_key',
+        type: 'apiKey',
+      },
+    ],
+    url: '/evm/{network}/nonce',
     ...options,
   });
 

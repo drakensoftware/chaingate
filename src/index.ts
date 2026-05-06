@@ -136,6 +136,13 @@ export type { RpcFeeData, RpcTransactionReceipt } from './Connector/EvmRpcConnec
 // Connector
 export { Connector } from './Connector/Connector';
 export type { AddressOptions } from './Connector/Connector';
+export { BaseEvmConnector } from './Connector/EvmConnector/BaseEvmConnector';
+export type {
+  EvmNetworkLike,
+  CreateEvmTransactionParams,
+} from './Connector/EvmConnector/BaseEvmConnector';
+export { BaseEvmTransaction } from './Connector/EvmConnector/BaseEvmTransaction';
+export type { BaseEvmFee, SignableTxParams } from './Connector/EvmConnector/BaseEvmTransaction';
 export { EvmConnector } from './Connector/EvmConnector/EvmConnector';
 export { EvmTransaction } from './Connector/EvmConnector/EvmTransaction';
 export type {
@@ -184,6 +191,9 @@ export type {
 // UTXO Cache
 export { UtxoLocalCache } from './utils/UtxoLocalCache';
 export type { CachedUtxo } from './utils/UtxoLocalCache';
+
+// EVM Nonce Cache
+export { EvmNonceCache } from './utils/EvmNonceCache';
 
 // Utils
 export { Amount } from './utils/Amount';

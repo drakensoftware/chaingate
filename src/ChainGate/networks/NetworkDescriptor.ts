@@ -21,7 +21,7 @@ import type {
  *
  * @example
  * ```ts
- * const cg = new ChainGate({ apiKey: '...' });
+ * const cg = new ChainGate();
  * const btc = cg.networks.bitcoin;
  * console.log(btc.name);   // 'Bitcoin'
  * console.log(btc.symbol); // 'BTC'
@@ -45,13 +45,13 @@ export class NetworkDescriptor<TAddressType extends AddressType = AddressType> {
   readonly addressTypes: Partial<Record<TAddressType, AddressTypeConfig>>;
 
   /**
-   * Full JSON-RPC endpoint URL for this network on the ChainGate RPC proxy,
-   * with the API key already appended.
+   * Full JSON-RPC endpoint URL for this network on the ChainGate RPC proxy.
+   * When a ChainGate API key is configured, it is appended automatically.
    *
    * @example
    * ```ts
    * console.log(cg.networks.ethereum.rpcUrl);
-   * // → "https://api.chaingate.dev/rpc/ethereum?api_key=your-key"
+   * // → "https://api.chaingate.dev/rpc/ethereum"
    * ```
    */
   readonly rpcUrl: string;
@@ -67,7 +67,7 @@ export class NetworkDescriptor<TAddressType extends AddressType = AddressType> {
     id: Network,
     info: NetworkInfoInternal,
     marketsCache: TTLCache<MarketsResponse>,
-    apiKey: string,
+    apiKey?: string,
   ) {
     this.id = id;
     this.name = info.name;

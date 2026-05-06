@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferErc1155 - ERC-1155 safeTransferFrom succeeds 1`] = `"0xda0275cf4997a302dd3bb37cd0005b266e7e1cf0007b4025c3226b41123468ab"`;
+exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferErc1155 - ERC-1155 safeTransferFrom succeeds 1`] = `"0xb396cdb684a60bacdba98c03b3e3f922a51eae77b537f709dcc793a12fd3b76b"`;
 
-exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferNft - ERC-721 safeTransferFrom succeeds 1`] = `"0x89c8c3904fb62ab8652cd03192e1fa29639cba1fd52e3161d401f6e52287b015"`;
+exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferNft - ERC-721 safeTransferFrom succeeds 1`] = `"0xd3d369047896048bb3dcae67451618c2242df20942499dd5a21fc7069be554ce"`;
 
-exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferToken - ERC-20 transfer succeeds 1`] = `"0xdc4d4bbe85547fc521fb9b029c45d219ca2455dcac9e9941ab378b7c02752212"`;
+exports[`EvmRpcConnector Token Transfers (Avalanche via RPC) > transferToken - ERC-20 transfer succeeds 1`] = `"0x3ec461447f5bc5a7286cd1416ba0e07a56c0ff7e7a424fb5cc614336e24e4f91"`;

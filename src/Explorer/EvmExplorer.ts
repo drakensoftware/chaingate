@@ -11,6 +11,7 @@ import {
   getEvmNetworkLatestBlock,
   getEvmNetworkNetworkStatus,
   getEvmNetworkNftMetadata,
+  getEvmNetworkNonce,
   getEvmNetworkTokenData,
   getEvmNetworkTransactionDetails,
   postEvmNetworkBroadcastTransaction,
@@ -29,6 +30,7 @@ import type {
   EvmLatestBlockResponse,
   EvmNetworkStatusResponse,
   EvmNftMetadataResponse,
+  EvmNonceResponse,
   EvmTokenDataResponse,
   EvmTxDetailsResponse,
 } from '../Client';
@@ -37,7 +39,7 @@ import type { AmountData } from '../utils/Amount';
 import { NETWORKS_INFO } from '../ChainGate/networks';
 import type { ChainGateGlobal } from '../ChainGate/ChainGate';
 
-export type EvmNetwork = 'ethereum';
+export type EvmNetwork = 'ethereum' | 'avalanche';
 
 const EVM_DECIMALS = 18;
 
@@ -49,7 +51,7 @@ export class EvmExplorer {
   /** @internal */
   readonly baseUrl: string;
   /** @internal */
-  readonly apiKey: string;
+  readonly apiKey: string | undefined;
   /** @internal */
   readonly global: ChainGateGlobal;
 
@@ -57,7 +59,7 @@ export class EvmExplorer {
     client: Client,
     network: EvmNetwork,
     baseUrl: string,
-    apiKey: string,
+    apiKey: string | undefined,
     global: ChainGateGlobal,
   ) {
     this.client = client;
@@ -152,6 +154,19 @@ export class EvmExplorer {
    */
   public async getAddressTransactionCount(address: string): Promise<EvmAddressTxCountResponse> {
     const { data } = await getEvmNetworkAddressTransactionCount({
+      client: this.client,
+      path: { network: this.network },
+      query: { address },
+      throwOnError: true,
+    });
+    return data;
+  }
+
+  /**
+   * Returns the next nonce to use when sending a transaction from an EVM address.
+   */
+  public async getNonce(address: string): Promise<EvmNonceResponse> {
+    const { data } = await getEvmNetworkNonce({
       client: this.client,
       path: { network: this.network },
       query: { address },
@@ -275,7 +290,8 @@ export class EvmExplorer {
    * Returns the URL endpoint for the SVG logo of this EVM network.
    */
   public getLogoUrl(): string {
-    return `${this.baseUrl}/evm/${this.network}/logo?api_key=${this.apiKey}`;
+    const suffix = this.apiKey ? `?api_key=${encodeURIComponent(this.apiKey)}` : '';
+    return `${this.baseUrl}/evm/${this.network}/logo${suffix}`;
   }
 
   /**
@@ -295,7 +311,8 @@ export class EvmExplorer {
    * Returns the URL endpoint for a token contract logo (PNG or SVG).
    */
   public getTokenLogoUrl(address: string): string {
-    const params = new URLSearchParams({ address, api_key: this.apiKey });
+    const params = new URLSearchParams({ address });
+    if (this.apiKey) params.set('api_key', this.apiKey);
     return `${this.baseUrl}/evm/${this.network}/tokenLogo?${params.toString()}`;
   }
 
@@ -319,7 +336,8 @@ export class EvmExplorer {
    * Returns the URL endpoint for a specific NFT token image.
    */
   public getNftImageUrl(contractAddress: string, tokenId: string): string {
-    const params = new URLSearchParams({ contractAddress, tokenId, api_key: this.apiKey });
+    const params = new URLSearchParams({ contractAddress, tokenId });
+    if (this.apiKey) params.set('api_key', this.apiKey);
     return `${this.baseUrl}/evm/${this.network}/nft/metadata/image?${params.toString()}`;
   }
 
@@ -327,7 +345,8 @@ export class EvmExplorer {
    * Returns the URL endpoint for a specific NFT token animation/video.
    */
   public getNftAnimationUrl(contractAddress: string, tokenId: string): string {
-    const params = new URLSearchParams({ contractAddress, tokenId, api_key: this.apiKey });
+    const params = new URLSearchParams({ contractAddress, tokenId });
+    if (this.apiKey) params.set('api_key', this.apiKey);
     return `${this.baseUrl}/evm/${this.network}/nft/metadata/animation?${params.toString()}`;
   }
 

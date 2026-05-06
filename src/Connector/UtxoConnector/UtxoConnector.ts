@@ -29,7 +29,7 @@ export interface UtxoAddressOptions extends AddressOptions {
  *
  * @example
  * ```ts
- * const cg = new ChainGate({ apiKey: 'your-key' });
+ * const cg = new ChainGate();
  * const btcConn = cg.connect(cg.networks.bitcoin, wallet);
  *
  * // Default address (segwit for Bitcoin)

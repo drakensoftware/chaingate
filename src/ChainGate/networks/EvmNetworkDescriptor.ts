@@ -15,7 +15,7 @@ export class EvmNetworkDescriptor extends NetworkDescriptor<EvmAddressType> {
     id: EvmNetwork,
     info: NetworkInfoInternal,
     marketsCache: TTLCache<MarketsResponse>,
-    apiKey: string,
+    apiKey?: string,
   ) {
     super(id, info, marketsCache, apiKey);
   }

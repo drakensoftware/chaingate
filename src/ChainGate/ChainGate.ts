@@ -22,6 +22,7 @@ import type { NetworkCollection } from './networks';
 import type { Wallet } from '../Wallet/Wallet';
 import { TTLCache } from '../utils/TTLCache';
 import { UtxoLocalCache } from '../utils/UtxoLocalCache';
+import { EvmNonceCache } from '../utils/EvmNonceCache';
 import { RpcUrls } from './RpcUrls';
 
 const BASE_URL = 'https://api.chaingate.dev';
@@ -33,6 +34,7 @@ const MARKETS_TTL = 60_000;
 export interface ChainGateGlobal {
   marketsCache: TTLCache<MarketsResponse>;
   utxoCache: UtxoLocalCache;
+  evmNonceCache: EvmNonceCache;
 }
 
 /**
@@ -41,19 +43,24 @@ export interface ChainGateGlobal {
  * Provides access to the ChainGate API for querying blockchain data
  * across EVM and UTXO networks.
  *
+ * The API key is optional — without one you get a small rate limit suitable
+ * for trying things out. Get a free API key at https://api.chaingate.dev for
+ * a higher quota.
+ *
  * @example
  * ```ts
  * import { ChainGate } from 'chaingate';
  *
- * const cg = new ChainGate({ apiKey: 'your-api-key' });
+ * const cg = new ChainGate();
  *
  * const btc = cg.explore(cg.networks.bitcoin);    // UtxoExplorer
  * const eth = cg.explore(cg.networks.ethereum);   // EvmExplorer
+ * const avax = cg.explore(cg.networks.avalanche); // EvmExplorer
  * ```
  */
 export class ChainGate {
   private readonly client: Client;
-  private readonly apiKey: string;
+  private readonly apiKey: string | undefined;
   private readonly _networks: NetworkCollection;
   private readonly _rpcUrls: RpcUrls;
 
@@ -76,7 +83,7 @@ export class ChainGate {
     network: UtxoNetworkDescriptor | EvmNetworkDescriptor | EvmRpcNetworkDescriptor,
   ): UtxoExplorer | EvmExplorer | EvmRpcExplorer {
     if (network instanceof EvmRpcNetworkDescriptor) {
-      return new EvmRpcExplorer(network.rpcUrl, network.chainId);
+      return new EvmRpcExplorer(network.rpcUrl, network.chainId, this.global.evmNonceCache);
     }
     if (network instanceof UtxoNetworkDescriptor) {
       return new UtxoExplorer(this.client, network.id, BASE_URL, this.apiKey, this.global);
@@ -183,7 +190,11 @@ export class ChainGate {
       return new BchConnector(wallet, explorer, network);
     }
     if (network instanceof EvmRpcNetworkDescriptor) {
-      const explorer = new EvmRpcExplorer(network.rpcUrl, network.chainId);
+      const explorer = new EvmRpcExplorer(
+        network.rpcUrl,
+        network.chainId,
+        this.global.evmNonceCache,
+      );
       return new EvmRpcConnector(wallet, explorer, network);
     }
     if (network instanceof EvmNetworkDescriptor) {
@@ -206,15 +217,16 @@ export class ChainGate {
   }
 
   /**
-   * @param options - Configuration options.
-   * @param options.apiKey - Your ChainGate API key.
+   * @param options - Optional configuration.
+   * @param options.apiKey - Your ChainGate API key. Omit to use the keyless
+   *   tier (small rate limit). Get a free key at https://api.chaingate.dev.
    */
-  constructor({ apiKey }: { apiKey: string }) {
+  constructor({ apiKey }: { apiKey?: string } = {}) {
     this.apiKey = apiKey;
     this.client = createClient(
       createConfig<ClientOptions>({
         baseUrl: BASE_URL,
-        headers: { 'x-api-key': apiKey },
+        headers: apiKey ? { 'x-api-key': apiKey } : {},
         throwOnError: true,
       }),
     );
@@ -226,6 +238,7 @@ export class ChainGate {
         return data;
       }, MARKETS_TTL),
       utxoCache: new UtxoLocalCache(),
+      evmNonceCache: new EvmNonceCache(),
     };
 
     this.client.interceptors.error.use((_error, response) => {

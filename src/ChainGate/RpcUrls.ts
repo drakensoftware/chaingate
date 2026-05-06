@@ -19,17 +19,18 @@ export type RpcNetwork =
  * Provides pre-built JSON-RPC endpoint URLs for every network supported by the
  * ChainGate RPC proxy.
  *
- * Each property returns a fully-qualified URL with the API key appended, ready
- * to be used with any JSON-RPC client (ethers, viem, bitcoinjs, etc.) or with
- * {@link ChainGate.networks.evmRpc | `cg.networks.evmRpc()`}.
+ * Each property returns a fully-qualified URL ready to be used with any
+ * JSON-RPC client (ethers, viem, bitcoinjs, etc.) or with
+ * {@link ChainGate.networks.evmRpc | `cg.networks.evmRpc()`}. When a
+ * ChainGate API key is configured, it is appended automatically.
  *
  * @example
  * ```ts
- * const cg = new ChainGate({ apiKey: 'your-key' });
+ * const cg = new ChainGate();
  *
  * // Use directly
  * console.log(cg.rpcUrls.ethereum);
- * // → "https://api.chaingate.dev/rpc/ethereum?api_key=your-key"
+ * // → "https://api.chaingate.dev/rpc/ethereum"
  *
  * // Combine with evmRpc connector
  * const polygon = cg.networks.evmRpc({
@@ -54,8 +55,11 @@ export class RpcUrls {
   readonly bnb: string;
   readonly base: string;
 
+  private readonly _apiKey: string | undefined;
+
   /** @internal */
-  constructor(apiKey: string) {
+  constructor(apiKey?: string) {
+    this._apiKey = apiKey;
     this.bitcoin = buildRpcUrl('bitcoin', apiKey);
     this.bitcoinTestnet = buildRpcUrl('bitcointestnet', apiKey);
     this.bitcoincash = buildRpcUrl('bitcoincash', apiKey);
@@ -76,23 +80,17 @@ export class RpcUrls {
    * @example
    * ```ts
    * const url = cg.rpcUrls.get('polygon');
-   * // → "https://api.chaingate.dev/rpc/polygon?api_key=your-key"
+   * // → "https://api.chaingate.dev/rpc/polygon"
    * ```
    */
   public get(network: RpcNetwork): string {
-    return buildRpcUrl(network, this.apiKey);
-  }
-
-  /** @internal */
-  private get apiKey(): string {
-    // Extract the api_key from any of the pre-built URLs to avoid storing it
-    // as a separate field (all URLs share the same key).
-    const url = new URL(this.ethereum);
-    return url.searchParams.get('api_key')!;
+    return buildRpcUrl(network, this._apiKey);
   }
 }
 
 /** @internal */
-export function buildRpcUrl(network: RpcNetwork, apiKey: string): string {
-  return `${BASE_URL}/rpc/${network}?api_key=${encodeURIComponent(apiKey)}`;
+export function buildRpcUrl(network: RpcNetwork, apiKey?: string): string {
+  return apiKey
+    ? `${BASE_URL}/rpc/${network}?api_key=${encodeURIComponent(apiKey)}`
+    : `${BASE_URL}/rpc/${network}`;
 }

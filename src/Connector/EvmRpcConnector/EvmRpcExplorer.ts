@@ -1,4 +1,5 @@
 import { RpcError } from '../../errors';
+import { EvmNonceCache } from '../../utils/EvmNonceCache';
 
 /** Fee data returned by {@link EvmRpcExplorer.getFeeData}. */
 export interface RpcFeeData {
@@ -32,12 +33,15 @@ export class EvmRpcExplorer {
   readonly rpcUrl: string;
   /** EVM chain ID. */
   readonly chainId: number;
+  /** @internal Per-address nonce cache shared across explorers. */
+  readonly nonceCache: EvmNonceCache;
 
   private nextId = 1;
 
-  constructor(rpcUrl: string, chainId: number) {
+  constructor(rpcUrl: string, chainId: number, nonceCache?: EvmNonceCache) {
     this.rpcUrl = rpcUrl;
     this.chainId = chainId;
+    this.nonceCache = nonceCache ?? new EvmNonceCache();
   }
 
   // ---------------------------------------------------------------------------
@@ -62,6 +66,15 @@ export class EvmRpcExplorer {
   }
 
   /**
+   * Returns the next nonce to use when sending a transaction from an address
+   * (`eth_getTransactionCount` at `"pending"`).
+   */
+  public async getNonce(address: string): Promise<bigint> {
+    const hex = await this.call<string>('eth_getTransactionCount', [address, 'pending']);
+    return BigInt(hex);
+  }
+
+  /**
    * Estimates gas for a transaction (`eth_estimateGas`).
    */
   public async estimateGas(params: {
@@ -69,6 +82,7 @@ export class EvmRpcExplorer {
     to: string;
     value: bigint;
     data?: string;
+    nonce?: bigint;
   }): Promise<bigint> {
     const txObj: Record<string, string> = {
       from: params.from,
@@ -77,6 +91,9 @@ export class EvmRpcExplorer {
     };
     if (params.data && params.data !== '0x') {
       txObj.data = params.data;
+    }
+    if (params.nonce !== undefined) {
+      txObj.nonce = '0x' + params.nonce.toString(16);
     }
     const hex = await this.call<string>('eth_estimateGas', [txObj]);
     return BigInt(hex);

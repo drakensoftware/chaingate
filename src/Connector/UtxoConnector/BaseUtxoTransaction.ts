@@ -44,6 +44,12 @@ export interface UtxoRecommendedFee {
   estimatedConfirmationSecs: number;
   /** Whether the wallet has enough funds to cover the transfer plus this fee. */
   enoughFunds: boolean;
+  /**
+   * Additional satoshis needed for the transaction to be broadcastable at this fee.
+   * Present only when `enoughFunds` is `false`, and `null` when the gap cannot
+   * be estimated.
+   */
+  missingFunds?: bigint | null;
 }
 
 /** All recommended fee tiers. */
@@ -352,15 +358,78 @@ export async function buildRecommendedFees(
     await tempTx.findUtxos(feePerKbSat);
     const selected = tempTx.selectUtxos(feePerKbSat);
 
-    results[tier] = {
+    const result: UtxoRecommendedFee = {
       feePerKbSat,
       estimatedFeeSat: selected ? selected.fee : null,
       estimatedConfirmationSecs: entry.confirmationTimeSecs,
       enoughFunds: !!selected,
     };
+    if (!selected) {
+      result.missingFunds = estimateMissingFunds({
+        utxos: state.utxos,
+        fromAddress,
+        toAddress,
+        valueSat,
+        feePerKbSat,
+        networkParams,
+      });
+    }
+    results[tier] = result;
   }
 
   return results as UtxoRecommendedFees;
+}
+
+/**
+ * Estimates the satoshis missing for a transaction to succeed at a given fee
+ * rate by re-running selection with a synthetic high-value input that uses the
+ * same script type as the sender's address. Returns `null` when the gap cannot
+ * be estimated.
+ * @internal
+ */
+export function estimateMissingFunds(params: {
+  utxos: Txo[];
+  fromAddress: string;
+  toAddress: string;
+  valueSat: bigint;
+  feePerKbSat: bigint;
+  networkParams: UtxoNetworkParams;
+}): bigint | null {
+  const { utxos, fromAddress, toAddress, valueSat, feePerKbSat, networkParams } = params;
+
+  const totalAvailable = utxos.reduce((sum, u) => sum + u.amount.min(), 0n);
+  const fromScript = OutScript.encode(btc.Address(networkParams).decode(fromAddress));
+  const dummyAmount = valueSat + 100_000_000_000n;
+
+  const vins = [
+    ...utxos.map((utxo) => ({
+      txid: hexToBytes(utxo.txid),
+      index: utxo.n,
+      witnessUtxo: { script: utxo.script, amount: utxo.amount.min() },
+    })),
+    {
+      txid: new Uint8Array(32),
+      index: 0,
+      witnessUtxo: { script: fromScript, amount: dummyAmount },
+    },
+  ];
+
+  const vouts = [{ address: toAddress, amount: valueSat }];
+  const feePerByte = feePerKbSat / 1000n || 1n;
+
+  const selected = btc.selectUTXO(vins, vouts, 'all', {
+    changeAddress: fromAddress,
+    feePerByte,
+    bip69: true,
+    createTx: false,
+    allowLegacyWitnessUtxo: true,
+    network: networkParams,
+  });
+
+  if (!selected) return null;
+
+  const totalNeeded = valueSat + (selected.fee ?? 0n);
+  return totalNeeded > totalAvailable ? totalNeeded - totalAvailable : null;
 }
 
 /**

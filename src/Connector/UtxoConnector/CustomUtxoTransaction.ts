@@ -253,16 +253,62 @@ export class CustomUtxoTransaction {
 
       const selected = this.runSelection(feePerByte);
       const estimatedFeeSat = selected ? (selected.fee ?? null) : null;
+      const enoughFunds = estimatedFeeSat !== null && totalIn >= (estimatedFeeSat ?? 0n);
 
-      results[tier] = {
+      const result: UtxoRecommendedFee = {
         feePerKbSat,
         estimatedFeeSat,
         estimatedConfirmationSecs: entry.confirmationTimeSecs,
-        enoughFunds: estimatedFeeSat !== null && totalIn >= (estimatedFeeSat ?? 0n),
+        enoughFunds,
       };
+      if (!enoughFunds) {
+        result.missingFunds = this.estimateMissingFunds(feePerByte, totalIn);
+      }
+      results[tier] = result;
     }
 
     return results as UtxoRecommendedFees;
+  }
+
+  /**
+   * Estimates the satoshis missing for the transaction to succeed at a given
+   * fee rate by re-running selection with a synthetic high-value input. Returns
+   * `null` when the gap cannot be estimated.
+   */
+  private estimateMissingFunds(feePerByte: bigint, totalIn: bigint): bigint | null {
+    const totalOut = this.outputList.reduce((sum, o) => sum + o.amount.min(), 0n);
+    const syntheticScript = hexToBytes(this.inputList[0].script);
+    const dummyAmount = totalOut + 100_000_000_000n;
+
+    const vins = this.inputList.map((vin) => ({
+      txid: hexToBytes(vin.txid),
+      index: vin.index,
+      witnessUtxo: { script: hexToBytes(vin.script), amount: vin.amount.min() },
+    }));
+    vins.push({
+      txid: new Uint8Array(32),
+      index: 0,
+      witnessUtxo: { script: syntheticScript, amount: dummyAmount },
+    });
+
+    const vouts = this.outputList.map((vout) => ({
+      address: vout.address,
+      amount: vout.amount.min(),
+    }));
+
+    const selected = btc.selectUTXO(vins, vouts, 'all', {
+      changeAddress: this.outputList[0].address,
+      feePerByte,
+      bip69: false,
+      createTx: false,
+      allowLegacyWitnessUtxo: true,
+      network: this.networkParams,
+    });
+
+    if (!selected) return null;
+    const estimatedFee = selected.fee ?? 0n;
+    const needed = totalOut + estimatedFee;
+    return needed > totalIn ? needed - totalIn : null;
   }
 
   // -------------------------------------------------------------------------

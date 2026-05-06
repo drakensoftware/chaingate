@@ -10,20 +10,8 @@ export interface AddressOptions {
   derivationPath?: string;
 }
 
-/**
- * Base class for network connectors. A connector bridges a {@link Wallet} with
- * a blockchain network, providing address derivation, transaction broadcasting,
- * and other network-specific operations.
- *
- * @typeParam TWallet - The wallet type accepted by this connector.
- * @typeParam TExplorer - The explorer type used for API calls.
- * @typeParam TNetwork - The network descriptor type for this connector.
- */
-export abstract class Connector<
-  TWallet extends Wallet,
-  TExplorer,
-  TNetwork extends NetworkDescriptor = NetworkDescriptor,
-> {
+/** Base class for network connectors. */
+export abstract class Connector<TWallet extends Wallet, TExplorer, TNetwork = NetworkDescriptor> {
   protected readonly wallet: TWallet;
   protected readonly explorer: TExplorer;
   protected readonly network: TNetwork;

@@ -1,11 +1,9 @@
 import type { EvmRpcExplorer, RpcFeeData } from './EvmRpcExplorer';
-import type { Eip1559TxParams, LegacyTxParams } from '../../utils/evmTx';
 import { signEip1559Transaction, signLegacyTransaction } from '../../utils/evmTx';
-import { NotEnoughFundsError, TransactionAlreadySentError } from '../../errors';
+import { fallbackGasFromCalldata } from '../../utils/evmGasFallback';
+import { BaseEvmTransaction } from '../EvmConnector/BaseEvmTransaction';
+import type { SignableTxParams } from '../EvmConnector/BaseEvmTransaction';
 import { BroadcastedEvmRpcTransaction } from './BroadcastedEvmRpcTransaction';
-
-/** Intrinsic gas for a simple ETH value transfer (no calldata). */
-const SIMPLE_TRANSFER_GAS = 21_000n;
 
 /** Fee parameters in wei for an EVM RPC transaction. */
 export interface EvmRpcFee {
@@ -19,9 +17,6 @@ export interface EvmRpcFee {
 
 /**
  * An unsigned EVM transaction prepared by {@link EvmRpcConnector.transfer}.
- *
- * Automatically selects EIP-1559 (type-2) or legacy (type-0) signing based on
- * the chain's capabilities detected via `eth_maxPriorityFeePerGas`.
  *
  * @example
  * ```ts
@@ -39,21 +34,9 @@ export interface EvmRpcFee {
  * const broadcasted = await tx.signAndBroadcast();
  * ```
  */
-export class EvmRpcTransaction {
+export class EvmRpcTransaction extends BaseEvmTransaction<BroadcastedEvmRpcTransaction> {
   private readonly explorer: EvmRpcExplorer;
-  private readonly fromAddress: string;
-  private readonly toAddress: string;
-  private readonly valueWei: bigint;
-  private readonly data: string;
-  private readonly nonce: bigint;
-  private gasLimit: bigint;
-  private readonly chainId: bigint;
-  private readonly balanceWei: bigint;
   private readonly supportsEip1559: boolean;
-  private readonly getPrivateKey: () => Promise<Uint8Array>;
-
-  private _currentFee: EvmRpcFee;
-  private sent = false;
 
   /** @internal */
   constructor(params: {
@@ -69,22 +52,23 @@ export class EvmRpcTransaction {
     feeData: RpcFeeData;
     getPrivateKey: () => Promise<Uint8Array>;
   }) {
+    super({
+      fromAddress: params.fromAddress,
+      toAddress: params.toAddress,
+      valueWei: params.valueWei,
+      data: params.data,
+      nonce: params.nonce,
+      gasLimit: params.gasLimit,
+      chainId: params.chainId,
+      balanceWei: params.balanceWei,
+      getPrivateKey: params.getPrivateKey,
+      initialFee: {
+        maxFeePerGas: params.feeData.maxFeePerGas ?? params.feeData.gasPrice,
+        maxPriorityFeePerGas: params.feeData.maxPriorityFeePerGas ?? 0n,
+      },
+    });
     this.explorer = params.explorer;
-    this.fromAddress = params.fromAddress;
-    this.toAddress = params.toAddress;
-    this.valueWei = params.valueWei;
-    this.data = params.data;
-    this.nonce = params.nonce;
-    this.gasLimit = params.gasLimit;
-    this.chainId = params.chainId;
-    this.balanceWei = params.balanceWei;
     this.supportsEip1559 = params.feeData.supportsEip1559;
-    this.getPrivateKey = params.getPrivateKey;
-
-    this._currentFee = {
-      maxFeePerGas: params.feeData.maxFeePerGas ?? params.feeData.gasPrice,
-      maxPriorityFeePerGas: params.feeData.maxPriorityFeePerGas ?? 0n,
-    };
   }
 
   /**
@@ -99,84 +83,42 @@ export class EvmRpcTransaction {
   }
 
   /**
-   * Returns whether the wallet has enough funds to cover the transfer plus fee.
-   */
-  public enoughFunds(): boolean {
-    const totalCost = this.valueWei + this._currentFee.maxFeePerGas * this.gasLimit;
-    return this.balanceWei >= totalCost;
-  }
-
-  /**
    * Overrides the fee for this transaction.
    *
-   * Pass an object with `maxFeePerGas`, `maxPriorityFeePerGas` (in wei),
-   * and an optional `gasLimit` override.
-   *
    * @throws {@link TransactionAlreadySentError} if the transaction has already been sent.
    */
-  public setFee(feeParams: EvmRpcFee): void {
-    if (this.sent) {
-      throw new TransactionAlreadySentError();
-    }
-    this._currentFee = {
-      maxFeePerGas: feeParams.maxFeePerGas,
-      maxPriorityFeePerGas: feeParams.maxPriorityFeePerGas,
-    };
-    if (feeParams.gasLimit !== undefined) {
-      this.gasLimit = feeParams.gasLimit;
-    }
+  public setFee(fee: EvmRpcFee): void {
+    this.applyFee(fee);
   }
 
-  /**
-   * Signs the transaction and broadcasts it to the network via JSON-RPC.
-   *
-   * @returns A {@link BroadcastedEvmRpcTransaction} that can be used to track confirmation.
-   * @throws {@link TransactionAlreadySentError} if the transaction has already been sent.
-   * @throws {@link NotEnoughFundsError} if the wallet does not have enough funds.
-   */
-  public async signAndBroadcast(): Promise<BroadcastedEvmRpcTransaction> {
-    if (this.sent) {
-      throw new TransactionAlreadySentError();
-    }
-    if (!this.enoughFunds()) {
-      throw new NotEnoughFundsError();
-    }
-
-    const privateKey = await this.getPrivateKey();
-    let signedRaw: string;
-
+  protected override signTransaction(privateKey: Uint8Array, params: SignableTxParams): string {
     if (this.supportsEip1559) {
-      const txParams: Eip1559TxParams = {
-        chainId: this.chainId,
-        nonce: this.nonce,
-        maxPriorityFeePerGas: this._currentFee.maxPriorityFeePerGas,
-        maxFeePerGas: this._currentFee.maxFeePerGas,
-        gasLimit: this.gasLimit,
-        to: this.toAddress,
-        value: this.valueWei,
-        data: this.data,
-      };
-      signedRaw = signEip1559Transaction(txParams, privateKey);
-    } else {
-      const txParams: LegacyTxParams = {
-        chainId: this.chainId,
-        nonce: this.nonce,
-        gasPrice: this._currentFee.maxFeePerGas,
-        gasLimit: this.gasLimit,
-        to: this.toAddress,
-        value: this.valueWei,
-        data: this.data,
-      };
-      signedRaw = signLegacyTransaction(txParams, privateKey);
+      return signEip1559Transaction(params, privateKey);
     }
+    return signLegacyTransaction(
+      {
+        chainId: params.chainId,
+        nonce: params.nonce,
+        gasPrice: params.maxFeePerGas,
+        gasLimit: params.gasLimit,
+        to: params.to,
+        value: params.value,
+        data: params.data,
+      },
+      privateKey,
+    );
+  }
 
-    // Zero out the private key after signing.
-    privateKey.fill(0);
+  protected override async broadcast(signedRaw: string): Promise<string> {
+    return this.explorer.sendRawTransaction(signedRaw);
+  }
 
-    const txHash = await this.explorer.sendRawTransaction(signedRaw);
-    this.sent = true;
+  protected override recordNonceUsed(): void {
+    this.explorer.nonceCache.recordUsed(this.explorer.chainId, this.fromAddress, this.nonce);
+  }
 
-    return new BroadcastedEvmRpcTransaction(txHash, this.explorer);
+  protected override buildBroadcasted(transactionId: string): BroadcastedEvmRpcTransaction {
+    return new BroadcastedEvmRpcTransaction(transactionId, this.explorer);
   }
 
   /**
@@ -195,24 +137,39 @@ export class EvmRpcTransaction {
   }): Promise<EvmRpcTransaction> {
     const { explorer, fromAddress, toAddress, valueWei, data = '0x', getPrivateKey } = params;
 
-    // Fetch nonce, gas estimate, fee data, and balance in parallel.
-    const estimateParams: { from: string; to: string; value: bigint; data?: string } = {
+    // Fetch the nonce first so we can pass it to estimateGas (the nonce can
+    // affect the estimate for contracts whose execution depends on account
+    // state). Take the max with the locally cached nonce so consecutive sends
+    // from the same address don't reuse a nonce when the network hasn't yet
+    // observed the previous broadcast.
+    const networkNonce = await explorer.getNonce(fromAddress);
+    const cachedNonce = explorer.nonceCache.get(explorer.chainId, fromAddress);
+    const nonce =
+      cachedNonce !== undefined && cachedNonce > networkNonce ? cachedNonce : networkNonce;
+
+    const estimateParams: {
+      from: string;
+      to: string;
+      value: bigint;
+      data?: string;
+      nonce: bigint;
+    } = {
       from: fromAddress,
       to: toAddress,
       value: valueWei,
+      nonce,
     };
     if (data !== '0x') {
       estimateParams.data = data;
     }
 
-    const [nonce, gasEstimate, feeData, balance] = await Promise.all([
-      explorer.getTransactionCount(fromAddress),
+    const [gasEstimate, feeData, balance] = await Promise.all([
       explorer.estimateGas(estimateParams).catch(() => null),
       explorer.getFeeData(),
       explorer.getBalance(fromAddress),
     ]);
 
-    const gasLimit = gasEstimate ?? SIMPLE_TRANSFER_GAS;
+    const gasLimit = gasEstimate ?? fallbackGasFromCalldata(data);
 
     return new EvmRpcTransaction({
       explorer,

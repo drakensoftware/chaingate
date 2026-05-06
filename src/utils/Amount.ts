@@ -294,7 +294,7 @@ export class Amount {
    *
    * @example
    * ```ts
-   * const cg = new ChainGate({ apiKey: 'key' });
+   * const cg = new ChainGate();
    * const balance = await cg.explore(cg.networks.bitcoin).getAddressBalance(addr);
    * const eur = await balance.confirmed.toCurrency('eur');
    * if (eur !== null) {

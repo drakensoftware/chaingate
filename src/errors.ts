@@ -63,14 +63,18 @@ export class NotEnoughFundsError extends Error {
 }
 
 /**
- * Thrown when the API returns 429 Too Many Requests and no API key was provided.
+ * Thrown when the keyless rate limit is exhausted (HTTP 429).
  *
- * Get a free API key at {@link https://api.chaingate.dev} to increase your rate limit.
+ * ChainGate works without an API key for light usage. To raise the quota,
+ * grab a free API key at {@link https://api.chaingate.dev} and pass it as
+ * `new ChainGate({ apiKey })`.
  */
 export class RateLimitError extends Error {
   constructor() {
     super(
-      'Rate limit exceeded. Get an API key at https://api.chaingate.dev to increase your quota.',
+      'ChainGate rate limit reached on the keyless tier. Get a free API key at ' +
+        'https://api.chaingate.dev and pass it as `new ChainGate({ apiKey })` ' +
+        'to raise your quota.',
     );
     this.name = 'RateLimitError';
   }

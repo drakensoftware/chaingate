@@ -32,7 +32,7 @@ export interface BchAddressOptions extends AddressOptions {
  *
  * @example
  * ```ts
- * const cg = new ChainGate({ apiKey: 'your-key' });
+ * const cg = new ChainGate();
  * const bch = cg.connect(cg.networks.bitcoincash, wallet);
  *
  * // Default address (cashaddr)

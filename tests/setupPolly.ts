@@ -2,8 +2,11 @@ import { config as loadEnv } from '@dotenvx/dotenvx';
 import { Polly } from '@pollyjs/core';
 import FetchAdapter from '@pollyjs/adapter-fetch';
 import FsPersister from '@pollyjs/persister-fs';
+import fs from 'node:fs';
 import path from 'path';
 import { beforeEach, afterEach } from 'vitest';
+
+const trackingFile = path.resolve(__dirname, '.recordings-tracking.log');
 
 // Load encrypted .env.test at runtime (requires DOTENV_PRIVATE_KEY_TEST to decrypt).
 loadEnv({ path: '.env.test', quiet: true });
@@ -73,6 +76,15 @@ beforeEach(({ task }) => {
         recordingsDir,
       },
     },
+  });
+
+  // Track every entry (by polly's request id + order) used during this test.
+  // The `remove-unused-recordings` script reads this log to prune both
+  // unused recording directories and stale entries inside `recording.har`.
+  polly.server.any().on('response', (req: { action: string; id: string; order: number }) => {
+    if (req.action !== 'record' && req.action !== 'replay') return;
+    if (!req.id) return;
+    fs.appendFileSync(trackingFile, `${polly.recordingId}\t${req.id}\t${req.order ?? 0}\n`);
   });
 
   // Strip secrets from persisted recordings so they are never saved to disk.

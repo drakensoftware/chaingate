@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EvmConnector (Avalanche) > gets address balance 1`] = `"0.33685559034212914"`;
+
+exports[`EvmConnector (Avalanche) > gets address balance 2`] = `"0"`;
+
+exports[`EvmConnector (Avalanche) > transfer - enough funds and broadcast 1`] = `"0x7474bacb0fbe28093c9b5d140cfd8e36d7b220eaa1fdd433605b24a4c148b9b2"`;

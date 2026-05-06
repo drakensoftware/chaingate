@@ -105,6 +105,20 @@ export const NETWORKS_INFO: Record<Network, NetworkInfoInternal> = {
       eoa: { derivationPath: "m/44'/60'/0'/0" },
     },
   },
+  avalanche: {
+    name: 'Avalanche',
+    symbol: 'AVAX',
+    type: 'evm',
+    decimals: 18,
+    isTestnet: false,
+    hasOwnToken: true,
+    nativeToken: { symbol: 'AVAX', name: 'Avalanche' },
+    chainId: 43114,
+    defaultAddressType: 'eoa',
+    addressTypes: {
+      eoa: { derivationPath: "m/44'/60'/0'/0" },
+    },
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -118,7 +132,7 @@ export const NETWORKS_INFO: Record<Network, NetworkInfoInternal> = {
  * **and** provides named properties for direct access:
  *
  * ```ts
- * const cg = new ChainGate({ apiKey: '...' });
+ * const cg = new ChainGate();
  *
  * // Direct access
  * cg.explore(cg.networks.bitcoin);
@@ -134,6 +148,7 @@ export interface NetworkCollection extends ReadonlyArray<NetworkDescriptor> {
   readonly bitcoincash: BchNetworkDescriptor;
   readonly bitcointestnet: UtxoNetworkDescriptor;
   readonly ethereum: EvmNetworkDescriptor;
+  readonly avalanche: EvmNetworkDescriptor;
 
   /**
    * Creates a descriptor for a custom EVM network accessible via a direct
@@ -159,7 +174,7 @@ export interface NetworkCollection extends ReadonlyArray<NetworkDescriptor> {
 /** @internal Builds the {@link NetworkCollection} for a {@link ChainGate} instance. */
 export function createNetworkCollection(
   marketsCache: TTLCache<MarketsResponse>,
-  apiKey: string,
+  apiKey?: string,
 ): NetworkCollection {
   const bitcoin = new UtxoNetworkDescriptor('bitcoin', NETWORKS_INFO.bitcoin, marketsCache, apiKey);
   const litecoin = new UtxoNetworkDescriptor(
@@ -187,6 +202,12 @@ export function createNetworkCollection(
     marketsCache,
     apiKey,
   );
+  const avalanche = new EvmNetworkDescriptor(
+    'avalanche',
+    NETWORKS_INFO.avalanche,
+    marketsCache,
+    apiKey,
+  );
 
   const all: NetworkDescriptor[] = [
     bitcoin,
@@ -195,6 +216,7 @@ export function createNetworkCollection(
     bitcoincash,
     bitcointestnet,
     ethereum,
+    avalanche,
   ];
 
   const evmRpc = (config: EvmRpcConfig): EvmRpcNetworkDescriptor => {
@@ -208,6 +230,7 @@ export function createNetworkCollection(
     bitcoincash: BchNetworkDescriptor;
     bitcointestnet: UtxoNetworkDescriptor;
     ethereum: EvmNetworkDescriptor;
+    avalanche: EvmNetworkDescriptor;
     evmRpc: (config: EvmRpcConfig) => EvmRpcNetworkDescriptor;
   };
 
@@ -218,6 +241,7 @@ export function createNetworkCollection(
     bitcoincash: { value: bitcoincash, writable: false, enumerable: false },
     bitcointestnet: { value: bitcointestnet, writable: false, enumerable: false },
     ethereum: { value: ethereum, writable: false, enumerable: false },
+    avalanche: { value: avalanche, writable: false, enumerable: false },
     evmRpc: { value: evmRpc, writable: false, enumerable: false },
   });
 

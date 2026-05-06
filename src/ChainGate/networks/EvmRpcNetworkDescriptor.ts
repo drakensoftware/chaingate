@@ -38,7 +38,7 @@ export interface EvmRpcConfig {
  *
  * @example
  * ```ts
- * const cg = new ChainGate({ apiKey: '...' });
+ * const cg = new ChainGate();
  * const bsc = cg.networks.evmRpc({
  *   rpcUrl: 'https://bsc-dataseed.binance.org',
  *   chainId: 56,

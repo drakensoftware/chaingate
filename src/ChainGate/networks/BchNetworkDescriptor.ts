@@ -17,7 +17,7 @@ export class BchNetworkDescriptor extends NetworkDescriptor<BchAddressType> {
   declare readonly networkParams: UtxoNetworkParams;
 
   /** @internal */
-  constructor(info: NetworkInfoInternal, marketsCache: TTLCache<MarketsResponse>, apiKey: string) {
+  constructor(info: NetworkInfoInternal, marketsCache: TTLCache<MarketsResponse>, apiKey?: string) {
     super('bitcoincash', info, marketsCache, apiKey);
   }
 
