@@ -38,6 +38,29 @@ import { Amount } from '../utils/Amount';
 import type { AmountData } from '../utils/Amount';
 import { NETWORKS_INFO } from '../ChainGate/networks';
 import type { ChainGateGlobal } from '../ChainGate/ChainGate';
+import type { EventStream, RawFrame, SubscribeRequest } from '../Events/EventStream';
+import type {
+  Subscription,
+  EvmBalanceEvent,
+  EvmBlockEvent,
+  EvmContractInteractionEvent,
+  EvmFullBlockEvent,
+  EvmMempoolTransactionEvent,
+  EvmPendingBalanceEvent,
+  EvmPendingTransactionEvent,
+  EvmTransactionEvent,
+} from '../Events/types';
+import { canonicalEvmAddress } from '../Events/address';
+import {
+  mapEvmBalance,
+  mapEvmBlock,
+  mapEvmContractInteraction,
+  mapEvmFullBlock,
+  mapEvmMempoolTransaction,
+  mapEvmPendingBalance,
+  mapEvmPendingTransaction,
+  mapEvmTransaction,
+} from '../Events/evmEvents';
 
 export type EvmNetwork = 'ethereum' | 'avalanche';
 
@@ -67,6 +90,14 @@ export class EvmExplorer {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
     this.global = global;
+  }
+
+  /**
+   * Creates an Amount from a raw wei bigint value.
+   * @internal
+   */
+  public amountFromWei(wei: bigint): Amount {
+    return new Amount(wei, EVM_DECIMALS, this.nativeData(), this.global.marketsCache);
   }
 
   /** Returns the native coin data for this network. */
@@ -374,5 +405,209 @@ export class EvmExplorer {
       throwOnError: true,
     });
     return data;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Real-time events
+  // ---------------------------------------------------------------------------
+
+  /**
+   * The real-time event connection of this network, shared by every explorer
+   * and connector created from the same {@link ChainGate} instance.
+   * @internal
+   */
+  get events(): EventStream {
+    return this.global.eventStreams.get('evm', this.network, this.baseUrl, this.apiKey);
+  }
+
+  private subscribeEvents<T>(
+    request: SubscribeRequest,
+    address: string | undefined,
+    map: (frame: RawFrame) => T,
+    callback: (event: T) => void,
+  ): Subscription {
+    const sub = this.events.subscribe(request, { onEvent: (frame) => callback(map(frame)) });
+    const subscription: Subscription = { unsubscribe: () => sub.unsubscribe(), ready: sub.ready };
+    return address === undefined ? subscription : { ...subscription, address };
+  }
+
+  /**
+   * Calls `callback` for every new block, as soon as it is finalized.
+   *
+   * @example
+   * ```ts
+   * const eth = cg.explore(cg.networks.ethereum);
+   * const sub = eth.onBlock((block) => {
+   *   console.log(`Block ${block.height} — ${block.numTxs} transactions`);
+   * });
+   *
+   * // Stop receiving blocks:
+   * sub.unsubscribe();
+   * ```
+   */
+  public onBlock(callback: (block: EvmBlockEvent) => void): Subscription {
+    return this.subscribeEvents({ channel: 'blocks' }, undefined, mapEvmBlock, callback);
+  }
+
+  /**
+   * Calls `callback` with every new block in full — the standard JSON-RPC
+   * block object with every transaction inline, exactly as the chain returns
+   * it (quantities are `0x`-hex strings).
+   *
+   * Full blocks are large. Prefer {@link onBlock}, {@link onBalance},
+   * {@link onTransaction} or {@link onContractInteraction} unless you really
+   * need every transaction.
+   */
+  public onFullBlock(callback: (block: EvmFullBlockEvent) => void): Subscription {
+    return this.subscribeEvents(
+      { channel: 'blocks', full: true },
+      undefined,
+      mapEvmFullBlock,
+      callback,
+    );
+  }
+
+  /**
+   * Calls `callback` with the new confirmed balance of `address` after every
+   * block in which the address was active.
+   *
+   * @throws {@link EventSubscriptionError} if `address` is not a valid EVM address.
+   *
+   * @example
+   * ```ts
+   * eth.onBalance('0x...', async ({ confirmed, height }) => {
+   *   console.log(`Block ${height}:`, confirmed.base(), 'ETH', await confirmed.toCurrency('usd'));
+   * });
+   * ```
+   */
+  public onBalance(address: string, callback: (event: EvmBalanceEvent) => void): Subscription {
+    const canonical = canonicalEvmAddress(address);
+    const amount = (wei: bigint) => this.amountFromWei(wei);
+    return this.subscribeEvents(
+      { channel: 'balance', address: canonical },
+      address,
+      (frame) => mapEvmBalance(frame, address, amount),
+      callback,
+    );
+  }
+
+  /**
+   * Calls `callback` whenever the pending (mempool) native-balance delta of
+   * `address` changes: a new pending transaction touches it, or one of its
+   * pending transactions is mined or expires. Gas is not included and token
+   * transfers are not visible until mined. Pending tracking may not be
+   * available on every network; where it is not, no events arrive.
+   *
+   * @throws {@link EventSubscriptionError} if `address` is not a valid EVM address.
+   */
+  public onPendingBalance(
+    address: string,
+    callback: (event: EvmPendingBalanceEvent) => void,
+  ): Subscription {
+    const canonical = canonicalEvmAddress(address);
+    const amount = (wei: bigint) => this.amountFromWei(wei);
+    return this.subscribeEvents(
+      { channel: 'balance', pending: true, address: canonical },
+      address,
+      (frame) => mapEvmPendingBalance(frame, address, amount),
+      callback,
+    );
+  }
+
+  /**
+   * Calls `callback` for every confirmed transaction in which `address`
+   * appears — as sender, recipient, or in an emitted event. The event carries
+   * the block height and the transaction's position in the block; use
+   * {@link getAddressHistory} to load the decoded transaction.
+   *
+   * @throws {@link EventSubscriptionError} if `address` is not a valid EVM address.
+   *
+   * @example
+   * ```ts
+   * eth.onTransaction('0x...', async ({ height }) => {
+   *   const history = await eth.getAddressHistory('0x...');
+   *   console.log(`Activity in block ${height}`, history.transactions[0]);
+   * });
+   * ```
+   */
+  public onTransaction(
+    address: string,
+    callback: (event: EvmTransactionEvent) => void,
+  ): Subscription {
+    const canonical = canonicalEvmAddress(address);
+    return this.subscribeEvents(
+      { channel: 'history', address: canonical },
+      address,
+      (frame) => mapEvmTransaction(frame, address),
+      callback,
+    );
+  }
+
+  /**
+   * Calls `callback` for every pending (unconfirmed) transaction sent from or
+   * to `address`, as soon as it is seen in the mempool. Pending tracking may
+   * not be available on every network; where it is not, no events arrive.
+   *
+   * @throws {@link EventSubscriptionError} if `address` is not a valid EVM address.
+   */
+  public onPendingTransaction(
+    address: string,
+    callback: (event: EvmPendingTransactionEvent) => void,
+  ): Subscription {
+    const canonical = canonicalEvmAddress(address);
+    const amount = (wei: bigint) => this.amountFromWei(wei);
+    return this.subscribeEvents(
+      { channel: 'history', pending: true, address: canonical },
+      address,
+      (frame) => mapEvmPendingTransaction(frame, address, amount),
+      callback,
+    );
+  }
+
+  /**
+   * Calls `callback` for every pending (unconfirmed) transaction seen on this
+   * network — the whole mempool, not just one address. Pending tracking may not
+   * be available on every network; where it is not, no events arrive.
+   */
+  public onMempoolTransaction(callback: (event: EvmMempoolTransactionEvent) => void): Subscription {
+    const amount = (wei: bigint) => this.amountFromWei(wei);
+    return this.subscribeEvents(
+      { channel: 'mempool' },
+      undefined,
+      (frame) => mapEvmMempoolTransaction(frame, amount),
+      callback,
+    );
+  }
+
+  /**
+   * Calls `callback` each time `address` interacts with a contract it had not
+   * interacted with before.
+   *
+   * @throws {@link EventSubscriptionError} if `address` is not a valid EVM address.
+   */
+  public onContractInteraction(
+    address: string,
+    callback: (event: EvmContractInteractionEvent) => void,
+  ): Subscription {
+    const canonical = canonicalEvmAddress(address);
+    return this.subscribeEvents(
+      { channel: 'contract_interactions', address: canonical },
+      address,
+      (frame) => mapEvmContractInteraction(frame, address),
+      callback,
+    );
+  }
+
+  /**
+   * Registers a listener for errors of this network's real-time event
+   * connection: {@link RateLimitError} / {@link RateLimitQuotaError} when the
+   * server closes it for rate limiting, {@link EventSubscriptionError} when a
+   * subscription is refused, {@link EventStreamError} for any other failure.
+   * The connection reconnects on its own; this is for visibility only.
+   *
+   * @returns A function that removes the listener.
+   */
+  public onError(callback: (error: Error) => void): () => void {
+    return this.events.onError(callback);
   }
 }

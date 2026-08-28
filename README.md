@@ -36,7 +36,7 @@ ChainGate is a cross-platform blockchain SDK and multi-blockchain integration li
 
 ChainGate offers **three levels of support**, depending on the chain:
 
-- **Full API** — **Bitcoin, Bitcoin Testnet, Litecoin, Dogecoin, Bitcoin Cash, Ethereum, and Avalanche.** Some of the features available here include address transaction history, UTXO listings, mempool / pending transactions, ERC-20 and NFT balance discovery, ERC-20 / ERC-721 / ERC-1155 metadata, native signing, broadcasting, fee estimation, and fiat pricing. A ChainGate-hosted RPC URL is included for every chain in this tier as well.
+- **Full API** — **Bitcoin, Bitcoin Testnet, Litecoin, Dogecoin, Bitcoin Cash, Ethereum, and Avalanche.** Some of the features available here include address transaction history, UTXO listings, mempool / pending transactions, real-time events, ERC-20 and NFT balance discovery, ERC-20 / ERC-721 / ERC-1155 metadata, native signing, broadcasting, fee estimation, and fiat pricing. A ChainGate-hosted RPC URL is included for every chain in this tier as well.
 - **RPC-only** — **Polygon, Arbitrum, Base, BNB Chain, and Sonic** ship with ChainGate-hosted JSON-RPC URLs. You get wallet creation, native-coin balance, signing + broadcasting (native, ERC-20, NFTs, arbitrary contract calls), and EIP-1559 gas estimation.
 - **Any RPC you want** — **Any other EVM chain** works by passing your own RPC URL to `cg.networks.evmRpc({ rpcUrl, chainId })` — same capabilities as the RPC-only tier above.
 
@@ -51,6 +51,7 @@ Use it to:
 - Derive private keys from a seed phrase (BIP-39 / BIP-32 / BIP-44 / BIP-84 / BIP-86)
 - Access hosted RPC endpoints for every supported chain without running your own node — or point ChainGate at any other EVM RPC URL
 - Track the current Ethereum gas price in gwei and estimate transaction fees before broadcasting
+- Get notified in real time of new blocks, balance changes and incoming or pending transactions for any address
 
 ## Features
 
@@ -60,6 +61,7 @@ Use it to:
 - 🔗 **Any RPC you want** — Same capabilities on any other EVM chain via `cg.networks.evmRpc({ rpcUrl, chainId })`
 - 📍 **Address derivation** — BIP-44 / BIP-84 / BIP-86 with segwit, legacy, taproot, cashaddr, and EOA
 - 🔍 **Blockchain explorer** — On UTXO chains and Ethereum: balances, transaction history, UTXOs, mempool / pending transactions, blocks, fees, ERC-20 / ERC-721 / ERC-1155 token metadata, and NFT data
+- ⚡ **Real-time events** — `onBlock()`, `onBalance()`, `onTransaction()`, `onPendingTransaction()`, `onMempoolTransaction()` and `onContractInteraction()` push typed events to your callbacks on every Full API chain — one shared connection per network, automatic reconnection, no polling
 - 📤 **Send crypto transactions in TypeScript** — Send native coins, ERC-20 tokens, NFTs, and call smart contracts with auto-suggested fees — on every supported chain
 - 🔒 **Encryption** — AES-256-GCM wallet encryption with password protection
 - ✍️ **Message signing** — EIP-191 (EVM) and Bitcoin-standard signing and verification
@@ -258,6 +260,33 @@ const btcExplorer = cg.explore(cg.networks.bitcoin);
 const mempool = await btcExplorer.getMempool();
 console.log(`${mempool.transactions.length} pending transactions in the mempool`);
 ```
+
+### Real-Time Events — Blocks, Balances & Transactions over WebSocket
+
+Stop polling. Subscribe with a callback and ChainGate pushes new blocks, balance changes, transactions and pending activity to you — on Bitcoin, Litecoin, Dogecoin, Bitcoin Cash, Bitcoin Testnet, Ethereum and Avalanche. The connection is opened, shared, kept alive and reconnected for you; every event is a typed object with `Amount` values.
+
+```ts
+const btc = cg.explore(cg.networks.bitcoin);
+
+// Every new block
+btc.onBlock((block) => console.log(`Block ${block.height} — ${block.numTxs} txs`));
+
+// Balance of any address, after every block that changes it
+btc.onBalance('bc1q...', async ({ confirmed }) => {
+  console.log(confirmed.base(), 'BTC ≈', await confirmed.toCurrency('usd'), 'USD');
+});
+
+// Or follow your own wallet — the address is derived for you
+const wallet = cg.connect(cg.networks.ethereum, myWallet);
+const sub = wallet.onTransaction(({ height }) => console.log('Activity in block', height));
+await sub.ready;      // confirmed by the server
+sub.unsubscribe();    // done — the last subscription closes the connection
+
+// Also: onFullBlock, onPendingBalance, onPendingTransaction, onMempoolTransaction,
+// onContractInteraction (EVM), and onError for connection errors.
+```
+
+Transaction confirmations use the same events: `broadcasted.onConfirmed()` fires as soon as the block that includes your transaction is finalized.
 
 ### Import a Wallet
 
@@ -536,6 +565,10 @@ ChainGate offers **three levels** of support:
 - **Full API** — Bitcoin, Bitcoin Testnet, Litecoin, Dogecoin, Bitcoin Cash, Ethereum, and Avalanche, with native + ERC-20 / NFT balances, address transaction history, UTXO and mempool data, explorer endpoints, fiat pricing, fee estimation, signing, broadcasting, and a hosted JSON-RPC URL per chain.
 - **RPC-only (hosted)** — Polygon, Arbitrum, Base, BNB Chain, and Sonic ship with first-party ChainGate JSON-RPC URLs. Wallets, native-coin balance, signing + broadcasting (native / ERC-20 / NFTs / contract calls), gas estimation — no address transaction history or token / NFT balance discovery.
 - **Any RPC you want** — Any other EVM chain (Optimism, Linea, Scroll, Gnosis, testnets, your own node, …) works through `cg.networks.evmRpc({ rpcUrl, chainId })` — you bring the JSON-RPC endpoint, same capabilities as the hosted tier.
+
+### Can I get real-time events instead of polling?
+
+Yes. On every Full API chain, `cg.explore(network)` and `cg.connect(network, wallet)` expose `onBlock()`, `onBalance()`, `onTransaction()`, `onPendingBalance()`, `onPendingTransaction()`, `onMempoolTransaction()` and — on Ethereum and Avalanche — `onContractInteraction()`. Each returns a subscription with `ready`, `address` and `unsubscribe()`; one WebSocket connection per network is shared by all of them and reconnected automatically. Events are included with the free API key and work without one too.
 
 ### Can I use ChainGate in the browser?
 

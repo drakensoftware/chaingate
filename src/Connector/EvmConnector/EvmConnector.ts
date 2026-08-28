@@ -9,6 +9,18 @@ import type { BaseValue } from '../../utils/Amount';
 import type { EvmNetworkDescriptor } from '../../ChainGate/networks';
 import { EvmTransaction } from './EvmTransaction';
 import { encodeErc20Transfer } from '../../utils/abiEncode';
+import { deferredSubscription } from '../../Events/deferredSubscription';
+import type {
+  Subscription,
+  EvmBalanceEvent,
+  EvmBlockEvent,
+  EvmContractInteractionEvent,
+  EvmFullBlockEvent,
+  EvmMempoolTransactionEvent,
+  EvmPendingBalanceEvent,
+  EvmPendingTransactionEvent,
+  EvmTransactionEvent,
+} from '../../Events/types';
 
 /**
  * Connector for Ethereum (and EVM-compatible) networks.
@@ -132,5 +144,112 @@ export class EvmConnector extends BaseEvmConnector<
       data,
       getPrivateKey,
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Real-time events
+  // ---------------------------------------------------------------------------
+
+  /** Calls `callback` for every new block on this network. See {@link EvmExplorer.onBlock}. */
+  public onBlock(callback: (block: EvmBlockEvent) => void): Subscription {
+    return this.explorer.onBlock(callback);
+  }
+
+  /** Calls `callback` with every new block in full. See {@link EvmExplorer.onFullBlock}. */
+  public onFullBlock(callback: (block: EvmFullBlockEvent) => void): Subscription {
+    return this.explorer.onFullBlock(callback);
+  }
+
+  /**
+   * Calls `callback` for every pending transaction seen on this network.
+   * See {@link EvmExplorer.onMempoolTransaction}.
+   */
+  public onMempoolTransaction(callback: (event: EvmMempoolTransactionEvent) => void): Subscription {
+    return this.explorer.onMempoolTransaction(callback);
+  }
+
+  /**
+   * Calls `callback` with the new confirmed balance of this wallet's address
+   * after every block in which it was active. The address is derived from the
+   * wallet (see {@link address}) and exposed as `subscription.address` once known.
+   *
+   * @example
+   * ```ts
+   * const sub = eth.onBalance(({ confirmed, height }) => {
+   *   console.log(`Block ${height}:`, confirmed.base(), 'ETH');
+   * });
+   * await sub.ready;
+   * console.log('Following', sub.address);
+   * ```
+   */
+  public onBalance(
+    callback: (event: EvmBalanceEvent) => void,
+    options?: AddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onBalance(address, callback),
+    );
+  }
+
+  /**
+   * Calls `callback` whenever the pending (mempool) native-balance delta of
+   * this wallet's address changes. See {@link EvmExplorer.onPendingBalance}.
+   */
+  public onPendingBalance(
+    callback: (event: EvmPendingBalanceEvent) => void,
+    options?: AddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onPendingBalance(address, callback),
+    );
+  }
+
+  /**
+   * Calls `callback` for every confirmed transaction in which this wallet's
+   * address appears. See {@link EvmExplorer.onTransaction}.
+   */
+  public onTransaction(
+    callback: (event: EvmTransactionEvent) => void,
+    options?: AddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onTransaction(address, callback),
+    );
+  }
+
+  /**
+   * Calls `callback` for every pending transaction sent from or to this
+   * wallet's address. See {@link EvmExplorer.onPendingTransaction}.
+   */
+  public onPendingTransaction(
+    callback: (event: EvmPendingTransactionEvent) => void,
+    options?: AddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onPendingTransaction(address, callback),
+    );
+  }
+
+  /**
+   * Calls `callback` each time this wallet's address interacts with a contract
+   * it had not interacted with before. See {@link EvmExplorer.onContractInteraction}.
+   */
+  public onContractInteraction(
+    callback: (event: EvmContractInteractionEvent) => void,
+    options?: AddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onContractInteraction(address, callback),
+    );
+  }
+
+  /**
+   * Registers a listener for errors of this network's real-time event
+   * connection. See {@link EvmExplorer.onError}.
+   *
+   * @returns A function that removes the listener.
+   */
+  public onError(callback: (error: Error) => void): () => void {
+    return this.explorer.onError(callback);
   }
 }

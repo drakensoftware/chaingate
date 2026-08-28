@@ -186,7 +186,7 @@ export class EvmTransaction extends BaseEvmTransaction<BroadcastedEvmTransaction
   }
 
   protected override buildBroadcasted(transactionId: string): BroadcastedEvmTransaction {
-    return new BroadcastedEvmTransaction(transactionId, this.explorer);
+    return new BroadcastedEvmTransaction(transactionId, this.explorer, this.fromAddress);
   }
 
   /** @internal — used by EvmConnector.transfer to build the transaction. */

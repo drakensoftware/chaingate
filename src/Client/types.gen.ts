@@ -535,7 +535,7 @@ export type EvmNftMetadataResponse = {
      */
     description?: string | null;
     /**
-     * ChainGate proxy URL to fetch the NFT image directly (resolves IPFS/data: URIs transparently)
+     * ChainGate URL to fetch the NFT image directly (resolves IPFS/data: URIs transparently)
      */
     image?: string | null;
     /**
@@ -543,7 +543,7 @@ export type EvmNftMetadataResponse = {
      */
     imageOriginal?: string | null;
     /**
-     * ChainGate proxy URL to fetch the NFT animation/video directly (resolves IPFS/data: URIs transparently)
+     * ChainGate URL to fetch the NFT animation/video directly (resolves IPFS/data: URIs transparently)
      */
     animationUrl?: string | null;
     /**
@@ -672,7 +672,7 @@ export type EvmTokenDataResponse = {
    */
   supportsERC165: boolean;
   /**
-   * Token logo URL (proxied from TrustWallet when available)
+   * Token logo URL (when available)
    */
   logoUrl?: string | null;
 };
@@ -1529,8 +1529,8 @@ export type GetEvmNetworkAddressBalanceData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
-    address: string;
+  query?: {
+    address?: string;
   };
   url: '/evm/{network}/addressBalance';
 };
@@ -1583,8 +1583,8 @@ export type GetEvmNetworkAddressHistoryData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
-    address: string;
+  query?: {
+    address?: string;
     page?: string;
   };
   url: '/evm/{network}/addressHistory';
@@ -1638,11 +1638,11 @@ export type GetEvmNetworkAddressTokenBalancesData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
+  query?: {
     /**
      * EVM address to query token balances for
      */
-    address: string;
+    address?: string;
   };
   url: '/evm/{network}/addressTokenBalances';
 };
@@ -1695,8 +1695,8 @@ export type GetEvmNetworkAddressTransactionCountData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
-    address: string;
+  query?: {
+    address?: string;
   };
   url: '/evm/{network}/addressTransactionCount';
 };
@@ -1749,8 +1749,8 @@ export type GetEvmNetworkBlockByHashData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
-    blockHash: string;
+  query?: {
+    blockHash?: string;
   };
   url: '/evm/{network}/blockByHash';
 };
@@ -1803,8 +1803,8 @@ export type GetEvmNetworkBlockByHeightData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
-    blockHeight: string;
+  query?: {
+    blockHeight?: string;
   };
   url: '/evm/{network}/blockByHeight';
 };
@@ -1961,11 +1961,11 @@ export type GetEvmNetworkEstimateGasData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
-    addressFrom: string;
-    addressTo: string;
-    nonce: string;
-    amount: string;
+  query?: {
+    addressFrom?: string;
+    addressTo?: string;
+    nonce?: string;
+    amount?: string;
     data?: string;
   };
   url: '/evm/{network}/estimateGas';
@@ -2226,8 +2226,8 @@ export type GetEvmNetworkNonceData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
-    address: string;
+  query?: {
+    address?: string;
   };
   url: '/evm/{network}/nonce';
 };
@@ -2279,15 +2279,15 @@ export type GetEvmNetworkOwnedTokensData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
+  query?: {
     /**
      * ERC-721 contract address
      */
-    contractAddress: string;
+    contractAddress?: string;
     /**
      * Wallet address to check ownership for
      */
-    address: string;
+    address?: string;
   };
   url: '/evm/{network}/ownedTokens';
 };
@@ -2340,11 +2340,11 @@ export type GetEvmNetworkTokenDataData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
+  query?: {
     /**
      * Token contract address
      */
-    contractAddress: string;
+    contractAddress?: string;
   };
   url: '/evm/{network}/tokenData';
 };
@@ -2397,11 +2397,11 @@ export type GetEvmNetworkTokenLogoData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
+  query?: {
     /**
      * ERC-20 token contract address
      */
-    address: string;
+    address?: string;
   };
   url: '/evm/{network}/tokenLogo';
 };
@@ -2454,8 +2454,8 @@ export type GetEvmNetworkTransactionDetailsData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
-    transactionId: string;
+  query?: {
+    transactionId?: string;
   };
   url: '/evm/{network}/transactionDetails';
 };
@@ -2508,15 +2508,15 @@ export type GetEvmNetworkNftMetadataData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
+  query?: {
     /**
      * NFT contract address
      */
-    contractAddress: string;
+    contractAddress?: string;
     /**
      * Token ID
      */
-    tokenId: string;
+    tokenId?: string;
   };
   url: '/evm/{network}/nft/metadata';
 };
@@ -2569,15 +2569,15 @@ export type GetEvmNetworkNftMetadataAnimationData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
+  query?: {
     /**
      * NFT contract address
      */
-    contractAddress: string;
+    contractAddress?: string;
     /**
      * Token ID
      */
-    tokenId: string;
+    tokenId?: string;
   };
   url: '/evm/{network}/nft/metadata/animation';
 };
@@ -2630,15 +2630,15 @@ export type GetEvmNetworkNftMetadataImageData = {
      */
     network: 'ethereum' | 'avalanche';
   };
-  query: {
+  query?: {
     /**
      * NFT contract address
      */
-    contractAddress: string;
+    contractAddress?: string;
     /**
      * Token ID
      */
-    tokenId: string;
+    tokenId?: string;
   };
   url: '/evm/{network}/nft/metadata/image';
 };
@@ -2931,8 +2931,8 @@ export type GetUtxoNetworkAddressBalanceData = {
      */
     network: 'bitcoin' | 'litecoin' | 'dogecoin' | 'bitcoincash' | 'bitcointestnet';
   };
-  query: {
-    address: string;
+  query?: {
+    address?: string;
   };
   url: '/utxo/{network}/addressBalance';
 };
@@ -2985,8 +2985,8 @@ export type GetUtxoNetworkAddressHistoryData = {
      */
     network: 'bitcoin' | 'litecoin' | 'dogecoin' | 'bitcoincash' | 'bitcointestnet';
   };
-  query: {
-    address: string;
+  query?: {
+    address?: string;
     page?: string;
   };
   url: '/utxo/{network}/addressHistory';
@@ -3040,8 +3040,8 @@ export type GetUtxoNetworkBlockByHashData = {
      */
     network: 'bitcoin' | 'litecoin' | 'dogecoin' | 'bitcoincash' | 'bitcointestnet';
   };
-  query: {
-    blockHash: string;
+  query?: {
+    blockHash?: string;
   };
   url: '/utxo/{network}/blockByHash';
 };
@@ -3094,8 +3094,8 @@ export type GetUtxoNetworkBlockByHeightData = {
      */
     network: 'bitcoin' | 'litecoin' | 'dogecoin' | 'bitcoincash' | 'bitcointestnet';
   };
-  query: {
-    blockHeight: string;
+  query?: {
+    blockHeight?: string;
   };
   url: '/utxo/{network}/blockByHeight';
 };
@@ -3461,8 +3461,8 @@ export type GetUtxoNetworkTransactionDetailsData = {
      */
     network: 'bitcoin' | 'litecoin' | 'dogecoin' | 'bitcoincash' | 'bitcointestnet';
   };
-  query: {
-    transactionId: string;
+  query?: {
+    transactionId?: string;
   };
   url: '/utxo/{network}/transactionDetails';
 };
@@ -3515,8 +3515,8 @@ export type GetUtxoNetworkUtxosByAddressData = {
      */
     network: 'bitcoin' | 'litecoin' | 'dogecoin' | 'bitcoincash' | 'bitcointestnet';
   };
-  query: {
-    address: string;
+  query?: {
+    address?: string;
     page?: string;
   };
   url: '/utxo/{network}/utxosByAddress';

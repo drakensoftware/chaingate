@@ -121,3 +121,37 @@ export class RpcError extends Error {
     this.code = code;
   }
 }
+
+/**
+ * Reported through `onError()` when a real-time event connection fails or is
+ * closed by the server (network errors, an API key that was rejected, or a
+ * connection dropped because events were not read fast enough).
+ *
+ * Rate-limit closures are reported as {@link RateLimitError} /
+ * {@link RateLimitQuotaError} instead.
+ */
+export class EventStreamError extends Error {
+  /** WebSocket close code, when the connection was closed. */
+  public readonly code?: number;
+  /** Close reason sent by the server, when available. */
+  public readonly reason?: string;
+
+  constructor(message: string, code?: number, reason?: string) {
+    super(message);
+    this.name = 'EventStreamError';
+    this.code = code;
+    this.reason = reason;
+  }
+}
+
+/**
+ * Thrown (synchronously) when subscribing to real-time events with an address
+ * that is not valid for the network, and used to reject `subscription.ready`
+ * when the server refuses a subscription.
+ */
+export class EventSubscriptionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'EventSubscriptionError';
+  }
+}

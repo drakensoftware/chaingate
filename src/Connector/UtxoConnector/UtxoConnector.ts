@@ -14,6 +14,17 @@ import { UtxoTransaction } from './UtxoTransaction';
 import { CustomUtxoTransaction, signCustomUtxoTransaction } from './CustomUtxoTransaction';
 import type { CustomUtxoTransactionParams } from './CustomUtxoTransaction';
 import { createPrivateKeyGetter } from './utxoConnectorUtils';
+import { deferredSubscription } from '../../Events/deferredSubscription';
+import type {
+  Subscription,
+  UtxoBalanceEvent,
+  UtxoBlockEvent,
+  UtxoFullBlockEvent,
+  UtxoMempoolTransactionEvent,
+  UtxoPendingBalanceEvent,
+  UtxoPendingTransactionEvent,
+  UtxoTransactionEvent,
+} from '../../Events/types';
 
 /** Options for resolving a UTXO wallet address. */
 export interface UtxoAddressOptions extends AddressOptions {
@@ -204,5 +215,101 @@ export class UtxoConnector extends Connector<Wallet, UtxoExplorer, UtxoNetworkDe
       getPrivateKey,
       signTransaction: signCustomUtxoTransaction,
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Real-time events
+  // ---------------------------------------------------------------------------
+
+  /** Calls `callback` for every new block on this network. See {@link UtxoExplorer.onBlock}. */
+  public onBlock(callback: (block: UtxoBlockEvent) => void): Subscription {
+    return this.explorer.onBlock(callback);
+  }
+
+  /** Calls `callback` with every new block in full. See {@link UtxoExplorer.onFullBlock}. */
+  public onFullBlock(callback: (block: UtxoFullBlockEvent) => void): Subscription {
+    return this.explorer.onFullBlock(callback);
+  }
+
+  /**
+   * Calls `callback` for every pending transaction seen on this network.
+   * See {@link UtxoExplorer.onMempoolTransaction}.
+   */
+  public onMempoolTransaction(
+    callback: (event: UtxoMempoolTransactionEvent) => void,
+  ): Subscription {
+    return this.explorer.onMempoolTransaction(callback);
+  }
+
+  /**
+   * Calls `callback` with the new confirmed balance of this wallet's address
+   * after every block that changes it. The address is derived from the wallet
+   * (see {@link address}) and exposed as `subscription.address` once known.
+   *
+   * @example
+   * ```ts
+   * const sub = connector.onBalance(({ confirmed }) => {
+   *   console.log('Balance:', confirmed.base(), confirmed.symbol);
+   * });
+   * await sub.ready;
+   * console.log('Following', sub.address);
+   * ```
+   */
+  public onBalance(
+    callback: (event: UtxoBalanceEvent) => void,
+    options?: UtxoAddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onBalance(address, callback),
+    );
+  }
+
+  /**
+   * Calls `callback` whenever the pending (mempool) balance delta of this
+   * wallet's address changes. See {@link UtxoExplorer.onPendingBalance}.
+   */
+  public onPendingBalance(
+    callback: (event: UtxoPendingBalanceEvent) => void,
+    options?: UtxoAddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onPendingBalance(address, callback),
+    );
+  }
+
+  /**
+   * Calls `callback` for every confirmed transaction that changes the balance
+   * of this wallet's address. See {@link UtxoExplorer.onTransaction}.
+   */
+  public onTransaction(
+    callback: (event: UtxoTransactionEvent) => void,
+    options?: UtxoAddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onTransaction(address, callback),
+    );
+  }
+
+  /**
+   * Calls `callback` for every pending transaction that touches this wallet's
+   * address. See {@link UtxoExplorer.onPendingTransaction}.
+   */
+  public onPendingTransaction(
+    callback: (event: UtxoPendingTransactionEvent) => void,
+    options?: UtxoAddressOptions,
+  ): Subscription {
+    return deferredSubscription(this.address(options), (address) =>
+      this.explorer.onPendingTransaction(address, callback),
+    );
+  }
+
+  /**
+   * Registers a listener for errors of this network's real-time event
+   * connection. See {@link UtxoExplorer.onError}.
+   *
+   * @returns A function that removes the listener.
+   */
+  public onError(callback: (error: Error) => void): () => void {
+    return this.explorer.onError(callback);
   }
 }

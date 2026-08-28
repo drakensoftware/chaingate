@@ -351,12 +351,30 @@ export class CustomUtxoTransaction {
       cache.markSpent(input.txid, input.index, txId);
     }
 
-    return new BroadcastedUtxoTransaction(txId, this.explorer);
+    return new BroadcastedUtxoTransaction(txId, this.explorer, this.senderAddresses());
   }
 
   // -------------------------------------------------------------------------
   // Internal helpers
   // -------------------------------------------------------------------------
+
+  /**
+   * Addresses that own the inputs being spent, derived from their locking
+   * scripts. Returns `null` when any script has no address form (e.g. P2PK),
+   * in which case confirmation is tracked block by block instead.
+   */
+  private senderAddresses(): string[] | null {
+    const codec = btc.Address(this.networkParams);
+    const addresses = new Set<string>();
+    for (const input of this.inputList) {
+      try {
+        addresses.add(codec.encode(OutScript.decode(hexToBytes(input.script))));
+      } catch {
+        return null;
+      }
+    }
+    return [...addresses];
+  }
 
   private guardNotSent(): void {
     if (this.sent) throw new TransactionAlreadySentError();

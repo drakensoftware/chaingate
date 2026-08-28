@@ -66,6 +66,8 @@ export {
   RateLimitError,
   RateLimitQuotaError,
   RpcError,
+  EventStreamError,
+  EventSubscriptionError,
   IncorrectKeystorePasswordError,
   InvalidKeystoreError,
 } from './errors';
@@ -217,3 +219,29 @@ export { LegacyKeystore } from './Keystore/LegacyKeystore';
 export type { LegacyKeystoreData } from './Keystore/LegacyKeystore';
 export { Web3Keystore } from './Keystore/Web3Keystore';
 export type { Web3KeystoreData } from './Keystore/Web3Keystore';
+
+// Real-time events
+export type {
+  Subscription,
+  UtxoBlockEvent,
+  UtxoBlockOutput,
+  UtxoBlockInput,
+  UtxoBlockTransaction,
+  UtxoFullBlockEvent,
+  UtxoBalanceEvent,
+  UtxoPendingBalanceEvent,
+  UtxoTransactionEvent,
+  UtxoMempoolInput,
+  UtxoMempoolOutput,
+  UtxoMempoolTransactionEvent,
+  UtxoPendingTransactionEvent,
+  EvmBlockEvent,
+  EvmFullBlockTransaction,
+  EvmFullBlockEvent,
+  EvmBalanceEvent,
+  EvmPendingBalanceEvent,
+  EvmTransactionEvent,
+  EvmMempoolTransactionEvent,
+  EvmPendingTransactionEvent,
+  EvmContractInteractionEvent,
+} from './Events/types';

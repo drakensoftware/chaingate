@@ -23,6 +23,7 @@ import type { Wallet } from '../Wallet/Wallet';
 import { TTLCache } from '../utils/TTLCache';
 import { UtxoLocalCache } from '../utils/UtxoLocalCache';
 import { EvmNonceCache } from '../utils/EvmNonceCache';
+import { EventStreams } from '../Events/EventStreams';
 import { RpcUrls } from './RpcUrls';
 
 const BASE_URL = 'https://api.chaingate.dev';
@@ -35,6 +36,8 @@ export interface ChainGateGlobal {
   marketsCache: TTLCache<MarketsResponse>;
   utxoCache: UtxoLocalCache;
   evmNonceCache: EvmNonceCache;
+  /** Real-time event connections, one per network, opened on demand. */
+  eventStreams: EventStreams;
 }
 
 /**
@@ -239,6 +242,7 @@ export class ChainGate {
       }, MARKETS_TTL),
       utxoCache: new UtxoLocalCache(),
       evmNonceCache: new EvmNonceCache(),
+      eventStreams: new EventStreams(),
     };
 
     this.client.interceptors.error.use((_error, response) => {

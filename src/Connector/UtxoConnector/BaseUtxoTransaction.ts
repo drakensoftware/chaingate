@@ -209,7 +209,7 @@ export abstract class BaseUtxoTransaction {
       }
     }
 
-    return new BroadcastedUtxoTransaction(txId, this.explorer);
+    return new BroadcastedUtxoTransaction(txId, this.explorer, [this.fromAddress]);
   }
 
   // -------------------------------------------------------------------------
